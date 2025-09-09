@@ -21,102 +21,107 @@
 
 ---
 
-nomo-flow/
-│
+<h3>🗂️ هيكل المشروع — Nomo Flow</h3>
+
+<div dir="ltr">
+
+<pre><code>nomo-flow/
 ├─ manage.py
 ├─ requirements.txt
 ├─ .env.example
 ├─ README.md
 │
-├─ nomo_flow/                 # إعدادات Django الأساسية للمشروع
-│   ├─ __init__.py
-│   ├─ settings.py            # الإعدادات (التطبيقات، قاعدة البيانات، المفاتيح، اللغات، إلخ)
-│   ├─ urls.py                # مسارات المشروع العامة (تجميع urls للتطبيقات)
-│   ├─ wsgi.py                # تشغيل المشروع على خوادم WSGI (مثل Gunicorn)
-│   └─ asgi.py                # تشغيل المشروع على ASGI (للدعم الآني / WebSockets لاحقًا)
+├─ nomo_flow/
+│  ├─ __init__.py
+│  ├─ settings.py
+│  ├─ urls.py
+│  ├─ wsgi.py
+│  └─ asgi.py
 │
-├─ core/                      # لبّ المشروع وأدواته المشتركة
-│   ├─ __init__.py
-│   ├─ salla_client.py        # عميل التكامل مع Salla (OAuth، استدعاءات API، تحديث التوكن)
-│   ├─ webhooks.py            # أدوات مساعدة للتحقق من تواقيع الويب هوكس ومعالجة الأخطاء
-│   ├─ utils.py               # دوال عامة (تسجيل، توليد أكواد، تنسيقات وقت، إلخ)
-│   └─ models.py              # نماذج أساسية مشتركة (إن لزم مثل Merchant/SallaToken)
+├─ core/
+│  ├─ __init__.py
+│  ├─ salla_client.py
+│  ├─ webhooks.py
+│  ├─ utils.py
+│  └─ models.py
 │
-├─ integrations/              # إعدادات الربط مع سلة
-│   ├─ __init__.py
-│   ├─ models.py              # Merchant, SallaToken, IntegrationSettings
-│   ├─ views.py               # شاشات: ربط المتجر عبر OAuth، حالة الاتصال
-│   ├─ urls.py
-│   └─ admin.py
+├─ integrations/
+│  ├─ __init__.py
+│  ├─ models.py
+│  ├─ views.py
+│  ├─ urls.py
+│  └─ admin.py
 │
-├─ features/                  # لوحة الميزات (Feature-based Dashboard)
-│   ├─ __init__.py
-│   ├─ models.py              # Feature, MerchantFeature (toggle + settings_json)
-│   ├─ views.py               # عرض البطاقات، تفعيل/إيقاف، فتح نماذج Setup
-│   ├─ urls.py
-│   ├─ services.py            # منطق تطبيق الإعدادات على الواجهة/الخادم
-│   └─ admin.py
+├─ features/
+│  ├─ __init__.py
+│  ├─ models.py
+│  ├─ views.py
+│  ├─ urls.py
+│  ├─ services.py
+│  └─ admin.py
 │
-├─ coupons/                   # الكوبونات (بدون مفهوم الحملات)
-│   ├─ __init__.py
-│   ├─ models.py              # Coupon (code, type, amount, limits …)
-│   ├─ views.py               # إنشاء/تعديل كوبون + مزامنة مع Salla
-│   ├─ urls.py
-│   ├─ services.py            # استدعاءات إنشاء/تعديل/تعطيل الكوبونات على Salla
-│   └─ admin.py
+├─ coupons/
+│  ├─ __init__.py
+│  ├─ models.py
+│  ├─ views.py
+│  ├─ urls.py
+│  ├─ services.py
+│  └─ admin.py
 │
-├─ notifications/             # التنبيهات والرسائل (Email/SMS/WhatsApp/Push)
-│   ├─ __init__.py
-│   ├─ models.py              # Notification (template, channel, schedule), Message (logs)
-│   ├─ views.py               # بناء القوالب، الجدولة البسيطة، استعراض السجلات
-│   ├─ urls.py
-│   ├─ services.py            # موصلات الإرسال (Mail/SMS/WhatsApp) + Personalization
-│   └─ admin.py
+├─ notifications/
+│  ├─ __init__.py
+│  ├─ models.py
+│  ├─ views.py
+│  ├─ urls.py
+│  ├─ services.py
+│  └─ admin.py
 │
-├─ visitors/                  # بيانات الزوار (Live Counter / Visitor Data)
-│   ├─ __init__.py
-│   ├─ models.py              # VisitorSession, PageView
-│   ├─ views.py               # إحصائيات سريعة، عدّاد مباشر، استعلامات
-│   ├─ urls.py
-│   └─ admin.py
+├─ visitors/
+│  ├─ __init__.py
+│  ├─ models.py
+│  ├─ views.py
+│  ├─ urls.py
+│  └─ admin.py
 │
-├─ events/                    # استقبال ومعالجة Webhooks من سلة
-│   ├─ __init__.py
-│   ├─ models.py              # Event (نوع الحدث، الحمولة، الأوقات)
-│   ├─ views.py               # endpoint للاستقبال (POST /webhooks/salla)
-│   ├─ urls.py
-│   └─ admin.py
+├─ events/
+│  ├─ __init__.py
+│  ├─ models.py
+│  ├─ views.py
+│  ├─ urls.py
+│  └─ admin.py
 │
-├─ attributions/              # إسناد الإيرادات (Orders ↔ Coupons/Notifications)
-│   ├─ __init__.py
-│   ├─ models.py              # Attribution (order, revenue_sar, used_coupon_code)
-│   ├─ services.py            # منطق الربط بين الطلبات ووُسوم المصدر
-│   └─ admin.py
+├─ attributions/
+│  ├─ __init__.py
+│  ├─ models.py
+│  └─ services.py
 │
-├─ templates/                 # قوالب HTML (Jinja/Django Templates)
-│   ├─ base.html              # القالب العام (Navbar/Sidebar/Flash messages)
-│   ├─ features/              # صفحات Dashboard وبطاقات الميزات
-│   ├─ coupons/               # نماذج إنشاء/تعديل كوبون
-│   ├─ notifications/         # محرر القوالب + معاينة
-│   ├─ visitors/              # شاشات التقارير
-│   └─ integrations/          # شاشة ربط سلة وحالة الاتصال
+├─ templates/
+│  ├─ base.html
+│  ├─ features/
+│  ├─ coupons/
+│  ├─ notifications/
+│  ├─ visitors/
+│  └─ integrations/
 │
-├─ static/                    # ملفات الواجهة (CSS/JS/Images)
-│   ├─ css/
-│   ├─ js/
-│   └─ images/
+├─ static/
+│  ├─ css/
+│  ├─ js/
+│  └─ images/
 │
-├─ scripts/                   # سكربتات مساعدة للتطوير/النشر
-│   ├─ dev_seed.py            # إدخال بيانات تجريبية (Features افتراضية، تاجر تجريبي)
-│   └─ export_db.sh           # مثال لتصدير قاعدة البيانات/نسخ احتياطي
+├─ scripts/
+│  ├─ dev_seed.py
+│  └─ export_db.sh
 │
-├─ tests/                     # اختبارات وحدات/تكامل
-│   ├─ __init__.py
-│   ├─ test_features.py
-│   ├─ test_coupons.py
-│   └─ test_notifications.py
+├─ tests/
+│  ├─ __init__.py
+│  ├─ test_features.py
+│  ├─ test_coupons.py
+│  └─ test_notifications.py
 │
-└─ docs/                      # وثائق المشروع
-    ├─ ERD.dbml              # مخطط dbdiagram.io
-    ├─ UX-flow.md            # رحلة المستخدم المختصرة
-    └─ API-notes.md          # ملاحظات التكامل مع Salla (endpoints ونطاقات الصلاحيات)
+└─ docs/
+   ├─ ERD.dbml
+   ├─ UX-flow.md
+   └─ API-notes.md
+</code></pre>
+
+</div>
