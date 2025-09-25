@@ -1,0 +1,378 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Numu Flow · Works with Salla</title>
+
+  <!-- SEO / Open Graph -->
+  <meta name="description" content="Numu Flow for Salla: coupons, popups, live visitor counter, email collector, and social ad campaigns (TikTok, Snapchat, Instagram) in one dashboard." />
+  <link rel="alternate" hreflang="ar" href="https://numuflow.com/ar/" />
+  <link rel="alternate" hreflang="en" href="https://numuflow.com/en/" />
+  <meta property="og:title" content="Numu Flow · Works with Salla" />
+  <meta property="og:description" content="Install on Salla in one click. Launch widgets and social ads without leaving your store." />
+  <meta property="og:image" content="/assets/og.png" />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#17a8ff" />
+
+  <style>
+    :root {
+      --brand:#17a8ff; --brand-dark:#0f9cf5;
+      --text:#0f172a; --muted:#64748b;
+      --bg:#f8fbfe; --card:#ffffff; --border:#e5e7eb;
+    }
+    html,body{margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:var(--text);background:var(--bg)}
+    a{color:inherit}
+    .container{max-width:1200px;margin:0 auto;padding:0 24px}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:16px;border-bottom:1px solid var(--border)}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+    .logo img{height:150px;width:auto;display:block}
+    .nav-links{display:flex;align-items:center;gap:14px}
+    .btn{border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:#fff}
+    .btn:hover{background:#fafafa}
+    .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 8px 20px rgba(23,168,255,0.25)}
+    .btn-primary:hover{background:var(--brand-dark)}
+    /* Language pills */
+    .lang-nav{display:flex;align-items:center;gap:6px;background:rgba(232,246,255,.6);border:1px solid var(--border);border-radius:9999px;padding:6px}
+    .chip{padding:8px 14px;border-radius:9999px;text-decoration:none;font-weight:800;color:var(--text)}
+    .chip:hover{background:rgba(23,168,255,.10)}
+    .chip-active{background:var(--brand);color:#fff}
+    .badge{display:inline-block;background:#e6f5ff;color:#0b6aa8;border-radius:9999px;padding:8px 14px;font-weight:700}
+    .hero{padding:56px 0 24px;text-align:center}
+    h1{font-size:44px;line-height:1.15;margin:12px 0 8px}
+    .accent{color:var(--brand)}
+    .lead{font-size:18px;color:var(--muted);max-width:900px;margin:0 auto}
+    .cta-row{display:flex;gap:12px;margin:22px 0;justify-content:center;flex-wrap:wrap}
+    .strip{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+    .pill{border:1px solid #cdeefe;background:#e8f6ff;border-radius:9999px;padding:8px 14px;font-weight:700}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .card{background:var(--card);border-radius:14px;padding:22px;box-shadow:0 2px 10px rgba(2,6,23,0.06);border:1px solid #eef2f7}
+    .card h4{margin:8px 0 6px;font-size:18px}
+    .card p{color:var(--muted);margin:0}
+    .icon{color:var(--brand);margin-bottom:8px}
+    .icon svg{width:34px;height:34px}
+    .section{padding:32px 0}
+    .section h2{text-align:center;font-size:32px;margin:0 0 8px}
+    .section .lead{text-align:center;margin-bottom:22px}
+    .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .shot{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#fff;height:220px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:600}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;list-style:none;padding:0;margin:0}
+    .cta{background:#e8f6ff;border:1px solid #cdeefe;margin:40px auto 20px;padding:28px;border-radius:18px;max-width:900px;text-align:center}
+    .pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .price-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px}
+    .price-title{font-weight:800}
+    .price{font-size:28px;margin:8px 0}
+    .ul{margin:0;padding:0;list-style:none}
+    .ul li{margin:6px 0;color:var(--muted)}
+    .faq{max-width:900px;margin:0 auto;display:grid;gap:12px}
+    details{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px}
+    summary{font-weight:700;cursor:pointer}
+    footer{padding:20px 0;color:#475569}
+    .footer{padding:32px 0;border-top:1px solid var(--border)}
+    .footer .brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px}
+    .footer .brand img{height:48px;width:48px;border-radius:8px}
+    .footer .brand .name{font-weight:800;font-size:22px}
+    .footer .desc{color:var(--muted);text-align:center;margin-bottom:12px}
+    .footer .links{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px}
+    .footer .links a{color:var(--text);font-weight:700;text-decoration:none}
+    .footer .links a:hover{color:var(--brand)}
+    .footer .copy{font-size:12px;color:#64748b;text-align:center}
+    .lang-switch{display:flex;gap:6px}
+    .small{font-size:12px;color:#64748b}
+    @media (max-width: 1000px){
+      .cards,.gallery,.pricing,.steps{grid-template-columns:1fr}
+      h1{font-size:36px}
+    }
+
+    /* RTL helpers */
+    [dir="rtl"] .nav{flex-direction:row-reverse}
+    [dir="rtl"] .nav-links{flex-direction:row-reverse}
+    [dir="rtl"] .cta-row{flex-direction:row-reverse}
+    [dir="rtl"] .strip{flex-direction:row-reverse}
+  </style>
+</head>
+<body>
+  <header class="container nav">
+    <div class="logo">
+      <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow" />
+    </div>
+    <div class="nav-links">
+      <a href="" class="btn btn-primary" data-i18n="install">Install on Salla</a>
+      <a href="/dashboard/" class="btn" data-i18n="dashboard">Dashboard</a>
+      <nav class="lang-nav" aria-label="Language">
+        <a href="#" id="pill-en" class="chip">EN</a>
+        <a href="#" id="pill-ar" class="chip">العربية</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="container hero">
+      <span class="badge" data-i18n="badge">Works with Salla – 1-click install</span>
+      <h1 data-i18n="heroTitle">Grow your <span class="accent">Salla</span> store with smart widgets & social ad campaigns</h1>
+      <p class="lead" data-i18n="heroLead">
+        Enable coupons, popups, live visitor counter, and launch TikTok/Snap/Instagram ads — all from one dashboard.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="" data-i18n="install">Install on Salla</a>
+        <a class="btn" href="/demo/" data-i18n="viewDemo">View Demo</a>
+      </div>
+      <p class="small" data-i18n="oauthNote">Secure OAuth · Zero code · Disable anytime</p>
+    </section>
+
+    <!-- QUICK START -->
+    <section class="container section">
+      <ol class="steps">
+        <li class="card">
+          <h4 data-i18n="step1T">1) Install</h4>
+          <p data-i18n="step1D">Add Numu Flow from the Salla App Store.</p>
+        </li>
+        <li class="card">
+          <h4 data-i18n="step2T">2) Connect</h4>
+          <p data-i18n="step2D">Authorize your store and pick your widgets.</p>
+        </li>
+        <li class="card">
+          <h4 data-i18n="step3T">3) Launch</h4>
+          <p data-i18n="step3D">Go live with coupons, popups, and live counter in minutes.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="container section">
+      <h2 data-i18n="featuresTitle">Powerful Marketing Features</h2>
+      <p class="lead" data-i18n="featuresLead">Convert more visitors with urgency, social proof, and personalized offers.</p>
+      <div class="cards">
+        <div class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <path d="M8.59 13.51 15.42 18.49"></path>
+              <path d="M15.41 5.51 8.59 10.49"></path>
+            </svg>
+          </div>
+          <h4 data-i18n="f1T">Social Ads Campaigns</h4>
+          <p data-i18n="f1D">Build and publish campaigns to TikTok, Snapchat, and Instagram from one place.</p>
+        </div>
+        <div class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </div>
+          <h4 data-i18n="f2T">Live View Counter</h4>
+          <p data-i18n="f2D">Show real-time visitors to create urgency and social proof.</p>
+        </div>
+        <div class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <path d="M22 6 12 13 2 6"></path>
+            </svg>
+          </div>
+          <h4 data-i18n="f3T">Email Collector</h4>
+          <p data-i18n="f3D">Capture emails with smart, non-intrusive popups.</p>
+        </div>
+        <div class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.59 13.41 11 3H4v7l9.59 9.59a2 2 0 0 0 2.82 0l4.18-4.18a2 2 0 0 0 0-2.82z"></path>
+              <path d="M7 7h.01"></path>
+            </svg>
+          </div>
+          <h4 data-i18n="f4T">Smart Discount Coupons</h4>
+          <p data-i18n="f4D">Auto-generate attractive coupons tied to your campaigns.</p>
+        </div>
+        <div class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <h4 data-i18n="f5T">Custom Notifications</h4>
+          <p data-i18n="f5D">Target alerts by page, device, or behavior.</p>
+        </div>
+        <div class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 12.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+          </div>
+          <h4 data-i18n="f6T">Recent Purchases</h4>
+          <p data-i18n="f6D">Display latest conversions to build trust.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY / SCREENSHOTS -->
+    <section class="container section">
+      <h2 data-i18n="shotsTitle">See it in Action</h2>
+      <p class="lead" data-i18n="shotsLead">Dashboard, on-store widget, and campaign builder.</p>
+      <div class="gallery">
+        <div class="shot"><span>Dashboard Screenshot</span></div>
+        <div class="shot"><span>Widget on Salla Store</span></div>
+        <div class="shot"><span>Campaign Builder</span></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container section">
+      <h2 data-i18n="faqTitle">FAQ for Salla Merchants</h2>
+      <div class="faq">
+        <details>
+          <summary data-i18n="fq1Q">Will Numu Flow slow my Salla store?</summary>
+          <p data-i18n="fq1A">We load lightweight scripts and defer non-critical assets. You can enable/disable widgets per page.</p>
+        </details>
+        <details>
+          <summary data-i18n="fq2Q">Can I disable widgets on specific pages?</summary>
+          <p data-i18n="fq2A">Yes, you can target by URL patterns or product collections.</p>
+        </details>
+        <details>
+          <summary data-i18n="fq3Q">How do ads connect to sales?</summary>
+          <p data-i18n="fq3A">We track clicks and attribute conversions using Salla order data and UTM parameters.</p>
+        </details>
+        <details>
+          <summary data-i18n="fq4Q">What permissions do you request?</summary>
+          <p data-i18n="fq4A">Store info and basic order/visitor data required to render widgets and analytics. You can revoke access anytime.</p>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="container footer">
+    <div class="brand">
+      <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow" style=height:100px;width:auto />
+    </div>
+    <p class="desc" data-i18n="footerDesc">Smart marketing tools for Salla stores.</p>
+    <div class="links">
+      <a href="/about/" data-i18n="footerAbout">About</a>
+      <a href="/contact/" data-i18n="footerContact">Contact</a>
+      <a href="/privacy/" data-i18n="footerPrivacy">Privacy Policy</a>
+    </div>
+    <div class="copy">© <span id="y"></span> Nomo Flow. <span data-i18n="rights">All rights reserved.</span></div>
+  </footer>
+
+  <script>
+    // Year
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Simple i18n (EN/AR) and RTL toggle:
+    const messages = {
+      en: {
+        install:"Install on Salla", docs:"Docs", support:"Support", dashboard:"Dashboard",
+        badge:"Works with Salla – 1-click install",
+        heroTitle:"Grow your <span class='accent'>Salla</span> store with smart widgets & social ad campaigns",
+        heroLead:"Enable coupons, popups, live visitor counter, and launch TikTok/Snap/Instagram ads — all from one dashboard.",
+        viewDemo:"View Demo", oauthNote:"Secure OAuth · Zero code · Disable anytime",
+        step1T:"1) Install", step1D:"Add Numu Flow from the Salla App Store.",
+        step2T:"2) Connect", step2D:"Authorize your store and pick your widgets.",
+        step3T:"3) Launch", step3D:"Go live with coupons, popups, and live counter in minutes.",
+        adsTitle:"Launch Ads Where Your Buyers Are", adsLead:"Create & monitor campaigns to TikTok, Snapchat, and Instagram without leaving Numu Flow.",
+        featuresTitle:"Powerful Marketing Features", featuresLead:"Convert more visitors with urgency, social proof, and personalized offers.",
+        f1T:"Social Ads Campaigns", f1D:"Build and publish campaigns to TikTok, Snapchat, and Instagram from one place.",
+        f2T:"Live View Counter", f2D:"Show real-time visitors to create urgency and social proof.",
+        f3T:"Email Collector", f3D:"Capture emails with smart, non-intrusive popups.",
+        f4T:"Smart Discount Coupons", f4D:"Auto-generate attractive coupons tied to your campaigns.",
+        f5T:"Custom Notifications", f5D:"Target alerts by page, device, or behavior.",
+        f6T:"Recent Purchases", f6D:"Display latest conversions to build trust.",
+        shotsTitle:"See it in Action", shotsLead:"Dashboard, on-store widget, and campaign builder.",
+        pricingTitle:"Simple Pricing (SAR)", pricingLead:"Start free, upgrade as you grow.",
+        p1Name:"Starter", p1Price:"Free", p1a:"Basic widgets (counter, coupons)", p1b:"Up to 10k impressions/mo", p1c:"Email support",
+        p2Name:"Pro", p2Price:"49 SAR/mo", p2a:"All widgets + Email Collector", p2b:"A/B tests & scheduling", p2c:"Basic social campaigns",
+        p3Name:"Business", p3Price:"149 SAR/mo", p3a:"Advanced targeting & analytics", p3b:"Social ads builder (TikTok/Snap/IG)", p3c:"Priority support",
+        ctaTitle:"Ready to boost your sales?", ctaLead:"Install Numu Flow on Salla and launch in minutes.",
+        faqTitle:"FAQ for Salla Merchants",
+        fq1Q:"Will Numu Flow slow my Salla store?", fq1A:"We load lightweight scripts and defer non-critical assets. You can enable/disable widgets per page.",
+        fq2Q:"Can I disable widgets on specific pages?", fq2A:"Yes, you can target by URL patterns or product collections.",
+        fq3Q:"How do ads connect to sales?", fq3A:"We track clicks and attribute conversions using Salla order data and UTM parameters.",
+        fq4Q:"What permissions do you request?", fq4A:"Store info and basic order/visitor data required to render widgets and analytics. You can revoke access anytime.",
+        footerDesc:"Smart marketing tools for Salla stores.",
+        footerAbout:"About",
+        footerContact:"Contact",
+        footerPrivacy:"Privacy Policy",
+        rights:"All rights reserved."
+      },
+      ar: {
+        install:"ثبّت على سلة", docs:"الوثائق", support:"الدعم", dashboard:"لوحة التحكم",
+        badge:"متوافق مع سلة – تثبيت بنقرة واحدة",
+        heroTitle:"نمِّ مبيعات متجرك على <span class='accent'>سلة</span> بأدوات ذكية وحملات إعلانية اجتماعية",
+        heroLead:"فعّل الكوبونات والنوافذ المنبثقة وعدّاد الزوار، واطلق إعلانات TikTok وSnapchat وInstagram من لوحة واحدة.",
+        viewDemo:"شاهد العرض", oauthNote:"توثيق آمن · بدون كود · يمكن الإيقاف في أي وقت",
+        step1T:"١) التثبيت", step1D:"أضف Numu Flow من متجر تطبيقات سلة.",
+        step2T:"٢) الربط", step2D:"امنح الصلاحيات واختر الأدوات المناسبة.",
+        step3T:"٣) الإطلاق", step3D:"فعّل الأدوات خلال دقائق على متجرك.",
+        adsTitle:"أطلِق إعلاناتك حيث يوجد عملاؤك", adsLead:"أنشئ وراقِب الحملات على TikTok وSnapchat وInstagram دون مغادرة Numu Flow.",
+        featuresTitle:"ميزات تسويقية قوية", featuresLead:"حوِّل الزوار إلى مشترين عبر العجلة الاجتماعية والعرض المخصص.",
+        f1T:"حملات الإعلانات الاجتماعية", f1D:"ابنِ وانشر الحملات على TikTok وSnapchat وInstagram من مكان واحد.",
+        f2T:"عدّاد الزوار اللحظي", f2D:"أظهر عدد الزوار مباشرة لخلق العجلة والإثبات الاجتماعي.",
+        f3T:"جامع الإيميلات", f3D:"اجمع الإيميلات بنوافذ ذكية غير مزعجة.",
+        f4T:"كوبونات ذكية", f4D:"أنشئ كوبونات جذابة مرتبطة بحملاتك.",
+        f5T:"تنبيهات مخصصة", f5D:"استهدف حسب الصفحة أو الجهاز أو السلوك.",
+        f6T:"آخر عمليات الشراء", f6D:"اعرض أحدث المشتريات لبناء الثقة.",
+        shotsTitle:"شاهد كيف تعمل", shotsLead:"لوحة التحكم، أداة المتجر، ومنشئ الحملات.",
+        pricingTitle:"أسعار بسيطة (ريال)", pricingLead:"ابدأ مجانًا وطوّر لاحقًا.",
+        p1Name:"البداية", p1Price:"مجاني", p1a:"أدوات أساسية (العدّاد، الكوبونات)", p1b:"حتى ١٠ آلاف ظهور/شهر", p1c:"دعم عبر الإيميل",
+        p2Name:"المحترف", p2Price:"٤٩ ريال/شهر", p2a:"كل الأدوات + جامع الإيميلات", p2b:"اختبارات A/B والجدولة", p2c:"حملات اجتماعية أساسية",
+        p3Name:"الأعمال", p3Price:"١٤٩ ريال/شهر", p3a:"استهداف وتحليلات متقدمة", p3b:"منشئ حملات TikTok/Snap/IG", p3c:"دعم أولوية",
+        ctaTitle:"جاهز لرفع المبيعات؟", ctaLead:"ثبّت Numu Flow على سلة وابدأ خلال دقائق.",
+        faqTitle:"الأسئلة الشائعة لتجار سلة",
+        fq1Q:"هل يبطّئ Numu Flow متجري على سلة؟", fq1A:"نحمّل سكربتات خفيفة ونؤخّر غير الضروري. ويمكن تفعيل/إيقاف الأدوات لكل صفحة.",
+        fq2Q:"هل أستطيع إخفاء الأدوات في صفحات محددة؟", fq2A:"نعم، عبر استهداف الروابط أو التصنيفات.",
+        fq3Q:"كيف ترتبط الإعلانات بالمبيعات؟", fq3A:"نعزو التحويلات لبيانات الطلب من سلة ومعلمات UTM.",
+        fq4Q:"ما الصلاحيات المطلوبة؟", fq4A:"معلومات المتجر وبعض بيانات الطلب/الزوار لتفعيل الأدوات والتحليلات، ويمكن إلغاء الربط في أي وقت.",
+        footerDesc:"أدوات تسويقية ذكية لمتاجر سلة.",
+        footerAbout:"من نحن",
+        footerContact:"اتصل بنا",
+        footerPrivacy:"سياسة الخصوصية",
+        rights:"جميع الحقوق محفوظة."
+      }
+    };
+
+    function applyLang(lang){
+      const map = messages[lang];
+      document.documentElement.lang = (lang === 'ar' ? 'ar' : 'en');
+      document.documentElement.dir = (lang === 'ar' ? 'rtl' : 'ltr');
+      document.querySelectorAll('[data-i18n]').forEach(el=>{
+        const key = el.getAttribute('data-i18n');
+        if(map[key] !== undefined){
+          if(key === 'heroTitle'){ el.innerHTML = map[key]; }
+          else { el.textContent = map[key]; }
+        }
+      });
+      try{ localStorage.setItem('nf_lang', lang); }catch(e){}
+      const sel = document.getElementById('lang');
+      if(sel && sel.value !== lang){ sel.value = lang; }
+    }
+
+    // language pills
+    const pillEn = document.getElementById('pill-en');
+    const pillAr = document.getElementById('pill-ar');
+    function setActive(lang){
+      pillEn.classList.toggle('chip-active', lang==='en');
+      pillAr.classList.toggle('chip-active', lang==='ar');
+    }
+    pillEn.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('en'); setActive('en'); });
+    pillAr.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('ar'); setActive('ar'); });
+
+    // initialize from storage or browser language
+    (function(){
+      let lang = 'en';
+      try{ lang = localStorage.getItem('nf_lang') || lang; }catch(e){}
+      if(!['en','ar'].includes(lang)){
+        lang = (navigator.language || '').startsWith('ar') ? 'ar' : 'en';
+      }
+      applyLang(lang);
+      setActive(lang);
+    })();
+  </script>
+</body>
+</html>
