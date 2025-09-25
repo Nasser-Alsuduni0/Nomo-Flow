@@ -48,12 +48,10 @@ INSTALLED_APPS = [
     'features',
     'notifications',
     'visitors',
-    # Newly added apps
     'marketing',
     'tracking',
     'optimizer',
     'dashboard',
-
 ]
 
 MIDDLEWARE = [
