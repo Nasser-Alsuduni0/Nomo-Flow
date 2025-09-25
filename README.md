@@ -1,127 +1,51 @@
-# Nomo Flow
+# Nomo Flow (Works with Salla)
 
-تطبيق تسويقي مخصص للتجار على منصة **سلة** يضيف أدوات تفاعلية مثل:  
-- كوبونات الخصم  
-- التنبيهات (Email / SMS / WhatsApp / Push)  
-- عداد الزوار (Live Counter)  
-- جامع الإيميلات (Email Collector)  
-- بيانات الزوار (Visitor Data)  
-- آخر عملية شراء (Latest Conversion)  
+> Smart marketing toolkit for Salla stores: coupons, notifications, live visitor counter, email collector, recent purchases, and social ad campaign launcher (TikTok/Snapchat/Instagram) — all from one dashboard.
 
-🎯 الهدف: زيادة مبيعات المتجر وتحسين تجربة العملاء من خلال أدوات تسويقية سهلة التفعيل والإدارة.
-
----
-
-## 🚀 المميزات
-- **لوحة تحكم (Dashboard):** كل ميزة تظهر كبطاقة يمكن تفعيلها أو إيقافها.  
-- **تكامل مع سلة (Salla Integration):** ربط OAuth 2.0 آمن مع متجر التاجر.  
-- **Webhooks:** استقبال أحداث (طلب جديد، سلة متروكة، كوبون مستخدم).  
-- **التقارير:** عرض وتحليل استخدام الكوبونات والتنبيهات والزوار.  
-- **تخصيص:** إعدادات مرنة لكل ميزة عبر JSON.  
+## Features
+- Salla OAuth 2.0 connect/callback flow with token storage per merchant
+- Webhook receiver for `app.store.authorize` and event ingestion
+- Coupons engine: create/issue/track discount codes with usage limits
+- Live View Counter widget rendered on storefront with configurable rules
+- Email Collector popup with double‑opt‑in and exportable CSV list
+- Notifications center for on‑site alerts (target by page/device/behavior)
+- Recent Purchases ticker for social proof (storefront widget)
+- Campaign Launcher to publish ads to TikTok/Snapchat/Instagram from one UI
+- Tracking module for attribution (UTM, click → order matching)
+- Optimizer (rules/A‑B tests) to auto‑tune widget variants
+- Admin dashboard with metrics, reports, and per‑feature toggles
 
 ---
 
-<h3>🗂️ هيكل المشروع — Nomo Flow</h3>
+## Project Structure (Django 5.x)
 
-<div dir="ltr">
-
-<pre><code>nomo-flow/
-├─ manage.py
-├─ requirements.txt
-├─ .env.example
+```
+Nomo-Flow/
 ├─ README.md
+├─ requirements.txt
+├─ NomoFlow/
+│  ├─ manage.py                         # Django entry
+│  ├─ db.sqlite3                        # Dev database (local)
+│  └─ NomoFlow/                         # Project module
+│     ├─ settings.py                    # Real settings (env-driven)
+│     ├─ urls.py                        # Root urls → core + salla
+│     ├─ asgi.py | wsgi.py | __init__.py
 │
-├─ nomo_flow/
-│  ├─ __init__.py
-│  ├─ settings.py
-│  ├─ urls.py
-│  ├─ wsgi.py
-│  └─ asgi.py
+│  ├─ core/                             # Public site (landing)
+│  │  ├─ views.py | urls.py
+│  │  ├─ templates/core/home.html       # Landing + i18n + SVG icons
+│  │  └─ static/core/img/logo.png       # Logo
 │
-├─ core/
-│  ├─ __init__.py
-│  ├─ salla_client.py
-│  ├─ webhooks.py
-│  ├─ utils.py
-│  └─ models.py
+│  ├─ integrations/                     # Salla OAuth + webhook
+│  │  ├─ urls.py                        # Mounted at /salla/
+│  │  └─ views.py                       # connect/callback/webhook
 │
-├─ integrations/
-│  ├─ __init__.py
-│  ├─ models.py
-│  ├─ views.py
-│  ├─ urls.py
-│  └─ admin.py
-│
-├─ features/
-│  ├─ __init__.py
-│  ├─ models.py
-│  ├─ views.py
-│  ├─ urls.py
-│  ├─ services.py
-│  └─ admin.py
-│
-├─ coupons/
-│  ├─ __init__.py
-│  ├─ models.py
-│  ├─ views.py
-│  ├─ urls.py
-│  ├─ services.py
-│  └─ admin.py
-│
-├─ notifications/
-│  ├─ __init__.py
-│  ├─ models.py
-│  ├─ views.py
-│  ├─ urls.py
-│  ├─ services.py
-│  └─ admin.py
-│
-├─ visitors/
-│  ├─ __init__.py
-│  ├─ models.py
-│  ├─ views.py
-│  ├─ urls.py
-│  └─ admin.py
-│
-├─ events/
-│  ├─ __init__.py
-│  ├─ models.py
-│  ├─ views.py
-│  ├─ urls.py
-│  └─ admin.py
-│
-├─ attributions/
-│  ├─ __init__.py
-│  ├─ models.py
-│  └─ services.py
-│
-├─ templates/
-│  ├─ base.html
-│  ├─ features/
-│  ├─ coupons/
-│  ├─ notifications/
-│  ├─ visitors/
-│  └─ integrations/
-│
-├─ static/
-│  ├─ css/
-│  ├─ js/
-│  └─ images/
-│
-├─ scripts/
-│  ├─ dev_seed.py
-│  └─ export_db.sh
-│
-├─ tests/
-│  ├─ __init__.py
-│  ├─ test_features.py
-│  ├─ test_coupons.py
-│  └─ test_notifications.py
-│
-└─ docs/
-   ├─ ERD.dbml
-   ├─ UX-flow.md
-   └─ API-notes.md
-</code></pre>
+│  ├─ coupons/ | features/ | notifications/ | visitors/
+│  ├─ tracking/ | optimizer/ | dashboard/
+│  └─ …
+```
 
-</div>
+---
+
+### عربي (مختصر)
+مشروع **Nomo Flow** متوافق مع منصة **سلة** ويقدّم أدوات تسويقية جاهزة: كوبونات، تنبيهات، عدّاد زوار لحظي، جامع إيميلات، وعرض أحدث المشتريات، بالإضافة إلى إطلاق حملات إعلانية اجتماعية. الصفحة الرئيسية باللغة العربية أو الإنجليزية ويمكن التبديل بينهما بسهولة.
