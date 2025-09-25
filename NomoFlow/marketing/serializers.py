@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Event
+from .models import Campaign
 
-class EventSerializer(serializers.ModelSerializer):
+
+class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Event
+        model = Campaign
         fields = "__all__"
