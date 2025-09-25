@@ -11,9 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env if present
+load_dotenv()
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,7 +30,7 @@ SECRET_KEY = 'django-insecure-p5qbq_i5_^vddqq(*9hpjpz!*jc-6+ohqmx4hnyr9uwrbj8-z#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()] if os.getenv("ALLOWED_HOSTS") else []
 
 
 # Application definition
@@ -37,12 +42,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "rest_framework",
-    "dashboard",
-    "marketing",
-    "tracking",
-    "optimizer",
-     
+    'core',
+    'coupons',
+    'integrations',
+    'features',
+    'notifications',
+    'visitors',
+    'tracking',
+    'optimizer',
+    'dashboard',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +134,28 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- Salla Integration Settings ---
+# Prefer configuring these via environment variables
+SALLA_CLIENT_ID = os.getenv("SALLA_CLIENT_ID", "")
+SALLA_CLIENT_SECRET = os.getenv("SALLA_CLIENT_SECRET", "")
+SALLA_REDIRECT_URI = os.getenv("SALLA_REDIRECT_URI", "")  # e.g., https://yourdomain.com/salla/callback
+SALLA_SCOPES = os.getenv("SALLA_SCOPES", "orders.read products.read webhooks.read_write offline_access").split()
+
+# API & OAuth endpoints (override via env if different in your portal)
+SALLA_OAUTH_AUTHORIZE_URL = os.getenv("SALLA_OAUTH_AUTHORIZE_URL", "https://accounts.salla.dev/oauth2/authorize")
+SALLA_OAUTH_TOKEN_URL     = os.getenv("SALLA_OAUTH_TOKEN_URL", "https://accounts.salla.dev/oauth2/token")
+SALLA_API_BASE            = os.getenv("SALLA_API_BASE", "https://api.salla.dev/admin/v2")
+# Optional user info endpoint (used to reliably fetch store/merchant info)
+SALLA_USERINFO_URL        = os.getenv("SALLA_USERINFO_URL", "https://accounts.salla.dev/oauth2/user/info")
+# Public base URL for webhooks/callbacks (required in production)
+PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "")  # e.g., https://yourdomain.com
+
+# Optional: default webhook secret if you want a global secret (or set per-merchant on subscription)
+SALLA_WEBHOOK_SECRET = os.getenv("SALLA_WEBHOOK_SECRET", "")
+SALLA_WEBHOOK_TOKEN = os.getenv("SALLA_WEBHOOK_TOKEN", "")
+
+# CSRF trusted origins (comma-separated) e.g. https://abc.ngrok-free.app,https://app.example.com
+_csrf_env = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+if _csrf_env:
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_env.split(",") if o.strip()]
