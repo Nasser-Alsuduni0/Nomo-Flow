@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'features',
     'notifications',
     'visitors',
+    'marketing',
     'tracking',
     'optimizer',
     'dashboard',
