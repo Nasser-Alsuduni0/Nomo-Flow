@@ -22,6 +22,14 @@ urlpatterns = [
     path('', include('core.urls')),
     path('admin/', admin.site.urls),
     path('salla/', include('integrations.urls')),
+    path('coupons/', include('coupons.urls')),
+    path('features/', include('features.urls')),
+    path('notifications/', include('notifications.urls')),
+    path('visitors/', include('visitors.urls')),
+    path('marketing/', include('marketing.urls')),
+    path('dashboard/', include('dashboard.urls')),
+    path('tracking/', include('tracking.urls')),
+    path('optimizer/', include('optimizer.urls')),
 ]
 
 # Ensure static files are served in development using finders
