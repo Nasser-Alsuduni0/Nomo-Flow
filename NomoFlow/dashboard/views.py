@@ -30,7 +30,8 @@ def page_discount_coupons(request):
     return render(request, "dashboard/feature_placeholder.html", {"title": "Discount Coupons"})
 
 def page_notifications(request):
-    return render(request, "dashboard/feature_placeholder.html", {"title": "Notifications"})
+    from notifications.views import notifications_page
+    return notifications_page(request)
 
 def page_purchase_display(request):
     return render(request, "dashboard/feature_placeholder.html", {"title": "Purchase Display"})
