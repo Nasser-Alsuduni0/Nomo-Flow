@@ -1,0 +1,49 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Dashboard · Overview{% endblock %}
+{% block header %}Overview{% endblock %}
+{% block content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="card p-3"><div class="text-muted">Spend Today</div><div id="kpi-spend" class="fs-3 fw-bold">-</div></div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="text-muted">Conversions</div><div id="kpi-conv" class="fs-3 fw-bold">-</div></div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="text-muted">CPA</div><div id="kpi-cpa" class="fs-3 fw-bold">-</div></div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="text-muted">ROAS</div><div id="kpi-roas" class="fs-3 fw-bold">-</div></div></div>
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="mb-0">Performance — Last 7 Days</h6>
+        <canvas id="perfChart" height="90" class="mt-3"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const apiBase = "/marketing";
+  function money(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(v||0); }
+  async function loadKPIs(){
+    try{
+      const r = await fetch(`${apiBase}/kpis/`);
+      const d = await r.json();
+      document.getElementById("kpi-spend").textContent = money(d.spend_today||0);
+      document.getElementById("kpi-conv").textContent  = d.conversions ?? 0;
+      document.getElementById("kpi-cpa").textContent   = d.cpa ?? "-";
+      document.getElementById("kpi-roas").textContent  = d.roas ?? "-";
+    }catch(e){ console.warn(e); }
+  }
+  (function renderChart(){
+    const ctx = document.getElementById('perfChart');
+    const labels=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const spend=[2100,1300,3800,2600,1700,2000,3200];
+    const conv =[12,8,35,20,15,18,28];
+    new Chart(ctx,{type:'line',data:{labels,
+      datasets:[
+        {label:'Spend ($)', data:spend, tension:.35, borderWidth:3},
+        {label:'Conversions', data:conv, tension:.35, borderWidth:3}
+      ]}, options:{responsive:true, interaction:{mode:'index',intersect:false}}});
+  })();
+  loadKPIs();
+</script>
+{% endblock %}
+
+
