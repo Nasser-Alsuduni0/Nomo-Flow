@@ -25,77 +25,185 @@
     html,body{margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:var(--text);background:var(--bg)}
     a{color:inherit}
     .container{max-width:1200px;margin:0 auto;padding:0 24px}
-    .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:16px;border-bottom:1px solid var(--border)}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+    
+    /* Navigation */
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:20px;border-bottom:1px solid var(--border);position:relative;flex-wrap:nowrap;overflow-x:hidden}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;flex-shrink:0;min-width:fit-content;max-width:300px;overflow:visible;direction:ltr}
+    .logo svg{flex-shrink:0;display:block;width:auto;max-width:100%;height:80px;direction:ltr}
     .logo img{height:150px;width:auto;display:block}
-    .nav-links{display:flex;align-items:center;gap:14px}
-    .btn{border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:#fff}
-    .btn:hover{background:#fafafa}
+    .nav-links{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex-shrink:1;justify-content:flex-end}
+    .btn{border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:#fff;transition:all 0.2s ease}
+    .btn:hover{background:#fafafa;transform:translateY(-1px)}
     .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 8px 20px rgba(23,168,255,0.25)}
-    .btn-primary:hover{background:var(--brand-dark)}
+    .btn-primary:hover{background:var(--brand-dark);transform:translateY(-1px)}
+    
+    /* Mobile Navigation */
+    .mobile-menu-btn{display:none;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text)}
+    .mobile-nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);z-index:1000;padding:20px}
+    .mobile-nav.active{display:block}
+    .mobile-nav .btn{display:block;width:100%;text-align:center;margin-bottom:12px}
+    .mobile-nav .btn:last-child{margin-bottom:0}
+    
     /* Language pills */
     .lang-nav{display:flex;align-items:center;gap:6px;background:rgba(232,246,255,.6);border:1px solid var(--border);border-radius:9999px;padding:6px}
-    .chip{padding:8px 14px;border-radius:9999px;text-decoration:none;font-weight:800;color:var(--text)}
+    .chip{padding:8px 14px;border-radius:9999px;text-decoration:none;font-weight:800;color:var(--text);transition:all 0.2s ease}
     .chip:hover{background:rgba(23,168,255,.10)}
     .chip-active{background:var(--brand);color:#fff}
-    .badge{display:inline-block;background:#e6f5ff;color:#0b6aa8;border-radius:9999px;padding:8px 14px;font-weight:700}
+    
+    /* Hero Section */
+    .badge{display:inline-block;background:#e6f5ff;color:#0b6aa8;border-radius:9999px;padding:8px 14px;font-weight:700;margin-bottom:16px}
     .hero{padding:56px 0 24px;text-align:center}
-    h1{font-size:44px;line-height:1.15;margin:12px 0 8px}
+    h1{font-size:44px;line-height:1.15;margin:12px 0 8px;font-weight:800}
     .accent{color:var(--brand)}
-    .lead{font-size:18px;color:var(--muted);max-width:900px;margin:0 auto}
+    .lead{font-size:18px;color:var(--muted);max-width:900px;margin:0 auto;line-height:1.6}
     .cta-row{display:flex;gap:12px;margin:22px 0;justify-content:center;flex-wrap:wrap}
     .strip{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px}
     .pill{border:1px solid #cdeefe;background:#e8f6ff;border-radius:9999px;padding:8px 14px;font-weight:700}
+    
+    /* Cards and Grids */
     .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-    .card{background:var(--card);border-radius:14px;padding:22px;box-shadow:0 2px 10px rgba(2,6,23,0.06);border:1px solid #eef2f7}
-    .card h4{margin:8px 0 6px;font-size:18px}
-    .card p{color:var(--muted);margin:0}
+    .card{background:var(--card);border-radius:14px;padding:22px;box-shadow:0 2px 10px rgba(2,6,23,0.06);border:1px solid #eef2f7;transition:all 0.3s ease}
+    .card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(2,6,23,0.1)}
+    .card h4{margin:8px 0 6px;font-size:18px;font-weight:700}
+    .card p{color:var(--muted);margin:0;line-height:1.5}
     .icon{color:var(--brand);margin-bottom:8px}
     .icon svg{width:34px;height:34px}
+    
+    /* Sections */
     .section{padding:32px 0}
-    .section h2{text-align:center;font-size:32px;margin:0 0 8px}
+    .section h2{text-align:center;font-size:32px;margin:0 0 8px;font-weight:800}
     .section .lead{text-align:center;margin-bottom:22px}
+    
+    /* Gallery */
     .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .shot{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#fff;height:220px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:600}
+    .shot{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#fff;height:220px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:600;transition:all 0.3s ease}
+    .shot:hover{transform:scale(1.02);box-shadow:0 8px 25px rgba(0,0,0,0.1)}
+    
+    /* Steps */
     .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;list-style:none;padding:0;margin:0}
+    
+    /* CTA */
     .cta{background:#e8f6ff;border:1px solid #cdeefe;margin:40px auto 20px;padding:28px;border-radius:18px;max-width:900px;text-align:center}
+    
+    /* Pricing */
     .pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    .price-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px}
+    .price-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;transition:all 0.3s ease}
+    .price-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.1)}
     .price-title{font-weight:800}
-    .price{font-size:28px;margin:8px 0}
+    .price{font-size:28px;margin:8px 0;font-weight:800}
     .ul{margin:0;padding:0;list-style:none}
-    .ul li{margin:6px 0;color:var(--muted)}
+    .ul li{margin:6px 0;color:var(--muted);line-height:1.5}
+    
+    /* FAQ */
     .faq{max-width:900px;margin:0 auto;display:grid;gap:12px}
-    details{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px}
-    summary{font-weight:700;cursor:pointer}
+    details{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;transition:all 0.3s ease}
+    details:hover{border-color:var(--brand)}
+    summary{font-weight:700;cursor:pointer;padding:8px 0}
+    
+    /* Footer */
     footer{padding:20px 0;color:#475569}
     .footer{padding:32px 0;border-top:1px solid var(--border)}
-    .footer .brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px}
+    .footer .brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;direction:ltr}
+    .footer .brand svg{direction:ltr}
     .footer .brand img{height:48px;width:48px;border-radius:8px}
     .footer .brand .name{font-weight:800;font-size:22px}
     .footer .desc{color:var(--muted);text-align:center;margin-bottom:12px}
-    .footer .links{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px}
-    .footer .links a{color:var(--text);font-weight:700;text-decoration:none}
+    .footer .links{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+    .footer .links a{color:var(--text);font-weight:700;text-decoration:none;transition:color 0.2s ease}
     .footer .links a:hover{color:var(--brand)}
     .footer .copy{font-size:12px;color:#64748b;text-align:center}
     .lang-switch{display:flex;gap:6px}
     .small{font-size:12px;color:#64748b}
-    @media (max-width: 1000px){
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .container{padding:0 20px}
+      .logo img{height:120px}
+      .logo svg{height:70px!important}
+    }
+    
+    @media (max-width: 1000px) {
       .cards,.gallery,.pricing,.steps{grid-template-columns:1fr}
       h1{font-size:36px}
+      .section h2{font-size:28px}
+      .hero{padding:40px 0 20px}
+    }
+    
+    @media (max-width: 768px) {
+      .container{padding:0 16px}
+      .nav{padding:12px 0;gap:12px}
+      .logo{max-width:200px}
+      .logo img{height:100px}
+      .logo svg{height:60px!important}
+      .nav-links{display:none}
+      .mobile-menu-btn{display:block}
+      .mobile-nav{display:none}
+      .mobile-nav.active{display:block}
+      
+      h1{font-size:28px;line-height:1.2}
+      .lead{font-size:16px}
+      .hero{padding:32px 0 16px}
+      .section{padding:24px 0}
+      .section h2{font-size:24px}
+      .card{padding:18px}
+      .cta{padding:20px;margin:24px auto 16px}
+      .footer{padding:24px 0}
+      .footer .links{gap:12px}
+    }
+    
+    @media (max-width: 480px) {
+      .container{padding:0 12px}
+      .logo img{height:80px}
+      h1{font-size:24px}
+      .lead{font-size:15px}
+      .btn{padding:8px 12px;font-size:14px}
+      .cta-row{gap:8px}
+      .card{padding:16px}
+      .icon svg{width:28px;height:28px}
+      .card h4{font-size:16px}
+      .section h2{font-size:20px}
+      .price{font-size:24px}
+      .footer .brand img{height:40px;width:40px}
     }
 
     /* RTL helpers */
     [dir="rtl"] .nav{flex-direction:row-reverse}
-    [dir="rtl"] .nav-links{flex-direction:row-reverse}
+    [dir="rtl"] .logo{margin-left:0;padding-left:0;margin-right:auto}
+    [dir="rtl"] .nav-links{flex-direction:row-reverse;margin-right:0;padding-right:0;margin-left:auto}
     [dir="rtl"] .cta-row{flex-direction:row-reverse}
     [dir="rtl"] .strip{flex-direction:row-reverse}
+    [dir="rtl"] .mobile-nav{left:auto;right:0}
+    
+    /* RTL responsive */
+    @media (max-width: 768px) {
+      [dir="rtl"] .logo{max-width:180px}
+      [dir="rtl"] .mobile-menu-btn{margin-left:0;margin-right:auto}
+    }
   </style>
 </head>
 <body>
   <header class="container nav">
     <div class="logo">
-      <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow" />
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" style="height:80px;width:auto" direction="ltr">
+        <!-- Three bars with blue colors -->
+        <rect x="8" y="40" width="16" height="32" rx="3" ry="3" fill="#0ea5e9"/>
+        <rect x="28" y="28" width="16" height="44" rx="3" ry="3" fill="#0ea5e9"/>
+        <rect x="48" y="16" width="16" height="56" rx="3" ry="3" fill="#0ea5e9"/>
+        
+        <!-- Upward arrow -->
+        <g id="logo-arrow" fill="none" stroke="#0ea5e9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 12 38 L 36 24 L 56 12 L 68 12"/>
+          <path d="M 68 12 L 62 9 M 68 12 L 65 18"/>
+        </g>
+        
+        <!-- Text -->
+        <text x="85" y="45" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28" fill="#1e293b" letter-spacing="-0.5" direction="ltr" text-anchor="start">
+          Nomo
+        </text>
+        <text x="85" y="68" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28" fill="#1e293b" letter-spacing="-0.5" direction="ltr" text-anchor="start">
+          Flow
+        </text>
+      </svg>
     </div>
     <div class="nav-links">
       <a href="" class="btn btn-primary" data-i18n="install">Install on Salla</a>
@@ -103,6 +211,15 @@
       <nav class="lang-nav" aria-label="Language">
         <a href="#" id="pill-en" class="chip">EN</a>
         <a href="#" id="pill-ar" class="chip">العربية</a>
+      </nav>
+    </div>
+    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle mobile menu">☰</button>
+    <div class="mobile-nav" id="mobile-nav">
+      <a href="" class="btn btn-primary" data-i18n="install">Install on Salla</a>
+      <a href="/dashboard/" class="btn" data-i18n="dashboard">Dashboard</a>
+      <nav class="lang-nav" aria-label="Language">
+        <a href="#" id="mobile-pill-en" class="chip">EN</a>
+        <a href="#" id="mobile-pill-ar" class="chip">العربية</a>
       </nav>
     </div>
   </header>
@@ -250,7 +367,26 @@
 
   <footer class="container footer">
     <div class="brand">
-      <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow" style=height:100px;width:auto />
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" style="height:60px;width:auto" direction="ltr">
+        <!-- Three bars with blue colors -->
+        <rect x="8" y="40" width="16" height="32" rx="3" ry="3" fill="#0ea5e9"/>
+        <rect x="28" y="28" width="16" height="44" rx="3" ry="3" fill="#0ea5e9"/>
+        <rect x="48" y="16" width="16" height="56" rx="3" ry="3" fill="#0ea5e9"/>
+        
+        <!-- Upward arrow -->
+        <g id="logo-arrow-footer" fill="none" stroke="#0ea5e9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 12 38 L 36 24 L 56 12 L 68 12"/>
+          <path d="M 68 12 L 62 9 M 68 12 L 65 18"/>
+        </g>
+        
+        <!-- Text -->
+        <text x="85" y="45" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28" fill="#1e293b" letter-spacing="-0.5" direction="ltr" text-anchor="start">
+          Nomo
+        </text>
+        <text x="85" y="68" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28" fill="#1e293b" letter-spacing="-0.5" direction="ltr" text-anchor="start">
+          Flow
+        </text>
+      </svg>
     </div>
     <p class="desc" data-i18n="footerDesc">Smart marketing tools for Salla stores.</p>
     <div class="links">
@@ -264,6 +400,23 @@
   <script>
     // Year
     document.getElementById('y').textContent = new Date().getFullYear();
+    
+    // Mobile menu functionality
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileNav = document.getElementById('mobile-nav');
+    
+    mobileMenuBtn.addEventListener('click', function() {
+      mobileNav.classList.toggle('active');
+      this.textContent = mobileNav.classList.contains('active') ? '✕' : '☰';
+    });
+    
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!mobileMenuBtn.contains(e.target) && !mobileNav.contains(e.target)) {
+        mobileNav.classList.remove('active');
+        mobileMenuBtn.textContent = '☰';
+      }
+    });
 
     // Simple i18n (EN/AR) and RTL toggle:
     const messages = {
@@ -356,12 +509,20 @@
     // language pills
     const pillEn = document.getElementById('pill-en');
     const pillAr = document.getElementById('pill-ar');
+    const mobilePillEn = document.getElementById('mobile-pill-en');
+    const mobilePillAr = document.getElementById('mobile-pill-ar');
+    
     function setActive(lang){
       pillEn.classList.toggle('chip-active', lang==='en');
       pillAr.classList.toggle('chip-active', lang==='ar');
+      mobilePillEn.classList.toggle('chip-active', lang==='en');
+      mobilePillAr.classList.toggle('chip-active', lang==='ar');
     }
+    
     pillEn.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('en'); setActive('en'); });
     pillAr.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('ar'); setActive('ar'); });
+    mobilePillEn.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('en'); setActive('en'); });
+    mobilePillAr.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('ar'); setActive('ar'); });
 
     // initialize from storage or browser language
     (function(){

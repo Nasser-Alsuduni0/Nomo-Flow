@@ -2,9 +2,33 @@ from django.shortcuts import render, get_object_or_404
 from marketing.models import Campaign
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from core.models import Merchant
 
 def index(request):
-    return render(request, "dashboard/overview.html")
+    # Get the merchant with active OAuth token (actually connected store)
+    from core.models import SallaToken
+    
+    try:
+        # Get the merchant that has an active OAuth token
+        salla_token = SallaToken.objects.select_related('merchant').first()
+        if salla_token:
+            merchant = salla_token.merchant
+        else:
+            # Fallback: get the most recently created merchant
+            merchant = Merchant.objects.order_by('-created_at').first()
+    except:
+        merchant = None
+    
+    if not merchant:
+        # Create a demo merchant if none exists
+        merchant, created = Merchant.objects.get_or_create(
+            salla_merchant_id='demo-store-123',
+            defaults={'name': 'Demo Store', 'owner_email': 'demo@example.com'}
+        )
+    
+    return render(request, "dashboard/overview.html", {
+        'merchant': merchant
+    })
 
 def campaign_detail(request, pk: int):
     c = get_object_or_404(Campaign, pk=pk)

@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-p5qbq_i5_^vddqq(*9hpjpz!*jc-6+ohqmx4hnyr9uwrbj8-z#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()] if os.getenv("ALLOWED_HOSTS") else []
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()] if os.getenv("ALLOWED_HOSTS") else ['localhost', '127.0.0.1', '.ngrok-free.app']
 
 
 # Application definition
@@ -145,19 +145,37 @@ SALLA_REDIRECT_URI = os.getenv("SALLA_REDIRECT_URI", "")  # e.g., https://yourdo
 SALLA_SCOPES = os.getenv("SALLA_SCOPES", "orders.read products.read webhooks.read_write offline_access").split()
 
 # API & OAuth endpoints (override via env if different in your portal)
-SALLA_OAUTH_AUTHORIZE_URL = os.getenv("SALLA_OAUTH_AUTHORIZE_URL", "https://accounts.salla.dev/oauth2/authorize")
-SALLA_OAUTH_TOKEN_URL     = os.getenv("SALLA_OAUTH_TOKEN_URL", "https://accounts.salla.dev/oauth2/token")
+SALLA_OAUTH_AUTHORIZE_URL = os.getenv("SALLA_OAUTH_AUTHORIZE_URL", "https://accounts.salla.sa/oauth2/authorize")
+SALLA_OAUTH_TOKEN_URL     = os.getenv("SALLA_OAUTH_TOKEN_URL", "https://accounts.salla.sa/oauth2/token")
 SALLA_API_BASE            = os.getenv("SALLA_API_BASE", "https://api.salla.dev/admin/v2")
 # Optional user info endpoint (used to reliably fetch store/merchant info)
-SALLA_USERINFO_URL        = os.getenv("SALLA_USERINFO_URL", "https://accounts.salla.dev/oauth2/user/info")
+SALLA_USERINFO_URL        = os.getenv("SALLA_USERINFO_URL", "https://accounts.salla.sa/oauth2/user/info")
 # Public base URL for webhooks/callbacks (required in production)
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "")  # e.g., https://yourdomain.com
 
 # Optional: default webhook secret if you want a global secret (or set per-merchant on subscription)
 SALLA_WEBHOOK_SECRET = os.getenv("SALLA_WEBHOOK_SECRET", "")
-SALLA_WEBHOOK_TOKEN = os.getenv("SALLA_WEBHOOK_TOKEN", "")
+SALLA_WEBHOOK_TOKEN = os.getenv("SALLA_WEBHOOK_TOKEN", "nomo-flow-webhook-token-2025")
 
 # CSRF trusted origins (comma-separated) e.g. https://abc.ngrok-free.app,https://app.example.com
-_csrf_env = os.getenv("CSRF_TRUSTED_ORIGINS", "")
-if _csrf_env:
-    CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_env.split(",") if o.strip()]
+CSRF_TRUSTED_ORIGINS = [
+    'https://e1fd5bb5653c.ngrok-free.app',
+]
+
+INSTALLED_APPS += ['corsheaders']
+MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware', *MIDDLEWARE]
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'ngrok-skip-browser-warning',  # Allow ngrok bypass header
+]
+
