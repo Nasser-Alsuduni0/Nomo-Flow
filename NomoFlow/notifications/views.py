@@ -183,10 +183,12 @@ def embed_js(request):
     js = r"""
    (function(){
   // === Resolve script src & base origin ===
-  var SCRIPT_SRC = (document.currentScript && document.currentScript.src) || (function(){
+  var SCRIPT_EL = (function(){
+    if (document.currentScript) return document.currentScript;
     var s = document.getElementsByTagName('script');
-    return s.length ? s[s.length - 1].src : '';
+    return s.length ? s[s.length - 1] : null;
   })();
+  var SCRIPT_SRC = (SCRIPT_EL && SCRIPT_EL.src) || '';
 
   // window.__NOMO_BASE__ إن ما تم ضبطه، خذ origin من رابط السكربت نفسه
   var BASE = (window.__NOMO_BASE__ || '').replace(/\/+$/,'');
@@ -204,8 +206,12 @@ def embed_js(request):
     return m ? decodeURIComponent(m[1]) : null;
   }
 
-  // store_id من query أو من global
-  var STORE_ID = qsFromScript('store_id', SCRIPT_SRC) || window.__NOMO_STORE_ID__ || null;
+  function isPlaceholder(v){
+    return !v || /^\s*\{\{/.test(String(v)) || String(v).toLowerCase() === 'null' || String(v).toLowerCase() === 'undefined';
+  }
+
+  // store_id من query أو من global أو data-attribute
+  var STORE_ID = qsFromScript('store_id', SCRIPT_SRC) || window.__NOMO_STORE_ID__ || (SCRIPT_EL && SCRIPT_EL.getAttribute('data-store-id')) || null;
 
   function ready(fn){
     if (document.readyState !== 'loading') fn();
@@ -472,7 +478,49 @@ def embed_js(request):
       });
   }
 
-  ready(fetchAndRender);
+  // === Resolve STORE_ID if missing/placeholder ===
+  function tryGetFromSalla(){
+    try {
+      if (window.salla && typeof window.salla.config?.get === 'function') {
+        return window.salla.config.get('store.id') || window.salla.config.get('merchant.id') || null;
+      }
+    } catch(e) {}
+    try {
+      if (window.Salla && window.Salla.store && window.Salla.store.id) {
+        return window.Salla.store.id;
+      }
+    } catch(e) {}
+    return null;
+  }
+
+  function resolveStoreIdAndStart(){
+    if (isPlaceholder(STORE_ID)) {
+      var fromSalla = tryGetFromSalla();
+      if (fromSalla) {
+        STORE_ID = fromSalla;
+      }
+    }
+
+    if (isPlaceholder(STORE_ID)) {
+      var attempts = 0;
+      var timer = setInterval(function(){
+        attempts += 1;
+        var sId = tryGetFromSalla();
+        if (sId) {
+          clearInterval(timer);
+          STORE_ID = sId;
+          fetchAndRender();
+        } else if (attempts >= 10) {
+          clearInterval(timer);
+          console.warn('Nomo Flow: Could not resolve STORE_ID');
+        }
+      }, 300);
+    } else {
+      fetchAndRender();
+    }
+  }
+
+  ready(resolveStoreIdAndStart);
 })();
 
     """

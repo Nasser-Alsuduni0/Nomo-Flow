@@ -27,6 +27,12 @@ def salla_connect(request):
     if not client_id or not redirect_uri:
         return HttpResponseBadRequest("Salla OAuth not configured")
 
+    # Debug logging
+    print(f"🔵 OAuth Authorization Request:")
+    print(f"   Client ID: {client_id}")
+    print(f"   Redirect URI: {redirect_uri}")
+    print(f"   Scopes: {scopes}")
+
     state = str(int(time.time()))  # could be a signed value if you need CSRF/state tracking
     query = {
         "response_type": "code",
@@ -48,16 +54,28 @@ def salla_callback(request):
     if not code:
         return HttpResponseBadRequest("Missing code")
 
+    redirect_uri = settings.SALLA_REDIRECT_URI or ((settings.PUBLIC_BASE_URL.rstrip("/") + "/salla/callback") if settings.PUBLIC_BASE_URL else "")
+    
+    # Debug logging
+    print(f"🟢 OAuth Token Exchange Request:")
+    print(f"   Client ID: {settings.SALLA_CLIENT_ID}")
+    print(f"   Redirect URI: {redirect_uri}")
+    print(f"   Code: {code[:20]}...")
+
     data = {
         "grant_type": "authorization_code",
         "client_id": settings.SALLA_CLIENT_ID,
         "client_secret": settings.SALLA_CLIENT_SECRET,
-        "redirect_uri": settings.SALLA_REDIRECT_URI or ((settings.PUBLIC_BASE_URL.rstrip("/") + "/salla/callback") if settings.PUBLIC_BASE_URL else ""),
+        "redirect_uri": redirect_uri,
         "code": code,
     }
     try:
         token_resp = requests.post(settings.SALLA_OAUTH_TOKEN_URL, data=data, timeout=20)
         if token_resp.status_code != 200:
+            print(f"🔴 Token Exchange FAILED!")
+            print(f"   Status: {token_resp.status_code}")
+            print(f"   Error: {token_resp.text}")
+            print(f"   Data sent: {data}")
             return HttpResponseBadRequest(f"Token exchange failed: {token_resp.status_code} - {token_resp.text}")
     except requests.exceptions.ConnectionError as e:
         return HttpResponseBadRequest(f"Connection error to Salla OAuth server: {str(e)}")

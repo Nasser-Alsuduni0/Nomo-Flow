@@ -51,7 +51,8 @@ def page_email_collector(request):
     return render(request, "dashboard/feature_placeholder.html", {"title": "Email Collector"})
 
 def page_discount_coupons(request):
-    return render(request, "dashboard/feature_placeholder.html", {"title": "Discount Coupons"})
+    from coupons.views import coupons_page
+    return coupons_page(request)
 
 def page_notifications(request):
     from notifications.views import notifications_page

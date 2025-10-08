@@ -159,7 +159,7 @@ SALLA_WEBHOOK_TOKEN = os.getenv("SALLA_WEBHOOK_TOKEN", "nomo-flow-webhook-token-
 
 # CSRF trusted origins (comma-separated) e.g. https://abc.ngrok-free.app,https://app.example.com
 CSRF_TRUSTED_ORIGINS = [
-    'https://e1fd5bb5653c.ngrok-free.app',
+    'https://9deb465bacda.ngrok-free.app',
 ]
 
 INSTALLED_APPS += ['corsheaders']
