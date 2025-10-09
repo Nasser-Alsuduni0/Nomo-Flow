@@ -3,29 +3,11 @@ from marketing.models import Campaign
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from core.models import Merchant
+from core.utils import get_current_merchant
+from django.http import JsonResponse, HttpResponseBadRequest
 
 def index(request):
-    # Get the merchant with active OAuth token (actually connected store)
-    from core.models import SallaToken
-    
-    try:
-        # Get the merchant that has an active OAuth token
-        salla_token = SallaToken.objects.select_related('merchant').first()
-        if salla_token:
-            merchant = salla_token.merchant
-        else:
-            # Fallback: get the most recently created merchant
-            merchant = Merchant.objects.order_by('-created_at').first()
-    except:
-        merchant = None
-    
-    if not merchant:
-        # Create a demo merchant if none exists
-        merchant, created = Merchant.objects.get_or_create(
-            salla_merchant_id='demo-store-123',
-            defaults={'name': 'Demo Store', 'owner_email': 'demo@example.com'}
-        )
-    
+    merchant = get_current_merchant(request)
     return render(request, "dashboard/overview.html", {
         'merchant': merchant
     })
@@ -66,4 +48,18 @@ def page_settings(request):
 
 def page_campaign(request):
     return render(request, "dashboard/campaign.html")
+
+
+def switch_merchant(request):
+    """Switch current merchant by id (POST or GET with ?merchant_id=)."""
+    from core.utils import set_current_merchant
+    mid = request.POST.get('merchant_id') or request.GET.get('merchant_id')
+    if not mid:
+        return HttpResponseBadRequest("merchant_id required")
+    try:
+        m = Merchant.objects.get(id=mid)
+    except Merchant.DoesNotExist:
+        return HttpResponseBadRequest("merchant not found")
+    set_current_merchant(request, m)
+    return JsonResponse({"ok": True, "merchant": {"id": m.id, "name": m.name, "store_id": m.salla_merchant_id}})
 

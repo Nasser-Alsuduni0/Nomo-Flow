@@ -142,7 +142,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SALLA_CLIENT_ID = os.getenv("SALLA_CLIENT_ID", "")
 SALLA_CLIENT_SECRET = os.getenv("SALLA_CLIENT_SECRET", "")
 SALLA_REDIRECT_URI = os.getenv("SALLA_REDIRECT_URI", "")  # e.g., https://yourdomain.com/salla/callback
-SALLA_SCOPES = os.getenv("SALLA_SCOPES", "orders.read products.read webhooks.read_write offline_access").split()
+# Include discount write scopes so we can create coupons via Admin API
+SALLA_SCOPES = os.getenv(
+    "SALLA_SCOPES",
+    "orders.read products.read discounts.read discounts.write webhooks.read_write offline_access discounts.write",
+).split()
 
 # API & OAuth endpoints (override via env if different in your portal)
 SALLA_OAUTH_AUTHORIZE_URL = os.getenv("SALLA_OAUTH_AUTHORIZE_URL", "https://accounts.salla.sa/oauth2/authorize")
@@ -159,7 +163,7 @@ SALLA_WEBHOOK_TOKEN = os.getenv("SALLA_WEBHOOK_TOKEN", "nomo-flow-webhook-token-
 
 # CSRF trusted origins (comma-separated) e.g. https://abc.ngrok-free.app,https://app.example.com
 CSRF_TRUSTED_ORIGINS = [
-    'https://9deb465bacda.ngrok-free.app',
+    'https://03e99b2271cc.ngrok-free.app',
 ]
 
 INSTALLED_APPS += ['corsheaders']

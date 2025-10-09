@@ -7,7 +7,7 @@ class PopupNotificationForm(forms.ModelForm):
         model = PopupNotification
         fields = [
             'title', 'message', 'is_active',
-            'background_color', 'text_color', 'button_text', 'button_url'
+            'button_text', 'button_url'
         ]
         widgets = {
             'title': forms.TextInput(attrs={
@@ -18,14 +18,6 @@ class PopupNotificationForm(forms.ModelForm):
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Enter notification message'
-            }),
-            'background_color': forms.TextInput(attrs={
-                'class': 'form-control',
-                'type': 'color'
-            }),
-            'text_color': forms.TextInput(attrs={
-                'class': 'form-control',
-                'type': 'color'
             }),
             'button_text': forms.TextInput(attrs={
                 'class': 'form-control',

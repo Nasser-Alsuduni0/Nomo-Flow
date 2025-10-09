@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from .models import PopupNotification
+from core.utils import get_current_merchant
 from .forms import PopupNotificationForm
 from django.views.decorators.http import require_GET
 from django.http import HttpResponse
@@ -9,27 +10,7 @@ from django.http import HttpResponse
 
 def notifications_page(request):
     """Main notifications page with form and list"""
-    # Get the merchant with active OAuth token (actually connected store)
-    from core.models import Merchant, SallaToken
-    
-    try:
-        # Get the merchant that has an active OAuth token
-        salla_token = SallaToken.objects.select_related('merchant').first()
-        if salla_token:
-            merchant = salla_token.merchant
-        else:
-            # Fallback: get the most recently created merchant
-            merchant = Merchant.objects.order_by('-created_at').first()
-    except:
-        merchant = None
-    
-    if not merchant:
-        # Create a demo merchant if none exists
-        merchant, created = Merchant.objects.get_or_create(
-            salla_merchant_id='demo-store-123',
-            defaults={'name': 'Demo Store', 'owner_email': 'demo@example.com'}
-        )
-    
+    merchant = get_current_merchant(request)
     notifications = PopupNotification.objects.filter(merchant=merchant).order_by('-created_at')
     
     if request.method == 'POST':
@@ -182,6 +163,13 @@ def embed_js(request):
     """
     js = r"""
    (function(){
+  // Idempotency guard: ensure embed runs only once even if script is included multiple times
+  if (window.__NOMO_NOTIFICATIONS_EMBED_LOADED__ || (document && document.documentElement && document.documentElement.getAttribute('data-nomo-notifications-embed') === '1')) {
+    try { console.log('Nomo Flow: notifications embed already loaded, skipping'); } catch(e){}
+    return;
+  }
+  window.__NOMO_NOTIFICATIONS_EMBED_LOADED__ = true;
+  try { document.documentElement.setAttribute('data-nomo-notifications-embed', '1'); } catch(e){}
   // === Resolve script src & base origin ===
   var SCRIPT_EL = (function(){
     if (document.currentScript) return document.currentScript;
@@ -233,7 +221,16 @@ def embed_js(request):
   function createNotif(n){
     console.log('Nomo Flow: Creating notification element for:', n.title);
     
+    // Remove any existing rendered notifications to avoid duplicates
+    try {
+      var existing = document.querySelectorAll('[data-nomo-notification]');
+      if (existing && existing.length) {
+        existing.forEach(function(el){ try { el.remove(); } catch(e){} });
+      }
+    } catch(e){}
+
     var wrap = document.createElement('div');
+    wrap.setAttribute('data-nomo-notification', '1');
     wrap.style.position = 'fixed';
     wrap.style.zIndex = '999999';
     wrap.style.opacity = '0';
@@ -242,27 +239,15 @@ def embed_js(request):
     applyPosition(wrap, 'bottom-left');
 
     var card = document.createElement('div');
-    card.style.maxWidth = '380px';
-    card.style.minWidth = '300px';
-    card.style.background = n.background_color || '#ffffff';
-    card.style.color = n.text_color || '#333333';
-    card.style.borderRadius = '16px';
-    card.style.boxShadow = '0 20px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05)';
-    card.style.padding = '20px 24px';
-    card.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-    card.style.position = 'relative';
-    card.style.backdropFilter = 'blur(10px)';
-    card.style.overflow = 'hidden';
+    card.style.cssText = 'max-width:380px;min-width:300px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(102,126,234,0.4);position:relative;overflow:hidden;font-family:system-ui,-apple-system, Segoe UI, Roboto, Arial, sans-serif;';
 
-    // Add decorative accent bar
-    var accent = document.createElement('div');
-    accent.style.position = 'absolute';
-    accent.style.top = '0';
-    accent.style.left = '0';
-    accent.style.right = '0';
-    accent.style.height = '4px';
-    accent.style.background = 'linear-gradient(90deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 100%)';
-    card.appendChild(accent);
+    // Decorative circles (match coupon popup style)
+    var circle1 = document.createElement('div');
+    circle1.style.cssText = 'position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(255,255,255,0.1);border-radius:50%';
+    card.appendChild(circle1);
+    var circle2 = document.createElement('div');
+    circle2.style.cssText = 'position:absolute;bottom:-30px;left:-30px;width:100px;height:100px;background:rgba(255,255,255,0.1);border-radius:50%';
+    card.appendChild(circle2);
 
     // Close button container
     var closeBtn = document.createElement('button');
@@ -270,7 +255,7 @@ def embed_js(request):
     closeBtn.style.position = 'absolute';
     closeBtn.style.top = '16px';
     closeBtn.style.right = '16px';
-    closeBtn.style.background = 'rgba(0,0,0,0.1)';
+    closeBtn.style.background = 'rgba(255,255,255,0.2)';
     closeBtn.style.border = 'none';
     closeBtn.style.borderRadius = '50%';
     closeBtn.style.width = '32px';
@@ -279,7 +264,7 @@ def embed_js(request):
     closeBtn.style.alignItems = 'center';
     closeBtn.style.justifyContent = 'center';
     closeBtn.style.cursor = 'pointer';
-    closeBtn.style.color = n.text_color || '#333333';
+    closeBtn.style.color = '#ffffff';
     closeBtn.style.transition = 'all 0.2s ease';
     closeBtn.style.opacity = '0.6';
     closeBtn.style.padding = '0';
@@ -287,12 +272,12 @@ def embed_js(request):
     
     closeBtn.onmouseover = function(){
       this.style.opacity = '1';
-      this.style.background = 'rgba(0,0,0,0.2)';
+      this.style.background = 'rgba(255,255,255,0.3)';
       this.style.transform = 'scale(1.1)';
     };
     closeBtn.onmouseout = function(){
       this.style.opacity = '0.6';
-      this.style.background = 'rgba(0,0,0,0.1)';
+      this.style.background = 'rgba(255,255,255,0.2)';
       this.style.transform = 'scale(1)';
     };
     closeBtn.onclick = function(){
@@ -321,7 +306,7 @@ def embed_js(request):
     iconContainer.style.display = 'flex';
     iconContainer.style.alignItems = 'center';
     iconContainer.style.justifyContent = 'center';
-    iconContainer.style.background = 'rgba(0,0,0,0.05)';
+    iconContainer.style.background = 'rgba(255,255,255,0.15)';
     iconContainer.style.borderRadius = '12px';
     iconContainer.innerHTML = '<svg width="28" height="28" viewBox="0 0 1800 1800" fill="currentColor" style="opacity:0.8"><path d="M1555.292,1240.33c-11.603-18.885-24.035-39.138-36.538-60.862c-1.408-5.24-4.108-9.945-7.79-13.722c-49.513-88.479-97.741-200.637-97.741-344.862c0-339.747-187.438-622.592-438.45-681.168c7.458-12.796,11.813-27.633,11.813-43.511c0-47.816-38.768-86.576-86.583-86.576c-47.813,0-86.581,38.759-86.581,86.576c0,15.878,4.35,30.715,11.813,43.511c-251.011,58.576-438.455,341.421-438.455,681.168c0,188.204-82.117,321.858-142.074,419.446c-47.275,76.945-81.431,132.54-53.413,182.688c34.706,62.133,150.24,84.154,527.356,89.08c-11.577,25.247-18.085,53.287-18.085,82.834c0,109.974,89.466,199.439,199.438,199.439c109.971,0,199.432-89.466,199.432-199.439c0-29.547-6.505-57.587-18.09-82.834c377.126-4.926,492.65-26.947,527.361-89.08C1636.728,1372.87,1602.566,1317.275,1555.292,1240.33z M900.002,1731.698c-75.415,0-136.767-61.352-136.767-136.767c0-30.793,10.234-59.236,27.477-82.121c34.47,0.25,70.82,0.385,109.26,0.424c0.021,0,0.039,0,0.061,0c38.438-0.039,74.783-0.174,109.26-0.424c17.231,22.885,27.471,51.328,27.471,82.121C1036.763,1670.347,975.412,1731.698,900.002,1731.698z"/></svg>';
     content.appendChild(iconContainer);
@@ -377,8 +362,8 @@ def embed_js(request):
       a.style.padding = '10px 20px';
       a.style.fontWeight = '600';
       a.style.fontSize = '14px';
-      a.style.background = 'rgba(255,255,255,0.95)';
-      a.style.color = n.background_color || '#333333';
+    a.style.background = 'rgba(255,255,255,0.95)';
+    a.style.color = '#4b6edc';
       a.style.borderRadius = '10px';
       a.style.textDecoration = 'none';
       a.style.transition = 'all 0.2s ease';

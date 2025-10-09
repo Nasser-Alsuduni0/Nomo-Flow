@@ -13,5 +13,6 @@ urlpatterns = [
     path("notifications/", views.page_notifications, name="page-notifications"),
     path("purchase-display/", views.page_purchase_display, name="page-purchase-display"),
     path("settings/", views.page_settings, name="page-settings"),
+    path("switch-merchant/", views.switch_merchant, name="switch-merchant"),
 ]
 

@@ -5,7 +5,7 @@
 
 <div class="alert alert-info mb-3" role="alert">
   <i class="bi bi-shop me-2"></i>
-  <strong>Current Store:</strong> {{ merchant.name }} ({{ merchant.salla_merchant_id }})
+  <strong>Current Store:</strong> {{ merchant.name }}
 </div>
 
 <div class="row">
@@ -30,15 +30,7 @@
               {{ form.message }}
             </div>
             
-            <div class="col-md-6">
-              <label class="form-label">Background Color</label>
-              {{ form.background_color }}
-            </div>
-            
-            <div class="col-md-6">
-              <label class="form-label">Text Color</label>
-              {{ form.text_color }}
-            </div>
+            {# Color pickers removed: standardized popup style #}
             
             <div class="col-md-6">
               <label class="form-label">Button Text (optional)</label>
@@ -145,15 +137,7 @@
               <textarea class="form-control" id="edit_message" name="message" rows="3" required></textarea>
             </div>
             
-            <div class="col-md-6">
-              <label class="form-label">Background Color</label>
-              <input type="color" class="form-control" id="edit_background_color" name="background_color" value="#17a8ff">
-            </div>
-            
-            <div class="col-md-6">
-              <label class="form-label">Text Color</label>
-              <input type="color" class="form-control" id="edit_text_color" name="text_color" value="#ffffff">
-            </div>
+            {# Color fields removed in edit modal #}
             
             <div class="col-md-6">
               <label class="form-label">Button Text (optional)</label>
@@ -211,8 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
           // Populate edit form
           document.getElementById('edit_title').value = notification.title;
           document.getElementById('edit_message').value = notification.message;
-          document.getElementById('edit_background_color').value = notification.background_color;
-          document.getElementById('edit_text_color').value = notification.text_color;
+          // Color fields removed; standardized style
           document.getElementById('edit_button_text').value = notification.button_text || '';
           document.getElementById('edit_button_url').value = notification.button_url || '';
           document.getElementById('edit_is_active').checked = notification.is_active;
@@ -314,8 +297,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // Get form values
       const title = document.getElementById('id_title')?.value || 'Notification Title';
       const message = document.getElementById('id_message')?.value || 'Your notification message will appear here...';
-      const bgColor = document.getElementById('id_background_color')?.value || '#ffffff';
-      const textColor = document.getElementById('id_text_color')?.value || '#333333';
+      const bgColor = '#667eea';
+      const textColor = '#ffffff';
       const buttonText = document.getElementById('id_button_text')?.value || '';
       const buttonUrl = document.getElementById('id_button_url')?.value || '';
       

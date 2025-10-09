@@ -7,28 +7,15 @@ from django.utils import timezone
 from .models import Coupon
 from .forms import CouponForm
 from core.models import Merchant, SallaToken
+from core.utils import get_current_merchant
 from django.conf import settings
+from datetime import timedelta
 import requests
 
 
 def get_merchant(request):
-    """Get the merchant from the active OAuth token or create a demo merchant"""
-    try:
-        salla_token = SallaToken.objects.select_related('merchant').first()
-        if salla_token:
-            return salla_token.merchant
-        else:
-            merchant = Merchant.objects.order_by('-created_at').first()
-    except:
-        merchant = None
-    
-    if not merchant:
-        merchant, created = Merchant.objects.get_or_create(
-            salla_merchant_id='demo-store-123',
-            defaults={'name': 'Demo Store', 'owner_email': 'demo@example.com'}
-        )
-    
-    return merchant
+    """Resolve current merchant using session-aware resolver."""
+    return get_current_merchant(request)
 
 
 @ensure_csrf_cookie
@@ -166,29 +153,51 @@ def _create_coupon_in_salla(merchant: Merchant, coupon: Coupon) -> None:
         return
 
     base = (getattr(settings, 'SALLA_API_BASE', '').rstrip('/') or 'https://api.salla.dev/admin/v2')
+    # Use only the generic /coupons endpoint (expects type/amount and YYYY-MM-DD dates)
     endpoints = [
-        f"{base}/discounts/coupons",
-        f"{base}/discount-coupons",
         f"{base}/coupons",
     ]
 
-    payload = {
-        "code": coupon.code,
-        # Common naming across APIs; Salla may use different keys but we'll try reasonable defaults
-        "discount_type": "percentage" if coupon.discount_kind == 'percent' else "amount",
-        "value": float(coupon.amount),
-        "max_discount_amount": float(coupon.max_discount_amount) if coupon.max_discount_amount is not None else None,
-        "min_cart": float(coupon.min_cart) if coupon.min_cart is not None else None,
-        "free_shipping": bool(coupon.free_shipping),
-        "exclude_discounted": bool(coupon.exclude_discounted),
-        "start_at": coupon.start_date.isoformat() if coupon.start_date else None,
-        "expire_at": coupon.expires_at.isoformat() if coupon.expires_at else None,
-        "usage_limit": coupon.max_uses,
-        "usage_limit_per_customer": coupon.per_customer_limit,
-    }
+    # Normalized values
+    discount_type = "percentage" if coupon.discount_kind == 'percent' else "amount"
+    value = float(coupon.amount)
+    max_amount = float(coupon.max_discount_amount) if coupon.max_discount_amount is not None else None
+    min_cart = float(coupon.min_cart) if coupon.min_cart is not None else None
+    free_shipping = bool(coupon.free_shipping)
+    exclude_discounted = bool(coupon.exclude_discounted)
+    # Format dates as YYYY-MM-DD for /coupons endpoint
+    today = timezone.now().date()
+    # Start date: required to be today or later; if missing or in the past, set to today
+    if coupon.start_date:
+        sd = coupon.start_date.date()
+        start_date_str = sd.isoformat() if sd >= today else today.isoformat()
+    else:
+        start_date_str = today.isoformat()
 
-    # Remove None values to keep payload clean
-    payload = {k: v for k, v in payload.items() if v is not None}
+    # Expiry date: required by Salla; if missing, default to 90 days from today
+    if coupon.expires_at:
+        expiry_date_str = coupon.expires_at.date().isoformat()
+    else:
+        expiry_date_str = (today + timedelta(days=90)).isoformat()
+    usage_limit = coupon.max_uses
+    usage_limit_per_customer = coupon.per_customer_limit
+
+    # Payload variants per endpoint family
+    legacy_payload = {
+        "code": coupon.code,
+        "type": discount_type,
+        "amount": value,
+        "maximum_amount": max_amount,
+        "free_shipping": free_shipping,
+        # Older naming commonly used
+        "exclude_sale_products": exclude_discounted,
+        "start_date": start_date_str,
+        "expiry_date": expiry_date_str,
+        # Usage limits may not be supported on all variants; include if present
+        "usage_limit": usage_limit,
+        "usage_limit_per_customer": usage_limit_per_customer,
+    }
+    legacy_payload = {k: v for k, v in legacy_payload.items() if v is not None}
 
     headers = {
         "Authorization": f"Bearer {token.access_token}",
@@ -200,7 +209,8 @@ def _create_coupon_in_salla(merchant: Merchant, coupon: Coupon) -> None:
     last_body = None
     for url in endpoints:
         try:
-            resp = requests.post(url, json=payload, headers=headers, timeout=20)
+            send_payload = legacy_payload
+            resp = requests.post(url, json=send_payload, headers=headers, timeout=20)
             last_status = resp.status_code
             if resp.status_code in (200, 201):
                 data = {}

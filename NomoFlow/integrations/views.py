@@ -14,6 +14,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from core.models import Merchant, SallaToken, Event
 from integrations.models import Integration
+from core.utils import set_current_merchant
 
 
 @require_GET
@@ -148,6 +149,11 @@ def salla_callback(request):
 
     # Redirect to dashboard after successful connection with success message
     from django.contrib import messages
+    # Set current merchant in session for this user
+    try:
+        set_current_merchant(request, merchant)
+    except Exception:
+        pass
     messages.success(request, f'Successfully connected your store "{merchant.name}" to Nomo Flow!')
     return redirect('dashboard')
 
