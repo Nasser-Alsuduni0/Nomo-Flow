@@ -16,3 +16,4 @@ urlpatterns = [
     path("switch-merchant/", views.switch_merchant, name="switch-merchant"),
 ]
 
+

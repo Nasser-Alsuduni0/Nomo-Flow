@@ -1,55 +1,169 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
 {% block title %}Dashboard · Overview{% endblock %}
-{% block header %}Overview{% endblock %}
-{% block content %}
+{% block header %}System Overview{% endblock %}
 
-<div class="alert alert-info mb-3" role="alert">
-  <i class="bi bi-shop me-2"></i>
-  <strong>Current Store:</strong> {{ merchant.name }}
-  {# store id removed per request #}
-</div>
-<div class="row g-3 mb-3">
-  <div class="col-md-3"><div class="card p-3"><div class="text-muted">Spend Today</div><div id="kpi-spend" class="fs-3 fw-bold">-</div></div></div>
-  <div class="col-md-3"><div class="card p-3"><div class="text-muted">Conversions</div><div id="kpi-conv" class="fs-3 fw-bold">-</div></div></div>
-  <div class="col-md-3"><div class="card p-3"><div class="text-muted">CPA</div><div id="kpi-cpa" class="fs-3 fw-bold">-</div></div></div>
-  <div class="col-md-3"><div class="card p-3"><div class="text-muted">ROAS</div><div id="kpi-roas" class="fs-3 fw-bold">-</div></div></div>
-  <div class="col-12">
-    <div class="card">
-      <div class="card-body">
-        <h6 class="mb-0">Performance — Last 7 Days</h6>
-        <canvas id="perfChart" height="90" class="mt-3"></canvas>
+{% block content %}
+<div class="container-fluid py-3">
+
+  <!-- 🏪 Store Info -->
+  <div class="alert alert-info d-flex align-items-center shadow-sm" role="alert">
+    <i class="bi bi-shop me-2 fs-4"></i>
+    <div><strong>Current Store:</strong> Demo Store</div>
+  </div>
+
+  <!-- 🔹 KPI Summary -->
+  <div class="row g-3 mb-4">
+    {% for kpi in kpis %}
+    <div class="col-md-3 col-6">
+      <div class="card p-3 shadow-sm border-0 bg-light text-center">
+        <div class="text-muted small mb-1">{{ kpi }}</div>
+        <div id="kpi-{{ kpi|lower|slugify }}" class="fs-4 fw-bold text-{% cycle 'primary' 'success' 'warning' 'danger' %}">-</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- 📈 Performance Chart -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h6 class="mb-3"><i class="bi bi-graph-up me-2 text-primary"></i>Performance (Last 7 Days)</h6>
+      <canvas id="perfChart" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- 🎯 Campaigns + Coupons -->
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="mb-3"><i class="bi bi-bullseye me-2 text-primary"></i>Top Campaigns</h6>
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Campaign</th>
+                <th>Status</th>
+                <th class="text-end">Budget</th>
+              </tr>
+            </thead>
+            <tbody id="campaigns-table">
+              <tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="mb-3"><i class="bi bi-ticket-perforated me-2 text-warning"></i>Coupon Usage</h6>
+          <canvas id="couponChart" height="180"></canvas>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- 💰 Expense Distribution -->
+  <div class="card mt-4 shadow-sm">
+    <div class="card-body">
+      <h6 class="mb-3"><i class="bi bi-pie-chart me-2 text-info"></i>Expense Distribution</h6>
+      <canvas id="expenseChart" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- 🤖 Smart AI Recommendations -->
+  <div class="card mt-4 shadow-sm border-0">
+    <div class="card-body">
+      <h6 class="mb-3"><i class="bi bi-stars me-2 text-purple"></i>Smart AI Recommendations</h6>
+      <div id="ai-loader" class="text-center text-muted">Loading intelligent insights...</div>
+      <ul id="ai-recommendations" class="list-group list-group-flush d-none"></ul>
+    </div>
+  </div>
+
 </div>
 
+<!-- ✅ Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-  const apiBase = "/marketing";
-  function money(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(v||0); }
-  async function loadKPIs(){
-    try{
-      const r = await fetch(`${apiBase}/kpis/`);
-      const d = await r.json();
-      document.getElementById("kpi-spend").textContent = money(d.spend_today||0);
-      document.getElementById("kpi-conv").textContent  = d.conversions ?? 0;
-      document.getElementById("kpi-cpa").textContent   = d.cpa ?? "-";
-      document.getElementById("kpi-roas").textContent  = d.roas ?? "-";
-    }catch(e){ console.warn(e); }
-  }
-  (function renderChart(){
-    const ctx = document.getElementById('perfChart');
-    const labels=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    const spend=[2100,1300,3800,2600,1700,2000,3200];
-    const conv =[12,8,35,20,15,18,28];
-    new Chart(ctx,{type:'line',data:{labels,
-      datasets:[
-        {label:'Spend ($)', data:spend, tension:.35, borderWidth:3},
-        {label:'Conversions', data:conv, tension:.35, borderWidth:3}
-      ]}, options:{responsive:true, interaction:{mode:'index',intersect:false}}});
-  })();
-  loadKPIs();
+const apiBase = "/api/dashboard";
+const money = v => new Intl.NumberFormat('en-US',{style:'currency',currency:'SAR'}).format(v || 0);
+
+// KPIs
+async function loadKPIs(){
+  const r = await fetch(`${apiBase}/metrics/`);
+  const d = await r.json();
+  document.getElementById("kpi-spend").textContent = money(d.total_budget);
+  document.getElementById("kpi-revenue").textContent = money(d.total_budget * 1.5);
+  document.getElementById("kpi-coupons").textContent = d.total_coupons;
+  document.getElementById("kpi-active-offers").textContent = d.active_campaigns;
+}
+
+// Performance
+function renderPerformance(){
+  const ctx = document.getElementById("perfChart");
+  const labels=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const spend=[2100,1300,3800,2600,1700,2000,3200];
+  const revenue=[3100,2500,4000,3000,1800,2500,4100];
+  new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Spend (SAR)',data:spend,borderWidth:3,borderColor:'#0d6efd',tension:.35},
+      {label:'Revenue (SAR)',data:revenue,borderWidth:3,borderColor:'#198754',tension:.35}
+    ]},
+    options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}}}
+  });
+}
+
+// Coupons
+function renderCoupons(){
+  const ctx = document.getElementById('couponChart');
+  new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:['Used','Unused'],datasets:[{data:[65,35],backgroundColor:['#facc15','#e5e7eb']}]},
+    options:{plugins:{legend:{position:'bottom'}}}
+  });
+}
+
+// Expenses
+function renderExpenses(){
+  const ctx=document.getElementById('expenseChart');
+  new Chart(ctx,{
+    type:'bar',
+    data:{labels:['Campaigns','Coupons','Offers'],
+      datasets:[{data:[4200,900,1200],backgroundColor:['#3b82f6','#fbbf24','#f87171']}]},
+    options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}
+  });
+}
+
+// Campaigns
+async function loadTopCampaigns(){
+  const r=await fetch(`${apiBase}/campaigns/`);
+  const list=await r.json();
+  const body=document.getElementById("campaigns-table");
+  if(!list.length){body.innerHTML='<tr><td colspan="3" class="text-center text-muted">No campaigns found</td></tr>';return;}
+  body.innerHTML=list.slice(0,5).map(c=>`
+    <tr>
+      <td>${c.name}</td>
+      <td><span class="badge bg-${c.status==='running'?'success':(c.status==='paused'?'warning':'secondary')}">${c.status}</span></td>
+      <td class="text-end">${money(c.budget_total)}</td>
+    </tr>`).join('');
+}
+
+// AI
+async function loadAIRecommendations(){
+  const loader=document.getElementById("ai-loader");
+  const list=document.getElementById("ai-recommendations");
+  try{
+    const r=await fetch(`${apiBase}/recommendations/`);
+    const data=await r.json();
+    if(!data.recommendations?.length){loader.textContent="No AI suggestions yet.";return;}
+    loader.classList.add("d-none");list.classList.remove("d-none");
+    list.innerHTML=data.recommendations.map(r=>`<li class="list-group-item"><i class="bi bi-lightbulb-fill text-warning me-2"></i>${r}</li>`).join('');
+  }catch(e){loader.textContent="⚠️ Failed to load AI insights.";console.warn(e);}
+}
+
+// Run all
+loadKPIs();renderPerformance();renderCoupons();renderExpenses();loadTopCampaigns();loadAIRecommendations();
 </script>
 {% endblock %}
-
-

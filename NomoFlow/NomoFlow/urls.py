@@ -29,9 +29,14 @@ urlpatterns = [
     path('notifications/', include('notifications.urls')),
     path('visitors/', include('visitors.urls')),
     path('marketing/', include('marketing.urls')),
+    path('api/marketing/', include('marketing.urls')), 
     path('dashboard/', include('dashboard.urls')),
     path('tracking/', include('tracking.urls')),
     path('optimizer/', include('optimizer.urls')),
+    path("api/optimizer/", include("optimizer.urls")),
+    path("api/dashboard/", include("dashboard_api.urls")),
+
+
 ]
 
 # Ensure static files are served in development using finders

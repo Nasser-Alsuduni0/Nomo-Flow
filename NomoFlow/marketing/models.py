@@ -10,7 +10,7 @@ class Campaign(models.Model):
     budget_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     primary_channel = models.CharField(max_length=32, choices=CH, default="tiktok")
     status = models.CharField(max_length=20, default="draft")   
-    external_ids = models.JSONField(default=dict, blank=True)
+    external_ids = models.JSONField(default=dict, blank=True, null=True)
     start_at = models.DateTimeField(auto_now_add=True)
     end_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
