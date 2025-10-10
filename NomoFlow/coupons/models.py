@@ -88,6 +88,7 @@ class Coupon(models.Model):
     )
     
     salla_coupon_id = models.CharField(max_length=100, null=True, blank=True)
+    is_active = models.BooleanField(default=True, verbose_name="Is Active")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

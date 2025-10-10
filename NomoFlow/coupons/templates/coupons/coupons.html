@@ -264,12 +264,29 @@
                     <div class="coupon-card" data-coupon-id="{{ coupon.id }}">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div class="coupon-code">{{ coupon.code }}</div>
-                            <button class="btn-delete" onclick="deleteCoupon({{ coupon.id }}, '{{ coupon.code }}')">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary btn-sm edit-btn" onclick="editCoupon({{ coupon.id }})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-{{ coupon.is_active|yesno:'warning,success' }} btn-sm toggle-btn" onclick="toggleCoupon({{ coupon.id }})">
+                                    <i class="bi bi-{{ coupon.is_active|yesno:'pause,play' }}"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteCoupon({{ coupon.id }}, '{{ coupon.code }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="coupon-details">
+                            <div class="coupon-detail-item">
+                                <span class="coupon-detail-label">Status</span>
+                                <span class="coupon-detail-value">
+                                    <span class="badge {% if coupon.is_active %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ coupon.is_active|yesno:'Active,Inactive' }}
+                                    </span>
+                                </span>
+                            </div>
+
                             <div class="coupon-detail-item">
                                 <span class="coupon-detail-label">Discount Type</span>
                                 <span class="coupon-detail-value">
@@ -520,6 +537,81 @@ function deleteCoupon(couponId, couponCode) {
         alert('An error occurred while deleting the coupon: ' + error.message);
     });
 }
+
+function toggleCoupon(couponId) {
+    const csrftoken = getCookie('csrftoken');
+    
+    fetch(`{% url 'coupons:toggle_coupon' 0 %}`.replace('0', couponId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error toggling coupon status');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred');
+    });
+}
+
+function editCoupon(couponId) {
+    fetch(`{% url 'coupons:edit_coupon' 0 %}`.replace('0', couponId))
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const c = data.coupon;
+            document.getElementById('id_code').value = c.code;
+            document.getElementById('id_discount_kind').value = c.discount_kind;
+            document.getElementById('id_amount').value = c.amount;
+            document.getElementById('id_max_discount_amount').value = c.max_discount_amount;
+            document.getElementById('id_start_date').value = c.start_date;
+            document.getElementById('id_expires_at').value = c.expires_at;
+            document.getElementById('id_free_shipping').checked = c.free_shipping;
+            document.getElementById('id_exclude_discounted').checked = c.exclude_discounted;
+            document.getElementById('id_min_cart').value = c.min_cart;
+            document.getElementById('id_max_uses').value = c.max_uses || '';
+            document.getElementById('id_per_customer_limit').value = c.per_customer_limit || '';
+            
+            const form = document.getElementById('couponForm');
+            form.setAttribute('data-edit-id', couponId);
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="bi bi-check-circle me-1"></i>Update Coupon';
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error loading coupon');
+    });
+}
+
+document.getElementById('couponForm').addEventListener('submit', function(e) {
+    const editId = this.getAttribute('data-edit-id');
+    if (editId) {
+        e.preventDefault();
+        const csrftoken = getCookie('csrftoken');
+        const formData = new FormData(this);
+        
+        fetch(`{% url 'coupons:edit_coupon' 0 %}`.replace('0', editId), {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) location.reload();
+            else alert('Error: ' + JSON.stringify(data.errors));
+        })
+        .catch(error => alert('Error updating coupon'));
+    }
+});
 </script>
 {% endblock %}
 

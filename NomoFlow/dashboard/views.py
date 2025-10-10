@@ -30,7 +30,8 @@ def page_live_view_counter(request):
     return render(request, "dashboard/feature_placeholder.html", {"title": "Live View Counter"})
 
 def page_email_collector(request):
-    return render(request, "dashboard/feature_placeholder.html", {"title": "Email Collector"})
+    from features.views import email_collector_page
+    return email_collector_page(request)
 
 def page_discount_coupons(request):
     from coupons.views import coupons_page

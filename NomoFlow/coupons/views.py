@@ -57,6 +57,14 @@ def delete_coupon(request, pk):
         merchant = get_merchant(request)
         coupon = get_object_or_404(Coupon, pk=pk, merchant=merchant)
         code = coupon.code
+        
+        # Try to delete from Salla first (best-effort)
+        try:
+            _delete_coupon_in_salla(merchant, coupon)
+        except Exception as e:
+            print(f"⚠️ Salla coupon deletion failed: {e}")
+        
+        # Delete from local database
         coupon.delete()
         
         return JsonResponse({
@@ -72,16 +80,70 @@ def delete_coupon(request, pk):
 
 @require_POST
 def toggle_coupon(request, pk):
-    """Toggle coupon active status (for future implementation)"""
+    """Toggle coupon active status"""
     merchant = get_merchant(request)
     coupon = get_object_or_404(Coupon, pk=pk, merchant=merchant)
     
-    # For now, we'll just return the current state
-    # In the future, you might add an 'is_active' field
+    # Toggle is_active status
+    coupon.is_active = not coupon.is_active
+    coupon.save()
+    
+    # Sync status to Salla (best-effort)
+    try:
+        _update_coupon_in_salla(merchant, coupon)
+    except Exception as e:
+        print(f"⚠️ Salla status sync failed: {e}")
     
     return JsonResponse({
         'success': True,
-        'is_active': True  # Placeholder
+        'is_active': coupon.is_active
+    })
+
+
+def edit_coupon(request, pk):
+    """Edit a coupon"""
+    merchant = get_merchant(request)
+    coupon = get_object_or_404(Coupon, pk=pk, merchant=merchant)
+    
+    if request.method == 'POST':
+        form = CouponForm(request.POST, instance=coupon)
+        if form.is_valid():
+            updated_coupon = form.save()
+            
+            # Try to sync update to Salla (best-effort)
+            try:
+                _update_coupon_in_salla(merchant, updated_coupon)
+            except Exception as e:
+                print(f"⚠️ Salla coupon update sync failed: {e}")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Coupon updated successfully!'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            })
+    
+    # Return coupon data for editing (GET request)
+    return JsonResponse({
+        'success': True,
+        'coupon': {
+            'id': coupon.id,
+            'code': coupon.code,
+            'discount_kind': coupon.discount_kind,
+            'amount': str(coupon.amount),
+            'max_discount_amount': str(coupon.max_discount_amount) if coupon.max_discount_amount else '',
+            'start_date': coupon.start_date.strftime('%Y-%m-%d') if coupon.start_date else '',
+            'expires_at': coupon.expires_at.strftime('%Y-%m-%d') if coupon.expires_at else '',
+            'free_shipping': coupon.free_shipping,
+            'exclude_discounted': coupon.exclude_discounted,
+            'min_cart': str(coupon.min_cart) if coupon.min_cart else '',
+            'max_uses': coupon.max_uses,
+            'per_customer_limit': coupon.per_customer_limit,
+            'is_active': coupon.is_active,
+        }
     })
 
 
@@ -113,9 +175,10 @@ def public_coupons_feed(request):
     
     now = timezone.now()
     
-    # Get active coupons that haven't expired
+    # Get active coupons that haven't expired and are not paused
     coupons = Coupon.objects.filter(
-        merchant=merchant
+        merchant=merchant,
+        is_active=True  # Only show active (not paused) coupons
     ).exclude(
         expires_at__lt=now
     ).values(
@@ -237,6 +300,103 @@ def _create_coupon_in_salla(merchant: Merchant, coupon: Coupon) -> None:
             print(f"🔴 Salla API request error for {url}: {e}")
 
     print(f"⚠️ Failed to create coupon in Salla. Last status={last_status}, body={last_body}")
+
+
+def _update_coupon_in_salla(merchant: Merchant, coupon: Coupon) -> None:
+    """Best-effort update the coupon in Salla Admin API via PUT request.
+    
+    Requires coupon.salla_coupon_id to be set (from initial creation).
+    """
+    if not coupon.salla_coupon_id:
+        print("ℹ️ No salla_coupon_id; skipping Salla update")
+        return
+
+    token = SallaToken.objects.filter(merchant=merchant).first()
+    if not token or not token.access_token:
+        print("ℹ️ No Salla token; skipping Salla update")
+        return
+
+    base = (getattr(settings, 'SALLA_API_BASE', '').rstrip('/') or 'https://api.salla.dev/admin/v2')
+    url = f"{base}/coupons/{coupon.salla_coupon_id}"
+    
+    today = timezone.now().date()
+    # Normalize dates
+    if coupon.start_date:
+        sd = coupon.start_date.date()
+        start_date_str = sd.isoformat() if sd >= today else today.isoformat()
+    else:
+        start_date_str = today.isoformat()
+
+    if coupon.expires_at:
+        expiry_date_str = coupon.expires_at.date().isoformat()
+    else:
+        expiry_date_str = (today + timedelta(days=90)).isoformat()
+
+    discount_type = "percentage" if coupon.discount_kind == 'percent' else "amount"
+    
+    payload = {
+        "code": coupon.code,
+        "type": discount_type,
+        "amount": float(coupon.amount),
+        "status": "active" if coupon.is_active else "inactive",
+        "maximum_amount": float(coupon.max_discount_amount) if coupon.max_discount_amount else None,
+        "minimum_amount": float(coupon.min_cart) if coupon.min_cart else None,
+        "free_shipping": bool(coupon.free_shipping),
+        "exclude_sale_products": bool(coupon.exclude_discounted),
+        "start_date": start_date_str,
+        "expiry_date": expiry_date_str,
+        "usage_limit": coupon.max_uses,
+        "usage_limit_per_user": coupon.per_customer_limit,
+    }
+    # Remove None values
+    payload = {k: v for k, v in payload.items() if v is not None}
+
+    headers = {
+        "Authorization": f"Bearer {token.access_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    try:
+        resp = requests.put(url, json=payload, headers=headers, timeout=20)
+        if resp.status_code in (200, 201):
+            print(f"✅ Updated Salla coupon id={coupon.salla_coupon_id}")
+        else:
+            print(f"⚠️ Failed to update Salla coupon. Status={resp.status_code}, body={resp.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"🔴 Salla API update request error: {e}")
+
+
+def _delete_coupon_in_salla(merchant: Merchant, coupon: Coupon) -> None:
+    """Best-effort delete the coupon in Salla Admin API via DELETE request.
+    
+    Requires coupon.salla_coupon_id to be set (from initial creation).
+    """
+    if not coupon.salla_coupon_id:
+        print("ℹ️ No salla_coupon_id; skipping Salla deletion")
+        return
+
+    token = SallaToken.objects.filter(merchant=merchant).first()
+    if not token or not token.access_token:
+        print("ℹ️ No Salla token; skipping Salla deletion")
+        return
+
+    base = (getattr(settings, 'SALLA_API_BASE', '').rstrip('/') or 'https://api.salla.dev/admin/v2')
+    url = f"{base}/coupons/{coupon.salla_coupon_id}"
+
+    headers = {
+        "Authorization": f"Bearer {token.access_token}",
+        "Accept": "application/json",
+    }
+
+    try:
+        resp = requests.delete(url, headers=headers, timeout=20)
+        if resp.status_code in (200, 204):
+            print(f"✅ Deleted Salla coupon id={coupon.salla_coupon_id}")
+        else:
+            print(f"⚠️ Failed to delete Salla coupon. Status={resp.status_code}, body={resp.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"🔴 Salla API delete request error: {e}")
 
 
 @require_GET
