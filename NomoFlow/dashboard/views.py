@@ -27,7 +27,8 @@ def kpis(request):
     return Response({"spend_today": 0, "conversions": 0, "cpa": None, "roas": None})
 
 def page_live_view_counter(request):
-    return render(request, "dashboard/feature_placeholder.html", {"title": "Live View Counter"})
+    from visitors.views import live_view_counter_page
+    return live_view_counter_page(request)
 
 def page_email_collector(request):
     from features.views import email_collector_page

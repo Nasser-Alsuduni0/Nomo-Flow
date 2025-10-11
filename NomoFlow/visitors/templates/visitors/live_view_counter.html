@@ -1,0 +1,213 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Live View Counter - NomoFlow{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="mb-1" style="font-weight: 700; color: var(--text);">Live View Counter</h2>
+            <p class="text-muted mb-0" style="font-size: 0.95rem;">Track real-time visitors on your store</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <div class="d-inline-flex align-items-center bg-white px-3 py-2 rounded-3 shadow-sm">
+                <span class="me-2" style="font-size: 0.9rem; font-weight: 500; color: var(--muted);">Status:</span>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="featureToggle" 
+                           {% if is_enabled %}checked{% endif %} 
+                           onchange="toggleFeature(this.checked)"
+                           style="width: 2.5rem; height: 1.25rem; cursor: pointer;">
+                    <label class="form-check-label ms-1" for="featureToggle" style="font-size: 0.95rem; font-weight: 600; cursor: pointer;">
+                        <span id="toggleLabel" style="color: {% if is_enabled %}#10b981{% else %}#6b7280{% endif %};">
+                            {% if is_enabled %}Enabled{% else %}Disabled{% endif %}
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ef4444 !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">ACTIVE NOW</p>
+                            <h3 class="mb-0" style="font-weight: 700; color: #ef4444;" id="activeVisitors">{{ active_visitors }}</h3>
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                                <span class="pulse-dot" style="display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 2s infinite;"></span>
+                                <span id="updateStatus">Live</span>
+                            </small>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 p-2 rounded">
+                            <i class="bi bi-eye-fill" style="font-size: 1.5rem; color: #ef4444;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #17a8ff !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">TODAY</p>
+                            <h3 class="mb-0" style="font-weight: 700; color: #17a8ff;">{{ today_sessions }}</h3>
+                            <small class="text-muted" style="font-size: 0.75rem;">Sessions</small>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-2 rounded">
+                            <i class="bi bi-calendar-check-fill" style="font-size: 1.5rem; color: #17a8ff;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #10b981 !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">PAGE VIEWS</p>
+                            <h3 class="mb-0" style="font-weight: 700; color: #10b981;">{{ today_views }}</h3>
+                            <small class="text-muted" style="font-size: 0.75rem;">Today</small>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-2 rounded">
+                            <i class="bi bi-file-earmark-text-fill" style="font-size: 1.5rem; color: #10b981;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #8b5cf6 !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">LAST 24 HOURS</p>
+                            <h3 class="mb-0" style="font-weight: 700; color: #8b5cf6;">{{ sessions_24h }}</h3>
+                            <small class="text-muted" style="font-size: 0.75rem;">Unique visitors</small>
+                        </div>
+                        <div class="bg-opacity-10 p-2 rounded" style="background-color: rgba(139, 92, 246, 0.1);">
+                            <i class="bi bi-clock-history" style="font-size: 1.5rem; color: #8b5cf6;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3" style="font-weight: 600;">
+                        <i class="bi bi-eye text-primary me-2"></i>
+                        Preview
+                    </h5>
+                    <p class="text-muted mb-3">This is how the live counter badge will appear on your store:</p>
+                    
+                    <div class="bg-light p-5 rounded text-center position-relative" style="min-height: 200px;">
+                        <p class="text-muted mb-4">Your store content here...</p>
+                        
+                        <!-- Preview Badge -->
+                        <div style="position: absolute; bottom: 20px; right: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                            <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span>
+                            <span>{{ active_visitors|default:"..." }} visitor{{ active_visitors|pluralize }} online</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+.pulse-dot {
+    animation: pulse 2s infinite;
+}
+</style>
+
+<script>
+function toggleFeature(enabled) {
+    fetch('/visitors/toggle/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ enabled: enabled })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const label = document.getElementById('toggleLabel');
+            label.textContent = enabled ? 'Enabled' : 'Disabled';
+            label.style.color = enabled ? '#10b981' : '#6b7280';
+            const message = enabled ? '✅ Live View Counter is now enabled on your store!' : '⚠️ Live View Counter is now disabled';
+            alert(message);
+        } else {
+            alert('Error: ' + data.message);
+            // Revert toggle
+            document.getElementById('featureToggle').checked = !enabled;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred');
+        // Revert toggle
+        document.getElementById('featureToggle').checked = !enabled;
+    });
+}
+
+// Auto-refresh active visitors every 5 seconds
+{% if merchant %}
+setInterval(function() {
+    fetch('/visitors/live-count/?store_id={{ merchant.salla_merchant_id }}', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.error('Failed to fetch live count:', response.status);
+            return { count: 0 };
+        }
+        return response.json();
+    })
+    .then(data => {
+        const countElement = document.getElementById('activeVisitors');
+        const statusElement = document.getElementById('updateStatus');
+        if (countElement) {
+            countElement.textContent = data.count || 0;
+        }
+        if (statusElement) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            statusElement.textContent = 'Updated ' + timeStr;
+            // Reset to "Live" after 2 seconds
+            setTimeout(() => {
+                statusElement.textContent = 'Live';
+            }, 2000);
+        }
+    })
+    .catch(error => {
+        console.error('Error updating count:', error);
+        const statusElement = document.getElementById('updateStatus');
+        if (statusElement) {
+            statusElement.textContent = 'Update failed';
+        }
+    });
+}, 5000);
+{% endif %}
+</script>
+{% endblock %}
+
