@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'tracking',
     'optimizer',
     'dashboard',
+    'dashboard_api',
 ]
 
 MIDDLEWARE = [
