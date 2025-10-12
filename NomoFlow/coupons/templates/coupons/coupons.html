@@ -5,80 +5,244 @@
 
 {% block extra_css %}
 <style>
+#couponsList {
+    max-height: 700px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+#couponsList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#couponsList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#couponsList::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+#couponsList::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
 .coupon-card {
     border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
+    border-radius: 16px;
     background: white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.coupon-card .card-body {
+    padding: 24px;
+}
+
+.coupon-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0ea5e9 0%, #06b6d4 100%);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
 }
 
 .coupon-card:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-4px);
+    border-color: #0ea5e9;
+}
+
+.coupon-card:hover::before {
+    transform: scaleX(1);
 }
 
 .coupon-code {
     font-family: 'Courier New', monospace;
     font-size: 20px;
-    font-weight: bold;
+    font-weight: 700;
     color: #0ea5e9;
-    background: #f0f9ff;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: 10px;
     display: inline-block;
+    letter-spacing: 1px;
+    border: 2px dashed #0ea5e9;
+}
+
+.coupon-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #475569;
+    padding: 6px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.summary-item i {
+    color: #0ea5e9;
+    font-size: 14px;
+}
+
+.toggle-details-btn {
+    color: #0ea5e9;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.toggle-details-btn:hover {
+    background: #f0f9ff;
+    border-color: #0ea5e9;
+    color: #0284c7;
+}
+
+.toggle-details-btn i {
+    transition: transform 0.3s ease;
+}
+
+.toggle-details-btn.expanded i {
+    transform: rotate(180deg);
+}
+
+.coupon-details-wrapper {
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .coupon-details {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-    margin-top: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
 }
 
 .coupon-detail-item {
     display: flex;
     flex-direction: column;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.coupon-detail-item:hover {
+    background: #f1f5f9;
 }
 
 .coupon-detail-label {
-    font-size: 12px;
-    color: #6b7280;
-    margin-bottom: 4px;
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
 }
 
 .coupon-detail-value {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
-    color: #111827;
+    color: #0f172a;
 }
 
-.badge {
+@media (max-width: 992px) {
+    .coupon-details {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .coupon-summary {
+        gap: 8px;
+    }
+    
+    .summary-item {
+        font-size: 13px;
+        padding: 5px 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .coupon-code {
+        font-size: 16px;
+        padding: 6px 12px;
+    }
+    
+    .coupon-summary {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    
+    .summary-item {
+        width: 100%;
+    }
+    
+    .coupon-details {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .coupon-card .card-body {
+        padding: 16px;
+    }
+    
+    .toggle-details-btn {
+        font-size: 13px;
+    }
+}
+
+/* Custom status labels - no Bootstrap classes */
+.status-label {
     display: inline-block;
-    padding: 4px 12px;
+    padding: 5px 12px;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    white-space: nowrap;
 }
 
-.badge-percent {
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-percent {
     background: #dbeafe;
     color: #1e40af;
 }
 
-.badge-fixed {
+.status-fixed {
     background: #d1fae5;
     color: #065f46;
-}
-
-.badge-yes {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.badge-no {
-    background: #fee2e2;
-    color: #991b1b;
 }
 
         .card {
@@ -254,34 +418,67 @@
 
         <!-- Coupons List -->
         <div class="col-lg-7">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-4"><i class="bi bi-ticket-perforated me-2"></i>Current Coupons</h5>
-                    
-                    {% if coupons %}
-                <div id="couponsList">
-                    {% for coupon in coupons %}
-                    <div class="coupon-card" data-coupon-id="{{ coupon.id }}">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="coupon-code">{{ coupon.code }}</div>
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-primary btn-sm edit-btn" onclick="editCoupon({{ coupon.id }})">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-outline-{{ coupon.is_active|yesno:'warning,success' }} btn-sm toggle-btn" onclick="toggleCoupon({{ coupon.id }})">
-                                    <i class="bi bi-{{ coupon.is_active|yesno:'pause,play' }}"></i>
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="deleteCoupon({{ coupon.id }}, '{{ coupon.code }}')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+            <h5 class="mb-4"><i class="bi bi-ticket-perforated me-2"></i>Current Coupons</h5>
+            
+            {% if coupons %}
+            <div id="couponsList" class="row">
+                {% for coupon in coupons %}
+                <div class="col-12 mb-3">
+                    <div class="coupon-card card shadow-sm" data-coupon-id="{{ coupon.id }}">
+                        <div class="card-body">
+                            <!-- Header: Code and Actions -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="coupon-code">{{ coupon.code }}</div>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="editCoupon({{ coupon.id }})" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-{{ coupon.is_active|yesno:'warning,success' }} btn-sm" onclick="toggleCoupon({{ coupon.id }})" title="Toggle Status">
+                                        <i class="bi bi-{{ coupon.is_active|yesno:'pause,play' }}"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteCoupon({{ coupon.id }}, '{{ coupon.code }}')" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="coupon-details">
+                            <!-- Quick Summary -->
+                            <div class="coupon-summary">
+                                <span class="status-label {% if coupon.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    {{ coupon.is_active|yesno:'Active,Inactive' }}
+                                </span>
+                                <div class="summary-item">
+                                    <i class="bi bi-tag-fill me-1"></i>
+                                    <strong>{{ coupon.amount }}{% if coupon.discount_kind == 'percent' %}%{% else %} SAR{% endif %}</strong> OFF
+                                </div>
+                                {% if coupon.min_cart %}
+                                <div class="summary-item">
+                                    <i class="bi bi-cart3 me-1"></i>
+                                    Min: {{ coupon.min_cart }} SAR
+                                </div>
+                                {% endif %}
+                                {% if coupon.expires_at %}
+                                <div class="summary-item">
+                                    <i class="bi bi-calendar-x me-1"></i>
+                                    Expires: {{ coupon.expires_at|date:"M d, Y" }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Toggle Details Button -->
+                            <button class="btn btn-link btn-sm w-100 mt-3 toggle-details-btn" type="button" onclick="toggleDetails({{ coupon.id }})">
+                                <span class="details-text">View Details</span>
+                                <i class="bi bi-chevron-down ms-1"></i>
+                            </button>
+
+                            <!-- Expandable Details Section -->
+                            <div class="coupon-details-wrapper" id="details-{{ coupon.id }}" style="display: none;">
+                                <hr class="my-3">
+                                <div class="coupon-details">
                             <div class="coupon-detail-item">
                                 <span class="coupon-detail-label">Status</span>
                                 <span class="coupon-detail-value">
-                                    <span class="badge {% if coupon.is_active %}badge-yes{% else %}badge-no{% endif %}">
+                                    <span class="status-label {% if coupon.is_active %}status-active{% else %}status-inactive{% endif %}">
                                         {{ coupon.is_active|yesno:'Active,Inactive' }}
                                     </span>
                                 </span>
@@ -290,7 +487,7 @@
                             <div class="coupon-detail-item">
                                 <span class="coupon-detail-label">Discount Type</span>
                                 <span class="coupon-detail-value">
-                                    <span class="badge {% if coupon.discount_kind == 'percent' %}badge-percent{% else %}badge-fixed{% endif %}">
+                                    <span class="status-label {% if coupon.discount_kind == 'percent' %}status-percent{% else %}status-fixed{% endif %}">
                                         {{ coupon.get_discount_kind_display }}
                                     </span>
                                 </span>
@@ -320,7 +517,7 @@
                             <div class="coupon-detail-item">
                                 <span class="coupon-detail-label">Free Shipping</span>
                                 <span class="coupon-detail-value">
-                                    <span class="badge {% if coupon.free_shipping %}badge-yes{% else %}badge-no{% endif %}">
+                                    <span class="status-label {% if coupon.free_shipping %}status-active{% else %}status-inactive{% endif %}">
                                         {% if coupon.free_shipping %}Yes{% else %}No{% endif %}
                                     </span>
                                 </span>
@@ -329,7 +526,7 @@
                             <div class="coupon-detail-item">
                                 <span class="coupon-detail-label">Exclude Discounted</span>
                                 <span class="coupon-detail-value">
-                                    <span class="badge {% if coupon.exclude_discounted %}badge-yes{% else %}badge-no{% endif %}">
+                                    <span class="status-label {% if coupon.exclude_discounted %}status-active{% else %}status-inactive{% endif %}">
                                         {% if coupon.exclude_discounted %}Yes{% else %}No{% endif %}
                                     </span>
                                 </span>
@@ -362,18 +559,21 @@
                                 <span class="coupon-detail-value">{{ coupon.per_customer_limit }}</span>
                             </div>
                             {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <i class="bi bi-ticket-perforated" style="font-size: 48px; color: #d1d5db;"></i>
-                        <p class="text-muted mt-3">No coupons yet. Start by creating a new coupon!</p>
-                    </div>
-                    {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-ticket-perforated" style="font-size: 48px; color: #d1d5db;"></i>
+                    <p class="text-muted mt-3">No coupons yet. Start by creating a new coupon!</p>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -472,6 +672,25 @@ function copySnippetCode() {
             console.error('Failed to copy:', err);
         }
         document.body.removeChild(textArea);
+    }
+}
+
+function toggleDetails(couponId) {
+    const detailsWrapper = document.getElementById('details-' + couponId);
+    const button = event.currentTarget;
+    const chevronIcon = button.querySelector('i');
+    const detailsText = button.querySelector('.details-text');
+    
+    if (detailsWrapper.style.display === 'none') {
+        // Show details
+        detailsWrapper.style.display = 'block';
+        button.classList.add('expanded');
+        detailsText.textContent = 'Hide Details';
+    } else {
+        // Hide details
+        detailsWrapper.style.display = 'none';
+        button.classList.remove('expanded');
+        detailsText.textContent = 'View Details';
     }
 }
 
