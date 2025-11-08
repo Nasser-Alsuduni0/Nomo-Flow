@@ -60,7 +60,9 @@ def page_notifications(request):
     return notifications_page(request)
 
 def page_purchase_display(request):
-    return render(request, "dashboard/feature_placeholder.html", {"title": "Purchase Display"})
+    from features.views import purchase_display_page
+
+    return purchase_display_page(request)
 
 def page_settings(request):
     return render(request, "dashboard/feature_placeholder.html", {"title": "Settings"})

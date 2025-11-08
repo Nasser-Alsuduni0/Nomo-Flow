@@ -1,0 +1,238 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Purchase Display - NomoFlow{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="mb-1" style="font-weight: 700; color: var(--text);">Purchase Display</h2>
+            <p class="text-muted mb-0" style="font-size: 0.95rem;">Show real-time social proof with popups of recent purchases on your storefront.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <div class="d-inline-flex align-items-center bg-white px-3 py-2 rounded-3 shadow-sm">
+                <span class="me-2" style="font-size: 0.9rem; font-weight: 500; color: var(--muted);">Status:</span>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="purchaseFeatureToggle"
+                           {% if is_enabled %}checked{% endif %}
+                           onchange="togglePurchaseFeature(this.checked)"
+                           style="width: 2.5rem; height: 1.25rem; cursor: pointer;">
+                    <label class="form-check-label ms-1" for="purchaseFeatureToggle" style="font-size: 0.95rem; font-weight: 600; cursor: pointer;">
+                        <span id="purchaseToggleLabel" style="color: {% if is_enabled %}#10b981{% else %}#6b7280{% endif %};">
+                            {% if is_enabled %}Enabled{% else %}Disabled{% endif %}
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0ea5e9 !important;">
+                <div class="card-body">
+                    <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">TOTAL ORDERS TRACKED</p>
+                    <h3 class="mb-0" style="font-weight: 700; color: var(--text);">{{ total_orders }}</h3>
+                    <small class="text-muted">Since connecting your store</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #22c55e !important;">
+                <div class="card-body">
+                    <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">ORDERS (LAST 24H)</p>
+                    <h3 class="mb-0" style="font-weight: 700; color: #22c55e;">{{ orders_last_24h }}</h3>
+                    <small class="text-muted">Rolling window</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #8b5cf6 !important;">
+                <div class="card-body">
+                    <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">ORDERS (LAST 7 DAYS)</p>
+                    <h3 class="mb-0" style="font-weight: 700; color: #8b5cf6;">{{ orders_last_7_days }}</h3>
+                    <small class="text-muted">Keep the widget feeling fresh</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #f97316 !important;">
+                <div class="card-body">
+                    <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">TOTAL REVENUE (SAR)</p>
+                    <h3 class="mb-0" style="font-weight: 700; color: #f97316;">{{ total_revenue|floatformat:0 }}</h3>
+                    <small class="text-muted">Attributed conversions</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3" style="font-weight: 600;">Widget Settings</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <tbody>
+                            {% for item in settings_items %}
+                                <tr>
+                                    <td class="text-muted" style="width: 45%; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">{{ item.label }}</td>
+                                    <td style="font-weight: 500;">{{ item.value }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-muted">No configuration stored yet.</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <small class="text-muted d-block mt-3">Settings stored per merchant. Customization controls are coming soon.</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3" style="font-weight: 600;">Last Purchase</h5>
+                    {% if latest_order_time %}
+                    <p class="mb-1" style="font-size: 1.75rem; font-weight: 700; color: var(--text);">
+                        {{ latest_order_amount|default:0|floatformat:0 }} SAR
+                    </p>
+                    <p class="text-muted mb-0">{{ latest_order_time|date:"M d, Y H:i" }} · {{ latest_order_time_ago }}</p>
+                    {% else %}
+                    <div class="text-muted">No purchase events tracked yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom">
+                        <div>
+                            <h5 class="mb-1" style="font-weight: 600;">Recent Purchases</h5>
+                            <small class="text-muted">Latest attributed orders pulled from Salla events.</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4 py-3">ORDER</th>
+                                    <th class="px-3 py-3">AMOUNT</th>
+                                    <th class="px-3 py-3">COUPON</th>
+                                    <th class="px-3 py-3">WHEN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td class="px-4 py-3" style="font-weight: 600;">{{ order.order_display }}</td>
+                                    <td class="px-3 py-3">{{ order.revenue|default:0|floatformat:2 }} SAR</td>
+                                    <td class="px-3 py-3">
+                                        {% if order.used_coupon %}
+                                        <span class="badge" style="background-color: rgba(59,130,246,0.15); color: #1d4ed8;">{{ order.used_coupon }}</span>
+                                        {% else %}
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-muted">{{ order.ago }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="py-5 text-center">
+                        <i class="bi bi-cart-x" style="font-size: 3rem; color: var(--muted); opacity: 0.4;"></i>
+                        <p class="text-muted mt-3 mb-0">No purchases tracked yet</p>
+                        <small class="text-muted">Confirm your Salla webhook integration to start collecting orders.</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePurchaseFeature(enabled) {
+    fetch('/features/toggle/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            enabled: enabled,
+            feature: 'recent_purchases'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const label = document.getElementById('purchaseToggleLabel');
+            label.textContent = enabled ? 'Enabled' : 'Disabled';
+            label.style.color = enabled ? '#10b981' : '#6b7280';
+        } else {
+            alert('Error: ' + data.message);
+            document.getElementById('purchaseFeatureToggle').checked = !enabled;
+        }
+    })
+    .catch(error => {
+        console.error('Toggle error', error);
+        alert('An unexpected error occurred');
+        document.getElementById('purchaseFeatureToggle').checked = !enabled;
+    });
+}
+
+function copyEmbedSnippet(buttonEl) {
+    const codeBlock = ``;
+    const successState = () => {
+        const original = buttonEl.innerHTML;
+        buttonEl.innerHTML = '<i class="bi bi-check2"></i> Copied';
+        setTimeout(() => buttonEl.innerHTML = original, 2000);
+    };
+
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        const textarea = document.createElement('textarea');
+        textarea.value = codeBlock;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            const ok = document.execCommand('copy');
+            if (ok) {
+                successState();
+            } else {
+                throw new Error('execCommand failed');
+            }
+        } catch (err) {
+            console.error('Clipboard copy failed', err);
+            alert('Unable to copy automatically. Please copy manually.');
+        }
+        document.body.removeChild(textarea);
+        return;
+    }
+
+    navigator.clipboard.writeText(codeBlock)
+        .then(() => successState())
+        .catch(err => {
+            console.error('Clipboard copy failed', err);
+            alert('Unable to copy automatically. Please copy manually.');
+        });
+}
+</script>
+{% endblock %}
+
