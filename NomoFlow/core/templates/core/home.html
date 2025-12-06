@@ -17,197 +17,931 @@
   <meta name="theme-color" content="#17a8ff" />
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    
     :root {
-      --brand:#17a8ff; --brand-dark:#0f9cf5;
-      --text:#0f172a; --muted:#64748b;
-      --bg:#f8fbfe; --card:#ffffff; --border:#e5e7eb;
+      --brand: #17a8ff;
+      --brand-dark: #0f9cf5;
+      --brand-light: #e0f4ff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --bg: #0a0e27;
+      --bg-light: #1a1f3a;
+      --card: rgba(255, 255, 255, 0.05);
+      --card-hover: rgba(255, 255, 255, 0.1);
+      --border: rgba(255, 255, 255, 0.1);
+      --glass: rgba(255, 255, 255, 0.08);
+      --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --gradient-brand: linear-gradient(135deg, #17a8ff 0%, #0f9cf5 50%, #0284c7 100%);
     }
-    html,body{margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:var(--text);background:var(--bg)}
-    a{color:inherit}
-    .container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+      color: #ffffff;
+      background: var(--bg);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(23, 168, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(245, 87, 108, 0.1) 0%, transparent 50%);
+      z-index: -1;
+      animation: backgroundShift 20s ease infinite;
+    }
+
+    @keyframes backgroundShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Floating particles effect */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @media (max-width: 768px) {
+      .particles {
+        display: none; /* Hide particles on mobile for better performance */
+      }
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(23, 168, 255, 0.3);
+      border-radius: 50%;
+      animation: float 15s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
     
     /* Navigation */
-    .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:20px;border-bottom:1px solid var(--border);position:relative;flex-wrap:nowrap;overflow-x:hidden}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;flex-shrink:0;min-width:fit-content;max-width:300px;overflow:visible;direction:ltr}
-    .logo svg{flex-shrink:0;display:block;width:auto;max-width:100%;height:80px;direction:ltr}
-    .logo img{height:150px;width:auto;display:block}
-    .nav-links{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex-shrink:1;justify-content:flex-end}
-    .btn{border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:#fff;transition:all 0.2s ease}
-    .btn:hover{background:#fafafa;transform:translateY(-1px)}
-    .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 8px 20px rgba(23,168,255,0.25)}
-    .btn-primary:hover{background:var(--brand-dark);transform:translateY(-1px)}
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 39, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .logo img {
+      height: 50px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 4px 12px rgba(23, 168, 255, 0.3));
+      transition: transform 0.3s ease;
+    }
+
+    .logo img:hover {
+      transform: scale(1.05);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      background: var(--card-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(23, 168, 255, 0.2);
+      border-color: rgba(23, 168, 255, 0.3);
+    }
+
+    .btn-primary {
+      background: var(--gradient-brand);
+      border: none;
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(23, 168, 255, 0.4);
+      font-weight: 700;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 12px 32px rgba(23, 168, 255, 0.5);
+      transform: translateY(-3px) scale(1.02);
+    }
     
     /* Mobile Navigation */
-    .mobile-menu-btn{display:none;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text)}
-    .mobile-nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);z-index:1000;padding:20px}
-    .mobile-nav.active{display:block}
-    .mobile-nav .btn{display:block;width:100%;text-align:center;margin-bottom:12px}
-    .mobile-nav .btn:last-child{margin-bottom:0}
+    .mobile-menu-btn {
+      display: none;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-menu-btn:hover {
+      background: var(--card-hover);
+    }
+
+    .mobile-nav {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(10, 14, 39, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      padding: 24px;
+      margin-top: 12px;
+    }
+
+    .mobile-nav.active {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mobile-nav .btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .mobile-nav .btn:last-child {
+      margin-bottom: 0;
+    }
     
     /* Language pills */
-    .lang-nav{display:flex;align-items:center;gap:6px;background:rgba(232,246,255,.6);border:1px solid var(--border);border-radius:9999px;padding:6px}
-    .chip{padding:8px 14px;border-radius:9999px;text-decoration:none;font-weight:800;color:var(--text);transition:all 0.2s ease}
-    .chip:hover{background:rgba(23,168,255,.10)}
-    .chip-active{background:var(--brand);color:#fff}
+    .lang-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      padding: 4px;
+      backdrop-filter: blur(10px);
+    }
+
+    .chip {
+      padding: 8px 16px;
+      border-radius: 9999px;
+      text-decoration: none;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .chip:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .chip-active {
+      background: var(--gradient-brand);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(23, 168, 255, 0.3);
+    }
     
     /* Hero Section */
-    .badge{display:inline-block;background:#e6f5ff;color:#0b6aa8;border-radius:9999px;padding:8px 14px;font-weight:700;margin-bottom:16px}
-    .hero{padding:56px 0 24px;text-align:center}
-    h1{font-size:44px;line-height:1.15;margin:12px 0 8px;font-weight:800}
-    .accent{color:var(--brand)}
-    .lead{font-size:18px;color:var(--muted);max-width:900px;margin:0 auto;line-height:1.6}
-    .cta-row{display:flex;gap:12px;margin:22px 0;justify-content:center;flex-wrap:wrap}
-    .strip{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px}
-    .pill{border:1px solid #cdeefe;background:#e8f6ff;border-radius:9999px;padding:8px 14px;font-weight:700}
+    .hero {
+      padding: 120px 0 80px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--gradient-brand);
+      color: #fff;
+      border-radius: 9999px;
+      padding: 10px 20px;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(23, 168, 255, 0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    h1 {
+      font-size: 64px;
+      line-height: 1.1;
+      margin: 24px 0 20px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffffff 0%, #a0d2ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .accent {
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .lead {
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 800px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+      animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 16px;
+      margin: 32px 0;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s ease 0.4s both;
+    }
+
+    .small {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 20px;
+      display: block;
+    }
     
     /* Cards and Grids */
-    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-    .card{background:var(--card);border-radius:14px;padding:22px;box-shadow:0 2px 10px rgba(2,6,23,0.06);border:1px solid #eef2f7;transition:all 0.3s ease}
-    .card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(2,6,23,0.1)}
-    .card h4{margin:8px 0 6px;font-size:18px;font-weight:700}
-    .card p{color:var(--muted);margin:0;line-height:1.5}
-    .icon{color:var(--brand);margin-bottom:8px}
-    .icon svg{width:34px;height:34px}
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 32px;
+      border: 1px solid var(--border);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-brand);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: -1;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(23, 168, 255, 0.5);
+      box-shadow: 0 20px 60px rgba(23, 168, 255, 0.3);
+    }
+
+    .card:hover::before {
+      opacity: 0.1;
+    }
+
+    .card h4 {
+      margin: 16px 0 12px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card p {
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .icon {
+      color: var(--brand);
+      margin-bottom: 16px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(23, 168, 255, 0.1);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover .icon {
+      background: rgba(23, 168, 255, 0.2);
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .icon svg {
+      width: 28px;
+      height: 28px;
+    }
     
     /* Sections */
-    .section{padding:32px 0}
-    .section h2{text-align:center;font-size:32px;margin:0 0 8px;font-weight:800}
-    .section .lead{text-align:center;margin-bottom:22px}
-    
-    /* Gallery */
-    .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .shot{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#fff;height:220px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:600;transition:all 0.3s ease}
-    .shot:hover{transform:scale(1.02);box-shadow:0 8px 25px rgba(0,0,0,0.1)}
+    .section {
+      padding: 100px 0;
+      position: relative;
+    }
+
+    .section h2 {
+      text-align: center;
+      font-size: 48px;
+      margin: 0 0 16px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffffff 0%, #a0d2ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section .lead {
+      text-align: center;
+      margin-bottom: 48px;
+      font-size: 18px;
+    }
     
     /* Steps */
-    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;list-style:none;padding:0;margin:0}
-    
-    /* CTA */
-    .cta{background:#e8f6ff;border:1px solid #cdeefe;margin:40px auto 20px;padding:28px;border-radius:18px;max-width:900px;text-align:center}
-    
-    /* Pricing */
-    .pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    .price-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;transition:all 0.3s ease}
-    .price-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.1)}
-    .price-title{font-weight:800}
-    .price{font-size:28px;margin:8px 0;font-weight:800}
-    .ul{margin:0;padding:0;list-style:none}
-    .ul li{margin:6px 0;color:var(--muted);line-height:1.5}
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .steps .card {
+      text-align: center;
+    }
+
+    .steps .card h4 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .steps .card h4 {
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .steps .card h4 {
+        font-size: 18px;
+      }
+    }
+
+    /* Gallery */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    @media (max-width: 768px) {
+      .gallery {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-top: 32px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .gallery {
+        gap: 12px;
+        margin-top: 24px;
+      }
+    }
+
+    .shot {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      height: 280px;
+      position: relative;
+      transition: all 0.4s ease;
+    }
+
+    .shot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .shot:hover img {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+      .shot {
+        height: 240px;
+        border-radius: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .shot {
+        height: 200px;
+        border-radius: 12px;
+      }
+    }
+
+    .shot::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-brand);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .shot:hover {
+      transform: scale(1.05);
+      border-color: rgba(23, 168, 255, 0.5);
+      box-shadow: 0 20px 60px rgba(23, 168, 255, 0.3);
+    }
+
+    .shot:hover::before {
+      opacity: 0.1;
+    }
+
+    .shot span {
+      position: relative;
+      z-index: 1;
+    }
     
     /* FAQ */
-    .faq{max-width:900px;margin:0 auto;display:grid;gap:12px}
-    details{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;transition:all 0.3s ease}
-    details:hover{border-color:var(--brand)}
-    summary{font-weight:700;cursor:pointer;padding:8px 0}
+    .faq {
+      max-width: 900px;
+      margin: 48px auto 0;
+      display: grid;
+      gap: 16px;
+    }
+
+    details {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      transition: all 0.3s ease;
+    }
+
+    details:hover {
+      border-color: rgba(23, 168, 255, 0.5);
+      background: var(--card-hover);
+    }
+
+    details[open] {
+      border-color: rgba(23, 168, 255, 0.5);
+      background: var(--card-hover);
+    }
+
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      padding: 8px 0;
+      color: #fff;
+      font-size: 18px;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details[open] summary {
+      margin-bottom: 12px;
+    }
+
+    details p {
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.7;
+      padding-top: 8px;
+    }
     
     /* Footer */
-    footer{padding:20px 0;color:#475569}
-    .footer{padding:32px 0;border-top:1px solid var(--border)}
-    .footer .brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;direction:ltr}
-    .footer .brand svg{direction:ltr}
-    .footer .brand img{height:48px;width:48px;border-radius:8px}
-    .footer .brand .name{font-weight:800;font-size:22px}
-    .footer .desc{color:var(--muted);text-align:center;margin-bottom:12px}
-    .footer .links{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px;flex-wrap:wrap}
-    .footer .links a{color:var(--text);font-weight:700;text-decoration:none;transition:color 0.2s ease}
-    .footer .links a:hover{color:var(--brand)}
-    .footer .copy{font-size:12px;color:#64748b;text-align:center}
-    .lang-switch{display:flex;gap:6px}
-    .small{font-size:12px;color:#64748b}
-    
+    footer {
+      padding: 80px 0 40px;
+      color: rgba(255, 255, 255, 0.7);
+      border-top: 1px solid var(--border);
+      margin-top: 100px;
+    }
+
+    .footer {
+      text-align: center;
+    }
+
+    .footer .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .footer .brand img {
+      height: 50px;
+      width: auto;
+      filter: drop-shadow(0 4px 12px rgba(23, 168, 255, 0.3));
+    }
+
+    .footer .desc {
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 24px;
+      font-size: 16px;
+    }
+
+    .footer .links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .footer .links a {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+
+    .footer .links a:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .footer .copy {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
     /* Responsive Design */
-    @media (max-width: 1200px) {
-      .container{padding:0 20px}
-      .logo img{height:120px}
-      .logo svg{height:70px!important}
+    @media (max-width: 1024px) {
+      .container { padding: 0 20px; }
+      h1 { font-size: 48px; }
+      .section h2 { font-size: 36px; }
+      .cards { grid-template-columns: repeat(2, 1fr); }
+      .gallery { grid-template-columns: repeat(2, 1fr); }
     }
-    
-    @media (max-width: 1000px) {
-      .cards,.gallery,.pricing,.steps{grid-template-columns:1fr}
-      h1{font-size:36px}
-      .section h2{font-size:28px}
-      .hero{padding:40px 0 20px}
-    }
-    
+
     @media (max-width: 768px) {
-      .container{padding:0 16px}
-      .nav{padding:12px 0;gap:12px}
-      .logo{max-width:200px}
-      .logo img{height:100px}
-      .logo svg{height:60px!important}
-      .nav-links{display:none}
-      .mobile-menu-btn{display:block}
-      .mobile-nav{display:none}
-      .mobile-nav.active{display:block}
+      .container { padding: 0 16px; }
+      .nav { 
+        padding: 16px 0; 
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .logo { 
+        flex: 0 0 auto;
+        max-width: 180px;
+      }
+      .logo img { 
+        height: 40px; 
+        max-width: 100%;
+      }
+      .nav-links { 
+        display: none; 
+      }
+      .mobile-menu-btn { 
+        display: block; 
+        margin-left: auto;
+      }
       
-      h1{font-size:28px;line-height:1.2}
-      .lead{font-size:16px}
-      .hero{padding:32px 0 16px}
-      .section{padding:24px 0}
-      .section h2{font-size:24px}
-      .card{padding:18px}
-      .cta{padding:20px;margin:24px auto 16px}
-      .footer{padding:24px 0}
-      .footer .links{gap:12px}
+      h1 { 
+        font-size: 32px; 
+        line-height: 1.2;
+        margin: 20px 0 16px;
+      }
+      .lead { 
+        font-size: 16px; 
+        line-height: 1.6;
+        margin-bottom: 32px;
+      }
+      .hero { 
+        padding: 60px 0 40px; 
+      }
+      .section { 
+        padding: 50px 0; 
+      }
+      .section h2 { 
+        font-size: 28px; 
+        margin-bottom: 12px;
+      }
+      .section .lead {
+        font-size: 16px;
+        margin-bottom: 32px;
+      }
+      .cards, .gallery, .steps { 
+        grid-template-columns: 1fr; 
+        gap: 20px;
+      }
+      .card { 
+        padding: 24px; 
+      }
+      .card h4 {
+        font-size: 18px;
+      }
+      .card p {
+        font-size: 14px;
+      }
+      .icon {
+        width: 44px;
+        height: 44px;
+      }
+      .icon svg {
+        width: 24px;
+        height: 24px;
+      }
+      .badge {
+        font-size: 12px;
+        padding: 8px 16px;
+      }
+      .cta-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .footer {
+        padding: 60px 0 30px;
+      }
+      .footer .links {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .faq {
+        gap: 12px;
+      }
+      details {
+        padding: 16px 20px;
+      }
+      summary {
+        font-size: 16px;
+      }
     }
-    
+
     @media (max-width: 480px) {
-      .container{padding:0 12px}
-      .logo img{height:80px}
-      h1{font-size:24px}
-      .lead{font-size:15px}
-      .btn{padding:8px 12px;font-size:14px}
-      .cta-row{gap:8px}
-      .card{padding:16px}
-      .icon svg{width:28px;height:28px}
-      .card h4{font-size:16px}
-      .section h2{font-size:20px}
-      .price{font-size:24px}
-      .footer .brand img{height:40px;width:40px}
+      .container { padding: 0 12px; }
+      .nav { padding: 12px 0; }
+      .logo img { height: 35px; }
+      
+      h1 { 
+        font-size: 26px; 
+        line-height: 1.15;
+        margin: 16px 0 12px;
+      }
+      .lead { 
+        font-size: 15px; 
+        margin-bottom: 24px;
+      }
+      .hero { 
+        padding: 50px 0 30px; 
+      }
+      .section { 
+        padding: 40px 0; 
+      }
+      .section h2 { 
+        font-size: 24px; 
+        margin-bottom: 10px;
+      }
+      .section .lead {
+        font-size: 14px;
+        margin-bottom: 24px;
+      }
+      .btn { 
+        padding: 12px 20px; 
+        font-size: 14px; 
+      }
+      .cta-row { 
+        gap: 10px; 
+      }
+      .card { 
+        padding: 20px; 
+      }
+      .card h4 {
+        font-size: 16px;
+        margin: 12px 0 8px;
+      }
+      .card p {
+        font-size: 13px;
+      }
+      .icon {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 12px;
+      }
+      .icon svg {
+        width: 22px;
+        height: 22px;
+      }
+      .badge {
+        font-size: 11px;
+        padding: 6px 12px;
+        margin-bottom: 16px;
+      }
+      .small {
+        font-size: 12px;
+        margin-top: 16px;
+      }
+      .gallery .shot {
+        height: 200px;
+      }
+      .footer {
+        padding: 40px 0 24px;
+      }
+      .footer .brand img {
+        height: 40px;
+      }
+      .footer .desc {
+        font-size: 14px;
+      }
+      .footer .copy {
+        font-size: 12px;
+      }
+      .mobile-nav {
+        padding: 20px;
+        margin-top: 8px;
+      }
+      .lang-nav {
+        padding: 3px;
+      }
+      .chip {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
     }
 
     /* RTL helpers */
-    [dir="rtl"] .nav{flex-direction:row-reverse}
-    [dir="rtl"] .logo{margin-left:0;padding-left:0;margin-right:auto}
-    [dir="rtl"] .nav-links{flex-direction:row-reverse;margin-right:0;padding-right:0;margin-left:auto}
-    [dir="rtl"] .cta-row{flex-direction:row-reverse}
-    [dir="rtl"] .strip{flex-direction:row-reverse}
-    [dir="rtl"] .mobile-nav{left:auto;right:0}
-    
-    /* RTL responsive */
-    @media (max-width: 768px) {
-      [dir="rtl"] .logo{max-width:180px}
-      [dir="rtl"] .mobile-menu-btn{margin-left:0;margin-right:auto}
-    }
+    [dir="rtl"] .nav { flex-direction: row-reverse; }
+    [dir="rtl"] .logo { margin-left: 0; margin-right: auto; }
+    [dir="rtl"] .nav-links { flex-direction: row-reverse; }
+    [dir="rtl"] .cta-row { flex-direction: row-reverse; }
+    [dir="rtl"] .mobile-nav { left: auto; right: 0; }
   </style>
 </head>
 <body>
+  <!-- Floating particles -->
+  <div class="particles" id="particles"></div>
+
   <header class="container nav">
     <div class="logo">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" style="height:80px;width:auto" direction="ltr">
-        <!-- Three bars with blue colors -->
-        <rect x="8" y="40" width="16" height="32" rx="3" ry="3" fill="#0ea5e9"/>
-        <rect x="28" y="28" width="16" height="44" rx="3" ry="3" fill="#0ea5e9"/>
-        <rect x="48" y="16" width="16" height="56" rx="3" ry="3" fill="#0ea5e9"/>
-        
-        <!-- Upward arrow -->
-        <g id="logo-arrow" fill="none" stroke="#0ea5e9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M 12 38 L 36 24 L 56 12 L 68 12"/>
-          <path d="M 68 12 L 62 9 M 68 12 L 65 18"/>
-        </g>
-        
-        <!-- Text -->
-        <text x="85" y="45" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28" fill="#1e293b" letter-spacing="-0.5" direction="ltr" text-anchor="start">
-          Nomo
-        </text>
-        <text x="85" y="68" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28" fill="#1e293b" letter-spacing="-0.5" direction="ltr" text-anchor="start">
-          Flow
-        </text>
-      </svg>
+      <a href="/">
+        <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow">
+      </a>
     </div>
     <div class="nav-links">
-      <a href="" class="btn btn-primary" data-i18n="install">Install on Salla</a>
-      <a href="/dashboard/" class="btn" data-i18n="dashboard">Dashboard</a>
+      <a href="{% url 'salla_connect' %}" class="btn btn-primary" data-i18n="install">Install on Salla</a>
+      <a href="/app/" class="btn" data-i18n="login">Login</a>
       <nav class="lang-nav" aria-label="Language">
         <a href="#" id="pill-en" class="chip">EN</a>
         <a href="#" id="pill-ar" class="chip">العربية</a>
@@ -215,8 +949,8 @@
     </div>
     <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle mobile menu">☰</button>
     <div class="mobile-nav" id="mobile-nav">
-      <a href="" class="btn btn-primary" data-i18n="install">Install on Salla</a>
-      <a href="/dashboard/" class="btn" data-i18n="dashboard">Dashboard</a>
+      <a href="{% url 'salla_connect' %}" class="btn btn-primary" data-i18n="install">Install on Salla</a>
+      <a href="/app/" class="btn" data-i18n="login">Login</a>
       <nav class="lang-nav" aria-label="Language">
         <a href="#" id="mobile-pill-en" class="chip">EN</a>
         <a href="#" id="mobile-pill-ar" class="chip">العربية</a>
@@ -233,24 +967,43 @@
         Enable coupons, popups, live visitor counter, and launch TikTok/Snap/Instagram ads — all from one dashboard.
       </p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="" data-i18n="install">Install on Salla</a>
-        <a class="btn" href="/demo/" data-i18n="viewDemo">View Demo</a>
+        <a href="{% url 'salla_connect' %}" class="btn btn-primary" data-i18n="install">Install on Salla</a>
+        <a href="/demo/" class="btn" data-i18n="viewDemo">View Demo</a>
       </div>
       <p class="small" data-i18n="oauthNote">Secure OAuth · Zero code · Disable anytime</p>
     </section>
 
     <!-- QUICK START -->
     <section class="container section">
+      <h2 data-i18n="stepsTitle">Get Started in 3 Steps</h2>
+      <p class="lead" data-i18n="stepsLead">Simple setup, powerful results</p>
       <ol class="steps">
         <li class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
           <h4 data-i18n="step1T">1) Install</h4>
           <p data-i18n="step1D">Add Nomo Flow from the Salla App Store.</p>
         </li>
         <li class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+          </div>
           <h4 data-i18n="step2T">2) Connect</h4>
           <p data-i18n="step2D">Authorize your store and pick your widgets.</p>
         </li>
         <li class="card">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
           <h4 data-i18n="step3T">3) Launch</h4>
           <p data-i18n="step3D">Go live with coupons, popups, and live counter in minutes.</p>
         </li>
@@ -264,7 +1017,7 @@
       <div class="cards">
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="18" cy="5" r="3"></circle>
               <circle cx="6" cy="12" r="3"></circle>
               <circle cx="18" cy="19" r="3"></circle>
@@ -277,7 +1030,7 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
@@ -287,7 +1040,7 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="4" width="20" height="16" rx="2"></rect>
               <path d="M22 6 12 13 2 6"></path>
             </svg>
@@ -297,7 +1050,7 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20.59 13.41 11 3H4v7l9.59 9.59a2 2 0 0 0 2.82 0l4.18-4.18a2 2 0 0 0 0-2.82z"></path>
               <path d="M7 7h.01"></path>
             </svg>
@@ -307,7 +1060,7 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
@@ -317,7 +1070,7 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="9" cy="21" r="1"></circle>
               <circle cx="20" cy="21" r="1"></circle>
               <path d="M1 1h4l2.68 12.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
@@ -334,9 +1087,15 @@
       <h2 data-i18n="shotsTitle">See it in Action</h2>
       <p class="lead" data-i18n="shotsLead">Dashboard, on-store widget, and campaign builder.</p>
       <div class="gallery">
-        <div class="shot"><span>Dashboard Screenshot</span></div>
-        <div class="shot"><span>Widget on Salla Store</span></div>
-        <div class="shot"><span>Campaign Builder</span></div>
+        <div class="shot">
+          <img src="{% static 'core/img/Dashboard.png' %}" alt="Dashboard Screenshot">
+        </div>
+        <div class="shot">
+          <img src="{% static 'core/img/Widget on Salla Store.png' %}" alt="Widget on Salla Store">
+        </div>
+        <div class="shot">
+          <img src="{% static 'core/img/Campaign Builder.png' %}" alt="Campaign Builder">
+        </div>
       </div>
     </section>
 
@@ -362,31 +1121,11 @@
         </details>
       </div>
     </section>
-
   </main>
 
   <footer class="container footer">
     <div class="brand">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" style="height:60px;width:auto" direction="ltr">
-        <!-- Three bars with blue colors -->
-        <rect x="8" y="40" width="16" height="32" rx="3" ry="3" fill="#0ea5e9"/>
-        <rect x="28" y="28" width="16" height="44" rx="3" ry="3" fill="#0ea5e9"/>
-        <rect x="48" y="16" width="16" height="56" rx="3" ry="3" fill="#0ea5e9"/>
-        
-        <!-- Upward arrow -->
-        <g id="logo-arrow-footer" fill="none" stroke="#0ea5e9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M 12 38 L 36 24 L 56 12 L 68 12"/>
-          <path d="M 68 12 L 62 9 M 68 12 L 65 18"/>
-        </g>
-        
-        <!-- Text -->
-        <text x="85" y="45" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28" fill="#1e293b" letter-spacing="-0.5" direction="ltr" text-anchor="start">
-          Nomo
-        </text>
-        <text x="85" y="68" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28" fill="#1e293b" letter-spacing="-0.5" direction="ltr" text-anchor="start">
-          Flow
-        </text>
-      </svg>
+      <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow">
     </div>
     <p class="desc" data-i18n="footerDesc">Smart marketing tools for Salla stores.</p>
     <div class="links">
@@ -400,6 +1139,23 @@
   <script>
     // Year
     document.getElementById('y').textContent = new Date().getFullYear();
+    
+    // Create floating particles
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 30;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+    
+    createParticles();
     
     // Mobile menu functionality
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -421,15 +1177,15 @@
     // Simple i18n (EN/AR) and RTL toggle:
     const messages = {
       en: {
-        install:"Install on Salla", docs:"Docs", support:"Support", dashboard:"Dashboard",
+        install:"Install on Salla", login:"Login",
         badge:"Works with Salla – 1-click install",
         heroTitle:"Grow your <span class='accent'>Salla</span> store with smart widgets & social ad campaigns",
         heroLead:"Enable coupons, popups, live visitor counter, and launch TikTok/Snap/Instagram ads — all from one dashboard.",
         viewDemo:"View Demo", oauthNote:"Secure OAuth · Zero code · Disable anytime",
+        stepsTitle:"Get Started in 3 Steps", stepsLead:"Simple setup, powerful results",
         step1T:"1) Install", step1D:"Add Nomo Flow from the Salla App Store.",
         step2T:"2) Connect", step2D:"Authorize your store and pick your widgets.",
         step3T:"3) Launch", step3D:"Go live with coupons, popups, and live counter in minutes.",
-        adsTitle:"Launch Ads Where Your Buyers Are", adsLead:"Create & monitor campaigns to TikTok, Snapchat, and Instagram without leaving Nomo Flow.",
         featuresTitle:"Powerful Marketing Features", featuresLead:"Convert more visitors with urgency, social proof, and personalized offers.",
         f1T:"Social Ads Campaigns", f1D:"Build and publish campaigns to TikTok, Snapchat, and Instagram from one place.",
         f2T:"Live View Counter", f2D:"Show real-time visitors to create urgency and social proof.",
@@ -438,32 +1194,25 @@
         f5T:"Custom Notifications", f5D:"Target alerts by page, device, or behavior.",
         f6T:"Recent Purchases", f6D:"Display latest conversions to build trust.",
         shotsTitle:"See it in Action", shotsLead:"Dashboard, on-store widget, and campaign builder.",
-        pricingTitle:"Simple Pricing (SAR)", pricingLead:"Start free, upgrade as you grow.",
-        p1Name:"Starter", p1Price:"Free", p1a:"Basic widgets (counter, coupons)", p1b:"Up to 10k impressions/mo", p1c:"Email support",
-        p2Name:"Pro", p2Price:"49 SAR/mo", p2a:"All widgets + Email Collector", p2b:"A/B tests & scheduling", p2c:"Basic social campaigns",
-        p3Name:"Business", p3Price:"149 SAR/mo", p3a:"Advanced targeting & analytics", p3b:"Social ads builder (TikTok/Snap/IG)", p3c:"Priority support",
-        ctaTitle:"Ready to boost your sales?", ctaLead:"Install Nomo Flow on Salla and launch in minutes.",
         faqTitle:"FAQ for Salla Merchants",
         fq1Q:"Will Nomo Flow slow my Salla store?", fq1A:"We load lightweight scripts and defer non-critical assets. You can enable/disable widgets per page.",
         fq2Q:"Can I disable widgets on specific pages?", fq2A:"Yes, you can target by URL patterns or product collections.",
         fq3Q:"How do ads connect to sales?", fq3A:"We track clicks and attribute conversions using Salla order data and UTM parameters.",
         fq4Q:"What permissions do you request?", fq4A:"Store info and basic order/visitor data required to render widgets and analytics. You can revoke access anytime.",
         footerDesc:"Smart marketing tools for Salla stores.",
-        footerAbout:"About",
-        footerContact:"Contact",
-        footerPrivacy:"Privacy Policy",
+        footerAbout:"About", footerContact:"Contact", footerPrivacy:"Privacy Policy",
         rights:"All rights reserved."
       },
       ar: {
-        install:"ثبّت على سلة", docs:"الوثائق", support:"الدعم", dashboard:"لوحة التحكم",
+        install:"ثبّت على سلة", login:"تسجيل الدخول",
         badge:"متوافق مع سلة – تثبيت بنقرة واحدة",
         heroTitle:"نمِّ مبيعات متجرك على <span class='accent'>سلة</span> بأدوات ذكية وحملات إعلانية اجتماعية",
         heroLead:"فعّل الكوبونات والنوافذ المنبثقة وعدّاد الزوار، واطلق إعلانات TikTok وSnapchat وInstagram من لوحة واحدة.",
         viewDemo:"شاهد العرض", oauthNote:"توثيق آمن · بدون كود · يمكن الإيقاف في أي وقت",
+        stepsTitle:"ابدأ في 3 خطوات", stepsLead:"إعداد بسيط، نتائج قوية",
         step1T:"١) التثبيت", step1D:"أضف Nomo Flow من متجر تطبيقات سلة.",
         step2T:"٢) الربط", step2D:"امنح الصلاحيات واختر الأدوات المناسبة.",
         step3T:"٣) الإطلاق", step3D:"فعّل الأدوات خلال دقائق على متجرك.",
-        adsTitle:"أطلِق إعلاناتك حيث يوجد عملاؤك", adsLead:"أنشئ وراقِب الحملات على TikTok وSnapchat وInstagram دون مغادرة Nomo Flow.",
         featuresTitle:"ميزات تسويقية قوية", featuresLead:"حوِّل الزوار إلى مشترين عبر العجلة الاجتماعية والعرض المخصص.",
         f1T:"حملات الإعلانات الاجتماعية", f1D:"ابنِ وانشر الحملات على TikTok وSnapchat وInstagram من مكان واحد.",
         f2T:"عدّاد الزوار اللحظي", f2D:"أظهر عدد الزوار مباشرة لخلق العجلة والإثبات الاجتماعي.",
@@ -472,20 +1221,13 @@
         f5T:"تنبيهات مخصصة", f5D:"استهدف حسب الصفحة أو الجهاز أو السلوك.",
         f6T:"آخر عمليات الشراء", f6D:"اعرض أحدث المشتريات لبناء الثقة.",
         shotsTitle:"شاهد كيف تعمل", shotsLead:"لوحة التحكم، أداة المتجر، ومنشئ الحملات.",
-        pricingTitle:"أسعار بسيطة (ريال)", pricingLead:"ابدأ مجانًا وطوّر لاحقًا.",
-        p1Name:"البداية", p1Price:"مجاني", p1a:"أدوات أساسية (العدّاد، الكوبونات)", p1b:"حتى ١٠ آلاف ظهور/شهر", p1c:"دعم عبر الإيميل",
-        p2Name:"المحترف", p2Price:"٤٩ ريال/شهر", p2a:"كل الأدوات + جامع الإيميلات", p2b:"اختبارات A/B والجدولة", p2c:"حملات اجتماعية أساسية",
-        p3Name:"الأعمال", p3Price:"١٤٩ ريال/شهر", p3a:"استهداف وتحليلات متقدمة", p3b:"منشئ حملات TikTok/Snap/IG", p3c:"دعم أولوية",
-        ctaTitle:"جاهز لرفع المبيعات؟", ctaLead:"ثبّت Nomo Flow على سلة وابدأ خلال دقائق.",
         faqTitle:"الأسئلة الشائعة لتجار سلة",
         fq1Q:"هل يبطّئ Nomo Flow متجري على سلة؟", fq1A:"نحمّل سكربتات خفيفة ونؤخّر غير الضروري. ويمكن تفعيل/إيقاف الأدوات لكل صفحة.",
         fq2Q:"هل أستطيع إخفاء الأدوات في صفحات محددة؟", fq2A:"نعم، عبر استهداف الروابط أو التصنيفات.",
         fq3Q:"كيف ترتبط الإعلانات بالمبيعات؟", fq3A:"نعزو التحويلات لبيانات الطلب من سلة ومعلمات UTM.",
         fq4Q:"ما الصلاحيات المطلوبة؟", fq4A:"معلومات المتجر وبعض بيانات الطلب/الزوار لتفعيل الأدوات والتحليلات، ويمكن إلغاء الربط في أي وقت.",
         footerDesc:"أدوات تسويقية ذكية لمتاجر سلة.",
-        footerAbout:"من نحن",
-        footerContact:"اتصل بنا",
-        footerPrivacy:"سياسة الخصوصية",
+        footerAbout:"من نحن", footerContact:"اتصل بنا", footerPrivacy:"سياسة الخصوصية",
         rights:"جميع الحقوق محفوظة."
       }
     };
@@ -502,8 +1244,6 @@
         }
       });
       try{ localStorage.setItem('nf_lang', lang); }catch(e){}
-      const sel = document.getElementById('lang');
-      if(sel && sel.value !== lang){ sel.value = lang; }
     }
 
     // language pills

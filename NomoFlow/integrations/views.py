@@ -23,18 +23,29 @@ def salla_connect(request):
     Redirect merchant to Salla OAuth authorization.
     """
     client_id = settings.SALLA_CLIENT_ID
-    redirect_uri = settings.SALLA_REDIRECT_URI or ((settings.PUBLIC_BASE_URL.rstrip("/") + "/salla/callback") if settings.PUBLIC_BASE_URL else "")
+    redirect_uri = settings.SALLA_REDIRECT_URI or ((settings.PUBLIC_BASE_URL.rstrip("/") + "/salla/callback/") if settings.PUBLIC_BASE_URL else "")
+    # Ensure redirect_uri ends with / to match URL pattern
+    if redirect_uri and not redirect_uri.endswith("/"):
+        redirect_uri = redirect_uri + "/"
     scopes = " ".join(settings.SALLA_SCOPES)
     if not client_id or not redirect_uri:
         return HttpResponseBadRequest("Salla OAuth not configured")
 
     # Debug logging
     print(f"🔵 OAuth Authorization Request:")
+    print(f"   Authorization URL: {settings.SALLA_OAUTH_AUTHORIZE_URL}")
     print(f"   Client ID: {client_id}")
     print(f"   Redirect URI: {redirect_uri}")
     print(f"   Scopes: {scopes}")
+    print(f"   ⚠️ IMPORTANT: Make sure this Redirect URI matches EXACTLY what's registered in Salla App Settings")
 
-    state = str(int(time.time()))  # could be a signed value if you need CSRF/state tracking
+    # Generate state parameter for CSRF protection
+    # Store it in session to verify on callback
+    import secrets
+    state = secrets.token_urlsafe(32)
+    request.session['oauth_state'] = state
+    request.session['oauth_redirect_uri'] = redirect_uri
+    
     query = {
         "response_type": "code",
         "client_id": client_id,
@@ -43,6 +54,8 @@ def salla_connect(request):
         "state": state,
     }
     url = f"{settings.SALLA_OAUTH_AUTHORIZE_URL}?{urlencode(query)}"
+    print(f"   Full OAuth URL: {url}")
+    print(f"   State (for CSRF protection): {state[:20]}...")
     return redirect(url)
 
 
@@ -51,11 +64,60 @@ def salla_callback(request):
     """
     Handle Salla OAuth callback, exchange code for tokens, fetch store and persist.
     """
+    # Check for error from Salla
+    error = request.GET.get("error")
+    error_description = request.GET.get("error_description", "")
+    
+    if error:
+        error_msg = f"OAuth error from Salla: {error}"
+        if error_description:
+            error_msg += f" - {error_description}"
+        print(f"🔴 {error_msg}")
+        print(f"   Full query params: {dict(request.GET)}")
+        # Redirect to app entry with error message
+        from django.contrib import messages
+        messages.error(request, f"خطأ في تسجيل الدخول: {error_description or error}")
+        return redirect('app_entry')
+    
+    # Verify state parameter for CSRF protection
+    received_state = request.GET.get("state")
+    stored_state = request.session.get('oauth_state')
+    
+    if not stored_state or received_state != stored_state:
+        print(f"🔴 State mismatch - possible CSRF attack!")
+        print(f"   Received state: {received_state}")
+        print(f"   Stored state: {stored_state}")
+        from django.contrib import messages
+        messages.error(request, "خطأ في التحقق من الأمان. يرجى المحاولة مرة أخرى.")
+        return redirect('app_entry')
+    
+    # Clear state from session after verification
+    if 'oauth_state' in request.session:
+        del request.session['oauth_state']
+    
     code = request.GET.get("code")
     if not code:
-        return HttpResponseBadRequest("Missing code")
+        # Log all query parameters for debugging
+        print(f"🔴 Missing code in callback")
+        print(f"   Full query params: {dict(request.GET)}")
+        print(f"   Request path: {request.path}")
+        print(f"   Request GET: {request.GET}")
+        print(f"   Request META: {dict(request.META.get('QUERY_STRING', ''))}")
+        
+        # Check if this is a direct access (not from OAuth redirect)
+        from django.contrib import messages
+        messages.error(request, "لم يتم استلام رمز التفعيل من سلة. يرجى المحاولة مرة أخرى.")
+        return redirect('app_entry')
 
-    redirect_uri = settings.SALLA_REDIRECT_URI or ((settings.PUBLIC_BASE_URL.rstrip("/") + "/salla/callback") if settings.PUBLIC_BASE_URL else "")
+    # Use redirect_uri from session (stored during authorization request) or fallback to settings
+    redirect_uri = request.session.get('oauth_redirect_uri') or settings.SALLA_REDIRECT_URI or ((settings.PUBLIC_BASE_URL.rstrip("/") + "/salla/callback/") if settings.PUBLIC_BASE_URL else "")
+    # Ensure redirect_uri ends with / to match URL pattern
+    if redirect_uri and not redirect_uri.endswith("/"):
+        redirect_uri = redirect_uri + "/"
+    
+    # Clear redirect_uri from session after use
+    if 'oauth_redirect_uri' in request.session:
+        del request.session['oauth_redirect_uri']
     
     # Debug logging
     print(f"🟢 OAuth Token Exchange Request:")
@@ -139,6 +201,10 @@ def salla_callback(request):
         },
     )
 
+    # Mark merchant as connected
+    merchant.is_connected = True
+    merchant.save(update_fields=["is_connected"])
+
     Integration.objects.get_or_create(
         merchant=merchant,
         defaults={
@@ -147,14 +213,13 @@ def salla_callback(request):
         },
     )
 
-    # Redirect to dashboard after successful connection with success message
-    from django.contrib import messages
     # Set current merchant in session for this user
+    from django.contrib import messages
     try:
         set_current_merchant(request, merchant)
     except Exception:
         pass
-    messages.success(request, f'Successfully connected your store "{merchant.name}" to Nomo Flow!')
+    messages.success(request, f'تم ربط متجرك "{merchant.name}" بنجاح!')
     return redirect('dashboard')
 
 
@@ -275,6 +340,9 @@ def salla_webhook(request):
                         "scope": scope if isinstance(scope, str) else " ".join(scope) if scope else "",
                     },
                 )
+                # Mark merchant as connected
+                merchant.is_connected = True
+                merchant.save(update_fields=["is_connected"])
                 Integration.objects.get_or_create(
                     merchant=merchant,
                     defaults={

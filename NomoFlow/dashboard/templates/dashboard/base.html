@@ -272,29 +272,9 @@
 
   <aside class="nf-sidebar" id="sidebar">
     <div class="nf-brand">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" style="height:32px;width:auto">
-        <!-- Three bars with blue colors -->
-        <rect x="8" y="40" width="16" height="32" rx="3" ry="3" fill="#0ea5e9" />
-        <rect x="28" y="28" width="16" height="44" rx="3" ry="3" fill="#0ea5e9" />
-        <rect x="48" y="16" width="16" height="56" rx="3" ry="3" fill="#0ea5e9" />
-
-        <!-- Upward arrow -->
-        <g id="logo-arrow" fill="none" stroke="#0ea5e9" stroke-width="3.5" stroke-linecap="round"
-          stroke-linejoin="round">
-          <path d="M 12 38 L 36 24 L 56 12 L 68 12" />
-          <path d="M 68 12 L 62 9 M 68 12 L 65 18" />
-        </g>
-
-        <!-- Text -->
-        <text x="85" y="45" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28"
-          fill="#1e293b" letter-spacing="-0.5">
-          Nomo
-        </text>
-        <text x="85" y="68" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="700" font-size="28"
-          fill="#1e293b" letter-spacing="-0.5">
-          Flow
-        </text>
-      </svg>
+      <a href="/">
+        <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow" style="height:40px;width:auto">
+      </a>
       <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Close menu">✕</button>
     </div>
     <nav class="nf-nav">
@@ -347,6 +327,9 @@
       <div class="label">Account</div>
       <a href="/" class="">
         <i class="bi bi-house"></i> Back to Home
+      </a>
+      <a href="{% url 'logout' %}" class="">
+        <i class="bi bi-box-arrow-right"></i> Log out
       </a>
     </nav>
   </aside>

@@ -7,6 +7,7 @@ class Merchant(models.Model):
     salla_merchant_id = models.CharField(max_length=100, unique=True, help_text="Store ID in Salla")
     owner_email = models.EmailField(max_length=254, null=True, blank=True)
     timezone = models.CharField(max_length=64, default="Asia/Riyadh")
+    is_connected = models.BooleanField(default=True, help_text="Whether the merchant is connected to Salla")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

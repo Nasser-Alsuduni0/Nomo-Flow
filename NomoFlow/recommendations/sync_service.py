@@ -10,11 +10,12 @@ from typing import Optional, List, Dict
 from decimal import Decimal
 
 from core.models import Merchant, SallaToken
+from core.auth_utils import call_salla_api_with_refresh
 from .models import Product, Customer, Order, OrderItem
 
 
 class SallaSyncService:
-    """Service to sync data from Salla API"""
+    """Service to sync data from Salla API with automatic token refresh"""
     
     def __init__(self, merchant: Merchant):
         self.merchant = merchant
@@ -23,14 +24,9 @@ class SallaSyncService:
             raise ValueError(f"No valid token for merchant {merchant.name}")
         
         self.base_url = settings.SALLA_API_BASE.rstrip('/')
-        self.headers = {
-            "Authorization": f"Bearer {self.token.access_token}",
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        }
     
     def sync_products(self, limit: int = 100) -> int:
-        """Sync products from Salla API"""
+        """Sync products from Salla API with automatic token refresh"""
         synced_count = 0
         page = 1
         per_page = min(limit, 50)  # Salla API typically limits to 50 per page
@@ -43,7 +39,14 @@ class SallaSyncService:
                     "per_page": per_page
                 }
                 
-                response = requests.get(url, headers=self.headers, params=params, timeout=30)
+                response, error_msg = call_salla_api_with_refresh(
+                    self.merchant, "GET", url, params=params
+                )
+                
+                if error_msg:
+                    print(f"Error fetching products: {error_msg}")
+                    # If token refresh failed, merchant needs to reconnect
+                    raise ValueError(f"API call failed: {error_msg}")
                 
                 if response.status_code != 200:
                     print(f"Error fetching products: {response.status_code} - {response.text}")
@@ -139,7 +142,7 @@ class SallaSyncService:
         return product
     
     def sync_orders(self, limit: int = 100) -> int:
-        """Sync orders from Salla API"""
+        """Sync orders from Salla API with automatic token refresh"""
         synced_count = 0
         page = 1
         per_page = min(limit, 50)
@@ -152,7 +155,14 @@ class SallaSyncService:
                     "per_page": per_page
                 }
                 
-                response = requests.get(url, headers=self.headers, params=params, timeout=30)
+                response, error_msg = call_salla_api_with_refresh(
+                    self.merchant, "GET", url, params=params
+                )
+                
+                if error_msg:
+                    print(f"Error fetching orders: {error_msg}")
+                    # If token refresh failed, merchant needs to reconnect
+                    raise ValueError(f"API call failed: {error_msg}")
                 
                 if response.status_code != 200:
                     print(f"Error fetching orders: {response.status_code} - {response.text}")

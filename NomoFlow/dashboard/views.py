@@ -11,6 +11,8 @@ from features.models import Feature, MerchantFeature
 
 def index(request):
     merchant = get_current_merchant(request)
+    if not merchant:
+        return redirect('app_entry')
     kpis = ["Visitors", "Page Views", "Coupons", "Revenue"]
     return render(request, "dashboard/overview.html", {
         'merchant': merchant,

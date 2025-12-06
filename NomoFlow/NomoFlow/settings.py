@@ -144,14 +144,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SALLA_CLIENT_ID = os.getenv("SALLA_CLIENT_ID", "")
 SALLA_CLIENT_SECRET = os.getenv("SALLA_CLIENT_SECRET", "")
 SALLA_REDIRECT_URI = os.getenv("SALLA_REDIRECT_URI", "")  # e.g., https://yourdomain.com/salla/callback
-# Include discount write scopes so we can create coupons via Admin API
+# Salla OAuth scopes - Only use scopes that are enabled for your app in Salla Partners Portal
+# Common available scopes: orders.read, products.read, webhooks.read_write, offline_access
+# Note: discounts.write may not be available for all apps - check your app settings in Salla Partners Portal
 SALLA_SCOPES = os.getenv(
     "SALLA_SCOPES",
-    "orders.read products.read discounts.read discounts.write webhooks.read_write offline_access discounts.write",
+    "orders.read products.read webhooks.read_write offline_access",
 ).split()
 
 # API & OAuth endpoints (override via env if different in your portal)
-SALLA_OAUTH_AUTHORIZE_URL = os.getenv("SALLA_OAUTH_AUTHORIZE_URL", "https://accounts.salla.sa/oauth2/authorize")
+# According to Salla docs: https://accounts.salla.sa/oauth2/auth
+SALLA_OAUTH_AUTHORIZE_URL = os.getenv("SALLA_OAUTH_AUTHORIZE_URL", "https://accounts.salla.sa/oauth2/auth")
 SALLA_OAUTH_TOKEN_URL     = os.getenv("SALLA_OAUTH_TOKEN_URL", "https://accounts.salla.sa/oauth2/token")
 SALLA_API_BASE            = os.getenv("SALLA_API_BASE", "https://api.salla.dev/admin/v2")
 # Optional user info endpoint (used to reliably fetch store/merchant info)
@@ -165,7 +168,7 @@ SALLA_WEBHOOK_TOKEN = os.getenv("SALLA_WEBHOOK_TOKEN", "nomo-flow-webhook-token-
 
 # CSRF trusted origins (comma-separated) e.g. https://abc.ngrok-free.app,https://app.example.com
 CSRF_TRUSTED_ORIGINS = [
-    'https://32e68d3cacfb.ngrok-free.app',
+    'https://639edf321289.ngrok-free.app',
 ]
 
 INSTALLED_APPS += ['corsheaders']
