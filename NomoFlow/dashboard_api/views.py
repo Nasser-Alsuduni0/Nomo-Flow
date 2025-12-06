@@ -1,55 +1,76 @@
 from django.http import JsonResponse
 from django.db.models import Sum, Count
-from marketing.models import Campaign
-from coupons.models import Coupon
-from visitors.models import VisitorSession
 from django.utils import timezone
 from datetime import timedelta
+from marketing.models import Campaign
+from coupons.models import Coupon
+from visitors.models import VisitorSession, PageView
+from core.utils import get_current_merchant
 
 def dashboard_metrics(request):
     now = timezone.now()
     week_ago = now - timedelta(days=7)
+    merchant = get_current_merchant(request)
 
-    campaigns = Campaign.objects.all()
-    total_campaigns = campaigns.count()
-    active_campaigns = campaigns.filter(status="running").count()
-    total_budget = campaigns.aggregate(total=Sum("budget_total"))["total"] or 0
-    total_coupons = Coupon.objects.count() if hasattr(Coupon, "objects") else 0
-    total_visitors = VisitorSession.objects.filter(last_seen_at__gte=week_ago).count()
+    # Visitor metrics
+    if merchant:
+        visitors = VisitorSession.objects.filter(merchant=merchant, last_seen_at__gte=week_ago)
+        page_views = PageView.objects.filter(merchant=merchant, viewed_at__gte=week_ago)
+        coupons = Coupon.objects.filter(merchant=merchant)
+    else:
+        visitors = VisitorSession.objects.filter(last_seen_at__gte=week_ago)
+        page_views = PageView.objects.filter(viewed_at__gte=week_ago)
+        coupons = Coupon.objects.all()
+
+    total_visitors = visitors.count()
+    total_page_views = page_views.count()
+    total_coupons = coupons.count()
+    
+    # Estimate revenue (can be replaced with real revenue tracking later)
+    # For now, estimate based on coupons and visitors
+    estimated_revenue = total_coupons * 100 + total_visitors * 5  # Placeholder calculation
 
     data = {
-        "total_campaigns": total_campaigns,
-        "active_campaigns": active_campaigns,
-        "total_budget": float(total_budget),
-        "total_coupons": total_coupons,
         "total_visitors": total_visitors,
+        "total_page_views": total_page_views,
+        "total_coupons": total_coupons,
+        "estimated_revenue": float(estimated_revenue),
     }
     return JsonResponse(data)
 
 
 def dashboard_recommendations(request):
-  
+    merchant = get_current_merchant(request)
     recs = []
-    total = Campaign.objects.count()
-
-    if total == 0:
-        recs.append("No campaigns found — create your first campaign to start gathering insights.")
+    
+    # Visitor-based recommendations
+    now = timezone.now()
+    week_ago = now - timedelta(days=7)
+    
+    if merchant:
+        visitors = VisitorSession.objects.filter(merchant=merchant, last_seen_at__gte=week_ago).count()
+        coupons = Coupon.objects.filter(merchant=merchant).count()
     else:
-        active = Campaign.objects.filter(status="running").count()
-        paused = Campaign.objects.filter(status="paused").count()
-
-        if active > paused:
-            recs.append("Most campaigns are active — monitor ROAS to ensure efficiency.")
-        if paused > 0:
-            recs.append("Some campaigns are paused — consider reviewing their targeting or budget.")
-        if total > 10:
-            recs.append("Great! You’re managing 10+ campaigns — consider grouping by audience type.")
-
-        recs += [
-            "Try boosting TikTok Ads — engagement is trending high this week.",
-            "Use limited-time coupons to create urgency and boost conversions.",
-            "Schedule influencer collaborations on weekends — CTR usually peaks on Fridays.",
-        ]
+        visitors = VisitorSession.objects.filter(last_seen_at__gte=week_ago).count()
+        coupons = Coupon.objects.count()
+    
+    if visitors == 0:
+        recs.append("No visitors this week — consider promoting your store on social media.")
+    elif visitors < 10:
+        recs.append("Low visitor traffic — try creating discount coupons to attract more customers.")
+    else:
+        recs.append(f"Great! You have {visitors} visitors this week — keep up the momentum!")
+    
+    if coupons == 0:
+        recs.append("Create your first discount coupon to encourage purchases.")
+    elif coupons < 3:
+        recs.append("Consider creating more discount coupons to increase conversions.")
+    
+    recs += [
+        "Use limited-time offers to create urgency and boost conversions.",
+        "Monitor your visitor analytics to understand peak traffic times.",
+        "Engage with visitors through personalized notifications.",
+    ]
 
     return JsonResponse({"recommendations": recs})
 
@@ -57,3 +78,91 @@ def dashboard_recommendations(request):
 def dashboard_campaigns(request):
     data = list(Campaign.objects.values("name", "status", "budget_total")[:10])
     return JsonResponse(data, safe=False)
+
+
+def dashboard_performance(request):
+    """Get visitor analytics data for last 7 days"""
+    now = timezone.now()
+    merchant = get_current_merchant(request)
+    
+    labels = []
+    visitors_data = []
+    page_views_data = []
+    
+    # Get data for each of the last 7 days
+    for i in range(7):
+        day = now - timedelta(days=6-i)
+        day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day.replace(hour=23, minute=59, second=59, microsecond=999999)
+        
+        # Get visitors and page views for this day
+        if merchant:
+            day_visitors = VisitorSession.objects.filter(
+                merchant=merchant,
+                last_seen_at__gte=day_start,
+                last_seen_at__lte=day_end
+            ).count()
+            day_page_views = PageView.objects.filter(
+                merchant=merchant,
+                viewed_at__gte=day_start,
+                viewed_at__lte=day_end
+            ).count()
+        else:
+            day_visitors = VisitorSession.objects.filter(
+                last_seen_at__gte=day_start,
+                last_seen_at__lte=day_end
+            ).count()
+            day_page_views = PageView.objects.filter(
+                viewed_at__gte=day_start,
+                viewed_at__lte=day_end
+            ).count()
+        
+        day_label = day.strftime('%a')
+        labels.append(day_label)
+        visitors_data.append(day_visitors)
+        page_views_data.append(day_page_views)
+    
+    return JsonResponse({
+        'labels': labels,
+        'visitors': visitors_data,
+        'page_views': page_views_data
+    })
+
+
+def dashboard_coupon_usage(request):
+    """Get coupon usage statistics"""
+    merchant = get_current_merchant(request)
+    
+    if merchant:
+        coupons = Coupon.objects.filter(merchant=merchant)
+    else:
+        coupons = Coupon.objects.all()
+    
+    active_count = coupons.filter(is_active=True).count()
+    inactive_count = coupons.filter(is_active=False).count()
+    
+    return JsonResponse({
+        'labels': ['Active', 'Inactive'],
+        'data': [active_count, inactive_count]
+    })
+
+
+def dashboard_traffic_sources(request):
+    """Get traffic sources analytics"""
+    merchant = get_current_merchant(request)
+    now = timezone.now()
+    week_ago = now - timedelta(days=7)
+    
+    if merchant:
+        sessions = VisitorSession.objects.filter(merchant=merchant, last_seen_at__gte=week_ago)
+    else:
+        sessions = VisitorSession.objects.filter(last_seen_at__gte=week_ago)
+    
+    # Group by source (if available) or use default
+    direct_count = sessions.filter(source__isnull=True).count() + sessions.filter(source='').count()
+    referral_count = sessions.exclude(source__isnull=True).exclude(source='').count()
+    
+    return JsonResponse({
+        'labels': ['Direct', 'Referral'],
+        'data': [direct_count, referral_count]
+    })

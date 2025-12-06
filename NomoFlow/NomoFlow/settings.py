@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'optimizer',
     'dashboard',
     'dashboard_api',
+    'recommendations',
 ]
 
 MIDDLEWARE = [
@@ -164,7 +165,7 @@ SALLA_WEBHOOK_TOKEN = os.getenv("SALLA_WEBHOOK_TOKEN", "nomo-flow-webhook-token-
 
 # CSRF trusted origins (comma-separated) e.g. https://abc.ngrok-free.app,https://app.example.com
 CSRF_TRUSTED_ORIGINS = [
-    'https://1f1846effbcd.ngrok-free.app',
+    'https://32e68d3cacfb.ngrok-free.app',
 ]
 
 INSTALLED_APPS += ['corsheaders']

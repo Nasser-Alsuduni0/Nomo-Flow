@@ -156,6 +156,27 @@ def email_collector_page(request):
     return render(request, 'features/email_collector.html', context)
 
 
+def _check_feature_ready(merchant, feature_key: str) -> tuple[bool, str]:
+    """
+    Check if a feature is ready to be enabled (has required setup).
+    Returns (is_ready, error_message)
+    """
+    if feature_key == 'notifications':
+        # Check if merchant has at least one PopupNotification
+        from notifications.models import PopupNotification
+        if not PopupNotification.objects.filter(merchant=merchant).exists():
+            return False, "Please create at least one notification first. Go to Settings to create your first notification."
+    
+    elif feature_key == 'coupons':
+        # Check if merchant has at least one Coupon
+        from coupons.models import Coupon
+        if not Coupon.objects.filter(merchant=merchant).exists():
+            return False, "Please create at least one discount coupon first. Go to Settings to create your first coupon."
+    
+    # Other features (email_collector, live_counter, recent_purchases) don't require setup
+    return True, ""
+
+
 @require_http_methods(["POST"])
 def toggle_feature(request):
     """Toggle a merchant feature on/off (defaults to email collector)."""
@@ -167,6 +188,24 @@ def toggle_feature(request):
         data = json.loads(request.body)
         enabled = data.get('enabled', False)
         feature_key = data.get('feature', 'email_collector')
+
+        # If trying to enable, check if feature is ready
+        if enabled:
+            is_ready, error_message = _check_feature_ready(merchant, feature_key)
+            if not is_ready:
+                # Get settings URL for the feature
+                settings_urls = {
+                    'notifications': '/dashboard/notifications/',
+                    'coupons': '/dashboard/discount-coupons/',
+                }
+                settings_url = settings_urls.get(feature_key, '/dashboard/features/')
+                
+                return JsonResponse({
+                    'success': False,
+                    'message': error_message,
+                    'requires_setup': True,
+                    'settings_url': settings_url
+                }, status=400)
 
         feature = _ensure_feature(feature_key)
 

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NomoFlow Recommendations Widget Snippet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 1.75rem;
+        }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            position: relative;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .copy-btn:hover {
+            background: #0284c7;
+        }
+        .copy-btn.copied {
+            background: #10b981;
+        }
+        .instructions {
+            background: #eff6ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .instructions h3 {
+            color: #0ea5e9;
+            margin-bottom: 15px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .error {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 NomoFlow Product Recommendations Widget</h1>
+        <p class="subtitle">Copy this code and add it to your Salla store theme</p>
+
+        {% if merchant %}
+        <div class="instructions">
+            <h3>✅ Configuration Complete</h3>
+            <p>Your store ID and domain have been automatically configured. Just copy the code below!</p>
+        </div>
+
+        <div class="code-block" id="snippet-code">
+            <button class="copy-btn" onclick="copyCode()">Copy Code</button>
+            <pre><code><!-- NomoFlow Product Recommendations Widget -->
+<!-- This widget automatically detects your Salla store ID -->
+<script>
+  // Set your NomoFlow domain (required)
+  window.__NOMO_BASE__ = '{{ base_url }}';
+  
+  // Store ID will be auto-detected from Salla environment
+  // If auto-detection fails, uncomment and set manually:
+  // window.__NOMO_STORE_ID__ = '{{ merchant.salla_merchant_id if merchant else "YOUR_STORE_ID" }}';
+  
+  // Optional: For logged-in customers (use Salla theme variable):
+  // window.__NOMO_CUSTOMER_ID__ = '{{ customer.id }}';
+  
+  // Optional: For product pages (use Salla theme variable):
+  // window.__NOMO_CURRENT_PRODUCT_ID__ = '{{ product.id }}';
+</script>
+
+<!-- Load the recommendations widget -->
+<script src="{{ base_url }}/api/recommendations/embed.js" defer></script>
+
+<!-- Optional: Place recommendations in a specific location -->
+<!-- <div data-nomo-recommendations style="margin: 40px 0;"></div> --></code></pre>
+        </div>
+
+        <div class="instructions">
+            <h3>📝 How to Add to Your Salla Store</h3>
+            <ol>
+                <li>Copy the code above (click "Copy Code" button)</li>
+                <li>Go to your Salla Admin Panel</li>
+                <li>Navigate to: <strong>Design → Theme Editor → Custom Code</strong></li>
+                <li>Paste the code before the <code>&lt;/body&gt;</code> tag</li>
+                <li><strong>Update the BASE_URL</strong> - Replace <code>{{ base_url }}</code> with your actual NomoFlow domain</li>
+                <li>Save and publish your theme</li>
+            </ol>
+            <p style="margin-top: 15px;"><strong>✨ Auto-Detection:</strong> The widget automatically detects your Salla store ID from the environment. No manual configuration needed!</p>
+        </div>
+
+        <div class="info-box">
+            <strong>💡 Tip:</strong> For product pages, you can add this in your product template to show similar products:
+            <pre style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; overflow-x: auto;"><code>&lt;div data-nomo-recommendations style="margin-top: 40px;"&gt;
+  &lt;h2 style="text-align: center;"&gt;You May Also Like&lt;/h2&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  window.__NOMO_CURRENT_PRODUCT_ID__ = '{{ product.id }}';
+  {% if customer %}window.__NOMO_CUSTOMER_ID__ = '{{ customer.id }}';{% endif %}
+&lt;/script&gt;</code></pre>
+        </div>
+
+        {% else %}
+        <div class="info-box">
+            <h3>📋 Universal Widget Code</h3>
+            <p>The widget code below works for <strong>any merchant</strong>. It automatically detects the store ID from the Salla environment.</p>
+        </div>
+
+        <div class="code-block" id="snippet-code">
+            <button class="copy-btn" onclick="copyCode()">Copy Code</button>
+            <pre><code><!-- NomoFlow Product Recommendations Widget -->
+<!-- This widget automatically detects your Salla store ID -->
+<script>
+  // Set your NomoFlow domain (REQUIRED - replace with your domain)
+  window.__NOMO_BASE__ = '{{ base_url }}';
+  
+  // Store ID will be auto-detected from Salla environment
+  // If auto-detection fails, uncomment and set manually:
+  // window.__NOMO_STORE_ID__ = 'YOUR_STORE_ID';
+  
+  // Optional: For logged-in customers (use Salla theme variable):
+  // window.__NOMO_CUSTOMER_ID__ = '{{ customer.id }}';
+  
+  // Optional: For product pages (use Salla theme variable):
+  // window.__NOMO_CURRENT_PRODUCT_ID__ = '{{ product.id }}';
+</script>
+
+<!-- Load the recommendations widget -->
+<script src="{{ base_url }}/api/recommendations/embed.js" defer></script>
+
+<!-- Optional: Place recommendations in a specific location -->
+<!-- <div data-nomo-recommendations style="margin: 40px 0;"></div> --></code></pre>
+        </div>
+
+        <div class="instructions">
+            <h3>📝 How to Add to Your Salla Store</h3>
+            <ol>
+                <li>Copy the code above (click "Copy Code" button)</li>
+                <li><strong>Update BASE_URL</strong> - Replace <code>{{ base_url }}</code> with your actual NomoFlow domain</li>
+                <li>Go to your Salla Admin Panel</li>
+                <li>Navigate to: <strong>Design → Theme Editor → Custom Code</strong></li>
+                <li>Paste the code before the <code>&lt;/body&gt;</code> tag</li>
+                <li>Save and publish your theme</li>
+            </ol>
+            <p style="margin-top: 15px;"><strong>✨ Auto-Detection:</strong> The widget automatically detects your Salla store ID. No manual store ID configuration needed!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function copyCode() {
+            const codeBlock = document.getElementById('snippet-code');
+            const code = codeBlock.querySelector('code').textContent;
+            
+            navigator.clipboard.writeText(code).then(function() {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(function() {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(function(err) {
+                alert('Failed to copy. Please select and copy manually.');
+            });
+        }
+    </script>
+</body>
+</html>

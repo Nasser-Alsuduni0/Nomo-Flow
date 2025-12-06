@@ -1,0 +1,286 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Product Recommendations - NomoFlow{% endblock %}
+{% block header %}Product Recommendations{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <h2 class="mb-2" style="font-weight: 700; color: var(--text);">Product Recommendations</h2>
+        <p class="text-muted mb-0" style="font-size: 1rem;">AI-powered product recommendations using collaborative filtering and content-based filtering.</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0ea5e9 !important;">
+                <div class="card-body">
+                    <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">TOTAL PRODUCTS</p>
+                    <h3 class="mb-0" style="font-weight: 700; color: var(--text);">{{ total_products }}</h3>
+                    <small class="text-muted">Synced from Salla</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #10b981 !important;">
+                <div class="card-body">
+                    <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">TOTAL CUSTOMERS</p>
+                    <h3 class="mb-0" style="font-weight: 700; color: #10b981;">{{ total_customers }}</h3>
+                    <small class="text-muted">Tracked customers</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #f59e0b !important;">
+                <div class="card-body">
+                    <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">TOTAL ORDERS</p>
+                    <h3 class="mb-0" style="font-weight: 700; color: #f59e0b;">{{ total_orders }}</h3>
+                    <small class="text-muted">Order history</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #8b5cf6 !important;">
+                <div class="card-body">
+                    <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">INTERACTIONS</p>
+                    <h3 class="mb-0" style="font-weight: 700; color: #8b5cf6;">{{ total_interactions }}</h3>
+                    <small class="text-muted">Views, carts, purchases</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Widget Snippets -->
+    <div class="card shadow-sm mb-4 border-primary">
+        <div class="card-body">
+            <h5 class="mb-3"><i class="bi bi-code-square me-2 text-primary"></i>Add Widgets to Your Salla Store</h5>
+            <p class="text-muted mb-3">Three separate widgets for different pages: Homepage, Product Page, and Cart Page.</p>
+            <div class="mb-3 d-flex gap-2 flex-wrap">
+                <a href="/api/recommendations/widgets/" target="_blank" class="btn btn-primary">
+                    <i class="bi bi-grid-3x3 me-1"></i> Get All Widgets
+                </a>
+                <a href="/api/recommendations/snippet/" target="_blank" class="btn btn-outline-primary">
+                    <i class="bi bi-clipboard me-1"></i> Legacy Widget
+                </a>
+            </div>
+            <div class="alert alert-info mb-0">
+                <strong>Three Widgets Available:</strong>
+                <ul class="mb-0 mt-2">
+                    <li><strong>Recommended For You</strong> - Homepage (personalized recommendations)</li>
+                    <li><strong>Similar Products</strong> - Product Page (content-based recommendations)</li>
+                    <li><strong>Frequently Bought Together</strong> - Cart Page (collaborative filtering)</li>
+                </ul>
+                <p class="mb-0 mt-2"><strong>✨ Note:</strong> All widgets automatically detect your store ID - no manual configuration needed!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync Actions -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="mb-3"><i class="bi bi-arrow-repeat me-2 text-primary"></i>Sync Data from Salla</h5>
+            <p class="text-muted mb-3">Sync products and orders from your Salla store to enable recommendations.</p>
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-primary" onclick="syncProducts()">
+                    <i class="bi bi-box-seam me-1"></i> Sync Products
+                </button>
+                <button class="btn btn-success" onclick="syncOrders()">
+                    <i class="bi bi-cart-check me-1"></i> Sync Orders
+                </button>
+            </div>
+            <div id="sync-status" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- API Endpoints Info -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="mb-3"><i class="bi bi-code-square me-2 text-info"></i>API Endpoints</h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Method</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>/api/recommendations/customer/&lt;customer_id&gt;/</code></td>
+                            <td>GET</td>
+                            <td>Get product recommendations for a customer</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/recommendations/product/&lt;product_id&gt;/</code></td>
+                            <td>GET</td>
+                            <td>Get similar products and frequently bought together</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/recommendations/trending/</code></td>
+                            <td>GET</td>
+                            <td>Get trending/popular products</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/recommendations/track/</code></td>
+                            <td>POST</td>
+                            <td>Track customer interaction with a product</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Products -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3"><i class="bi bi-grid me-2 text-primary"></i>Recent Products</h5>
+            {% if recent_products %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Synced</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in recent_products %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if product.image_url %}
+                                    <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                                         style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin-right: 10px;">
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ product.name|truncatewords:5 }}</strong>
+                                        {% if product.sku %}
+                                        <br><small class="text-muted">SKU: {{ product.sku }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ product.category|default:"—" }}</td>
+                            <td>
+                                {% if product.price %}
+                                {{ product.price }} SAR
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if product.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if product.synced_at %}
+                                <small class="text-muted">{{ product.synced_at|timesince }} ago</small>
+                                {% else %}
+                                <small class="text-muted">Never</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No products synced yet. Click "Sync Products" to get started.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 5000);
+}
+
+async function syncProducts() {
+    const statusDiv = document.getElementById('sync-status');
+    statusDiv.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Syncing products...';
+    
+    try {
+        const response = await fetch('/api/recommendations/sync/products/?limit=100', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            statusDiv.innerHTML = `<div class="alert alert-success mb-0">✅ ${data.message}</div>`;
+            showNotification(data.message, 'success');
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            statusDiv.innerHTML = `<div class="alert alert-danger mb-0">❌ ${data.error}</div>`;
+            showNotification(data.error || 'Failed to sync products', 'error');
+        }
+    } catch (error) {
+        statusDiv.innerHTML = `<div class="alert alert-danger mb-0">❌ Error: ${error.message}</div>`;
+        showNotification('An error occurred while syncing products', 'error');
+    }
+}
+
+async function syncOrders() {
+    const statusDiv = document.getElementById('sync-status');
+    statusDiv.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Syncing orders...';
+    
+    try {
+        const response = await fetch('/api/recommendations/sync/orders/?limit=100', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            statusDiv.innerHTML = `<div class="alert alert-success mb-0">✅ ${data.message}</div>`;
+            showNotification(data.message, 'success');
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            statusDiv.innerHTML = `<div class="alert alert-danger mb-0">❌ ${data.error}</div>`;
+            showNotification(data.error || 'Failed to sync orders', 'error');
+        }
+    } catch (error) {
+        statusDiv.innerHTML = `<div class="alert alert-danger mb-0">❌ Error: ${error.message}</div>`;
+        showNotification('An error occurred while syncing orders', 'error');
+    }
+}
+</script>
+{% endblock %}
+

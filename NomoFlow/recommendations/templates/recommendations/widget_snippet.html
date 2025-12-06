@@ -1,0 +1,26 @@
+<!-- NomoFlow Product Recommendations Widget -->
+<!-- Add this snippet to your Salla store theme -->
+<!-- Replace YOUR_STORE_ID with your actual Salla store ID -->
+<!-- Replace YOUR_DOMAIN with your NomoFlow domain (e.g., https://yourdomain.com) -->
+
+<script>
+  // Configuration - UPDATE THESE VALUES
+  window.__NOMO_BASE__ = 'YOUR_DOMAIN';  // e.g., 'https://yourdomain.com'
+  window.__NOMO_STORE_ID__ = 'YOUR_STORE_ID';  // Your Salla store ID
+  
+  // Optional: Set customer ID if available
+  // window.__NOMO_CUSTOMER_ID__ = '{{ customer.id }}';
+  
+  // Optional: Set current product ID for product pages
+  // window.__NOMO_CURRENT_PRODUCT_ID__ = '{{ product.id }}';
+  
+  // Optional: Track viewed products
+  // window.__NOMO_VIEWED_PRODUCTS__ = ['product-id-1', 'product-id-2'];
+</script>
+
+<!-- Load the recommendations widget -->
+<script src="YOUR_DOMAIN/api/recommendations/embed.js" defer></script>
+
+<!-- Optional: Custom container for recommendations -->
+<!-- <div data-nomo-recommendations style="margin: 20px 0;"></div> -->
+

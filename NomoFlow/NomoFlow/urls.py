@@ -35,6 +35,7 @@ urlpatterns = [
     path('optimizer/', include('optimizer.urls')),
     path("api/optimizer/", include("optimizer.urls")),
     path("api/dashboard/", include("dashboard_api.urls")),
+    path("api/recommendations/", include("recommendations.urls")),
 
 
 ]
