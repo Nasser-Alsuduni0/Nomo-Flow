@@ -1,24 +1,27 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nomo Flow · Works with Salla</title>
 
   <!-- SEO / Open Graph -->
-  <meta name="description" content="Nomo Flow for Salla: coupons, popups, live visitor counter, email collector, and social ad campaigns (TikTok, Snapchat, Instagram) in one dashboard." />
+  <meta name="description"
+    content="Nomo Flow for Salla: coupons, popups, live visitor counter, email collector, and social ad campaigns (TikTok, Snapchat, Instagram) in one dashboard." />
   <link rel="alternate" hreflang="ar" href="https://nomoflow.com/ar/" />
   <link rel="alternate" hreflang="en" href="https://nomoflow.com/en/" />
   <meta property="og:title" content="Nomo Flow · Works with Salla" />
-  <meta property="og:description" content="Install on Salla in one click. Launch widgets and social ads without leaving your store." />
+  <meta property="og:description"
+    content="Install on Salla in one click. Launch widgets and social ads without leaving your store." />
   <meta property="og:image" content="/assets/og.png" />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#17a8ff" />
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-    
+
     :root {
       --brand: #17a8ff;
       --brand-dark: #0f9cf5;
@@ -63,7 +66,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: 
+      background:
         radial-gradient(circle at 20% 50%, rgba(23, 168, 255, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 40% 20%, rgba(245, 87, 108, 0.1) 0%, transparent 50%);
@@ -72,8 +75,15 @@
     }
 
     @keyframes backgroundShift {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.8;
+      }
     }
 
     /* Floating particles effect */
@@ -89,7 +99,8 @@
 
     @media (max-width: 768px) {
       .particles {
-        display: none; /* Hide particles on mobile for better performance */
+        display: none;
+        /* Hide particles on mobile for better performance */
       }
     }
 
@@ -103,10 +114,25 @@
     }
 
     @keyframes float {
-      0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+
+      0%,
+      100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-100vh) translateX(50px);
+        opacity: 0;
+      }
     }
 
     a {
@@ -121,7 +147,7 @@
       position: relative;
       z-index: 1;
     }
-    
+
     /* Navigation */
     .nav {
       display: flex;
@@ -216,7 +242,7 @@
       box-shadow: 0 12px 32px rgba(23, 168, 255, 0.5);
       transform: translateY(-3px) scale(1.02);
     }
-    
+
     /* Mobile Navigation */
     .mobile-menu-btn {
       display: none;
@@ -260,6 +286,7 @@
         opacity: 0;
         transform: translateY(-10px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -276,7 +303,7 @@
     .mobile-nav .btn:last-child {
       margin-bottom: 0;
     }
-    
+
     /* Language pills */
     .lang-nav {
       display: flex;
@@ -309,7 +336,7 @@
       color: #fff;
       box-shadow: 0 4px 12px rgba(23, 168, 255, 0.3);
     }
-    
+
     /* Hero Section */
     .hero {
       padding: 120px 0 80px;
@@ -332,8 +359,15 @@
     }
 
     @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
     }
 
     h1 {
@@ -353,6 +387,7 @@
         opacity: 0;
         transform: translateY(30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -390,7 +425,7 @@
       margin-top: 20px;
       display: block;
     }
-    
+
     /* Cards and Grids */
     .cards {
       display: grid;
@@ -469,7 +504,7 @@
       width: 28px;
       height: 28px;
     }
-    
+
     /* Sections */
     .section {
       padding: 100px 0;
@@ -492,7 +527,7 @@
       margin-bottom: 48px;
       font-size: 18px;
     }
-    
+
     /* Steps */
     .steps {
       display: grid;
@@ -567,6 +602,40 @@
       transition: transform 0.4s ease;
     }
 
+    .shot-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px;
+      padding-top: 60px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+      color: #fff;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 2;
+    }
+
+    .shot:hover .shot-caption {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .shot-caption h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .shot-caption p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0;
+      line-height: 1.4;
+    }
+
     .shot:hover img {
       transform: scale(1.05);
     }
@@ -611,7 +680,7 @@
       position: relative;
       z-index: 1;
     }
-    
+
     /* FAQ */
     .faq {
       max-width: 900px;
@@ -661,7 +730,7 @@
       line-height: 1.7;
       padding-top: 8px;
     }
-    
+
     /* Footer */
     footer {
       padding: 80px 0 40px;
@@ -724,197 +793,269 @@
 
     /* Responsive Design */
     @media (max-width: 1024px) {
-      .container { padding: 0 20px; }
-      h1 { font-size: 48px; }
-      .section h2 { font-size: 36px; }
-      .cards { grid-template-columns: repeat(2, 1fr); }
-      .gallery { grid-template-columns: repeat(2, 1fr); }
+      .container {
+        padding: 0 20px;
+      }
+
+      h1 {
+        font-size: 48px;
+      }
+
+      .section h2 {
+        font-size: 36px;
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .gallery {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     @media (max-width: 768px) {
-      .container { padding: 0 16px; }
-      .nav { 
-        padding: 16px 0; 
+      .container {
+        padding: 0 16px;
+      }
+
+      .nav {
+        padding: 16px 0;
         flex-wrap: wrap;
         gap: 12px;
       }
-      .logo { 
+
+      .logo {
         flex: 0 0 auto;
         max-width: 180px;
       }
-      .logo img { 
-        height: 40px; 
+
+      .logo img {
+        height: 40px;
         max-width: 100%;
       }
-      .nav-links { 
-        display: none; 
+
+      .nav-links {
+        display: none;
       }
-      .mobile-menu-btn { 
-        display: block; 
+
+      .mobile-menu-btn {
+        display: block;
         margin-left: auto;
       }
-      
-      h1 { 
-        font-size: 32px; 
+
+      h1 {
+        font-size: 32px;
         line-height: 1.2;
         margin: 20px 0 16px;
       }
-      .lead { 
-        font-size: 16px; 
+
+      .lead {
+        font-size: 16px;
         line-height: 1.6;
         margin-bottom: 32px;
       }
-      .hero { 
-        padding: 60px 0 40px; 
+
+      .hero {
+        padding: 60px 0 40px;
       }
-      .section { 
-        padding: 50px 0; 
+
+      .section {
+        padding: 50px 0;
       }
-      .section h2 { 
-        font-size: 28px; 
+
+      .section h2 {
+        font-size: 28px;
         margin-bottom: 12px;
       }
+
       .section .lead {
         font-size: 16px;
         margin-bottom: 32px;
       }
-      .cards, .gallery, .steps { 
-        grid-template-columns: 1fr; 
+
+      .cards,
+      .gallery,
+      .steps {
+        grid-template-columns: 1fr;
         gap: 20px;
       }
-      .card { 
-        padding: 24px; 
+
+      .card {
+        padding: 24px;
       }
+
       .card h4 {
         font-size: 18px;
       }
+
       .card p {
         font-size: 14px;
       }
+
       .icon {
         width: 44px;
         height: 44px;
       }
+
       .icon svg {
         width: 24px;
         height: 24px;
       }
+
       .badge {
         font-size: 12px;
         padding: 8px 16px;
       }
+
       .cta-row {
         flex-direction: column;
         align-items: stretch;
         gap: 12px;
       }
+
       .btn {
         width: 100%;
         justify-content: center;
       }
+
       .footer {
         padding: 60px 0 30px;
       }
+
       .footer .links {
         flex-direction: column;
         gap: 12px;
       }
+
       .faq {
         gap: 12px;
       }
+
       details {
         padding: 16px 20px;
       }
+
       summary {
         font-size: 16px;
       }
     }
 
     @media (max-width: 480px) {
-      .container { padding: 0 12px; }
-      .nav { padding: 12px 0; }
-      .logo img { height: 35px; }
-      
-      h1 { 
-        font-size: 26px; 
+      .container {
+        padding: 0 12px;
+      }
+
+      .nav {
+        padding: 12px 0;
+      }
+
+      .logo img {
+        height: 35px;
+      }
+
+      h1 {
+        font-size: 26px;
         line-height: 1.15;
         margin: 16px 0 12px;
       }
-      .lead { 
-        font-size: 15px; 
+
+      .lead {
+        font-size: 15px;
         margin-bottom: 24px;
       }
-      .hero { 
-        padding: 50px 0 30px; 
+
+      .hero {
+        padding: 50px 0 30px;
       }
-      .section { 
-        padding: 40px 0; 
+
+      .section {
+        padding: 40px 0;
       }
-      .section h2 { 
-        font-size: 24px; 
+
+      .section h2 {
+        font-size: 24px;
         margin-bottom: 10px;
       }
+
       .section .lead {
         font-size: 14px;
         margin-bottom: 24px;
       }
-      .btn { 
-        padding: 12px 20px; 
-        font-size: 14px; 
+
+      .btn {
+        padding: 12px 20px;
+        font-size: 14px;
       }
-      .cta-row { 
-        gap: 10px; 
+
+      .cta-row {
+        gap: 10px;
       }
-      .card { 
-        padding: 20px; 
+
+      .card {
+        padding: 20px;
       }
+
       .card h4 {
         font-size: 16px;
         margin: 12px 0 8px;
       }
+
       .card p {
         font-size: 13px;
       }
+
       .icon {
         width: 40px;
         height: 40px;
         margin-bottom: 12px;
       }
+
       .icon svg {
         width: 22px;
         height: 22px;
       }
+
       .badge {
         font-size: 11px;
         padding: 6px 12px;
         margin-bottom: 16px;
       }
+
       .small {
         font-size: 12px;
         margin-top: 16px;
       }
+
       .gallery .shot {
         height: 200px;
       }
+
       .footer {
         padding: 40px 0 24px;
       }
+
       .footer .brand img {
         height: 40px;
       }
+
       .footer .desc {
         font-size: 14px;
       }
+
       .footer .copy {
         font-size: 12px;
       }
+
       .mobile-nav {
         padding: 20px;
         margin-top: 8px;
       }
+
       .lang-nav {
         padding: 3px;
       }
+
       .chip {
         padding: 6px 12px;
         font-size: 12px;
@@ -922,13 +1063,30 @@
     }
 
     /* RTL helpers */
-    [dir="rtl"] .nav { flex-direction: row-reverse; }
-    [dir="rtl"] .logo { margin-left: 0; margin-right: auto; }
-    [dir="rtl"] .nav-links { flex-direction: row-reverse; }
-    [dir="rtl"] .cta-row { flex-direction: row-reverse; }
-    [dir="rtl"] .mobile-nav { left: auto; right: 0; }
+    [dir="rtl"] .nav {
+      flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .logo {
+      margin-left: 0;
+      margin-right: auto;
+    }
+
+    [dir="rtl"] .nav-links {
+      flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .cta-row {
+      flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .mobile-nav {
+      left: auto;
+      right: 0;
+    }
   </style>
 </head>
+
 <body>
   <!-- Floating particles -->
   <div class="particles" id="particles"></div>
@@ -936,7 +1094,7 @@
   <header class="container nav">
     <div class="logo">
       <a href="/">
-        <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow">
+        <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow" style="padding-left: 4px;">
       </a>
     </div>
     <div class="nav-links">
@@ -962,7 +1120,8 @@
     <!-- HERO -->
     <section class="container hero">
       <span class="badge" data-i18n="badge">Works with Salla – 1-click install</span>
-      <h1 data-i18n="heroTitle">Grow your <span class="accent">Salla</span> store with smart widgets & social ad campaigns</h1>
+      <h1 data-i18n="heroTitle">Grow your <span class="accent">Salla</span> store with smart widgets & social ad
+        campaigns</h1>
       <p class="lead" data-i18n="heroLead">
         Enable coupons, popups, live visitor counter, and launch TikTok/Snap/Instagram ads — all from one dashboard.
       </p>
@@ -980,7 +1139,8 @@
       <ol class="steps">
         <li class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -991,8 +1151,11 @@
         </li>
         <li class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path
+                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+              </path>
             </svg>
           </div>
           <h4 data-i18n="step2T">2) Connect</h4>
@@ -1000,7 +1163,8 @@
         </li>
         <li class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
             </svg>
           </div>
@@ -1013,11 +1177,13 @@
     <!-- FEATURES -->
     <section class="container section">
       <h2 data-i18n="featuresTitle">Powerful Marketing Features</h2>
-      <p class="lead" data-i18n="featuresLead">Convert more visitors with urgency, social proof, and personalized offers.</p>
+      <p class="lead" data-i18n="featuresLead">Convert more visitors with urgency, social proof, and personalized
+        offers.</p>
       <div class="cards">
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <circle cx="18" cy="5" r="3"></circle>
               <circle cx="6" cy="12" r="3"></circle>
               <circle cx="18" cy="19" r="3"></circle>
@@ -1030,7 +1196,8 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
@@ -1040,7 +1207,8 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <rect x="2" y="4" width="20" height="16" rx="2"></rect>
               <path d="M22 6 12 13 2 6"></path>
             </svg>
@@ -1050,7 +1218,8 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M20.59 13.41 11 3H4v7l9.59 9.59a2 2 0 0 0 2.82 0l4.18-4.18a2 2 0 0 0 0-2.82z"></path>
               <path d="M7 7h.01"></path>
             </svg>
@@ -1060,7 +1229,8 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
@@ -1070,7 +1240,8 @@
         </div>
         <div class="card">
           <div class="icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
               <circle cx="9" cy="21" r="1"></circle>
               <circle cx="20" cy="21" r="1"></circle>
               <path d="M1 1h4l2.68 12.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
@@ -1089,12 +1260,24 @@
       <div class="gallery">
         <div class="shot">
           <img src="{% static 'core/img/Dashboard.png' %}" alt="Dashboard Screenshot">
+          <div class="shot-caption">
+            <h3 data-i18n="shot1T">Comprehensive Dashboard</h3>
+            <p data-i18n="shot1D">Track all your key metrics in one place.</p>
+          </div>
         </div>
         <div class="shot">
           <img src="{% static 'core/img/Widget on Salla Store.png' %}" alt="Widget on Salla Store">
+          <div class="shot-caption">
+            <h3 data-i18n="shot2T">On-Store Widget</h3>
+            <p data-i18n="shot2D">Seamlessly integrates with your store design.</p>
+          </div>
         </div>
         <div class="shot">
           <img src="{% static 'core/img/Campaign Builder.png' %}" alt="Campaign Builder">
+          <div class="shot-caption">
+            <h3 data-i18n="shot3T">Campaign Builder</h3>
+            <p data-i18n="shot3D">Create and launch ads in minutes.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -1105,7 +1288,8 @@
       <div class="faq">
         <details>
           <summary data-i18n="fq1Q">Will Nomo Flow slow my Salla store?</summary>
-          <p data-i18n="fq1A">We load lightweight scripts and defer non-critical assets. You can enable/disable widgets per page.</p>
+          <p data-i18n="fq1A">We load lightweight scripts and defer non-critical assets. You can enable/disable widgets
+            per page.</p>
         </details>
         <details>
           <summary data-i18n="fq2Q">Can I disable widgets on specific pages?</summary>
@@ -1117,7 +1301,8 @@
         </details>
         <details>
           <summary data-i18n="fq4Q">What permissions do you request?</summary>
-          <p data-i18n="fq4A">Store info and basic order/visitor data required to render widgets and analytics. You can revoke access anytime.</p>
+          <p data-i18n="fq4A">Store info and basic order/visitor data required to render widgets and analytics. You can
+            revoke access anytime.</p>
         </details>
       </div>
     </section>
@@ -1139,12 +1324,12 @@
   <script>
     // Year
     document.getElementById('y').textContent = new Date().getFullYear();
-    
+
     // Create floating particles
     function createParticles() {
       const particlesContainer = document.getElementById('particles');
       const particleCount = 30;
-      
+
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
@@ -1154,20 +1339,20 @@
         particlesContainer.appendChild(particle);
       }
     }
-    
+
     createParticles();
-    
+
     // Mobile menu functionality
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileNav = document.getElementById('mobile-nav');
-    
-    mobileMenuBtn.addEventListener('click', function() {
+
+    mobileMenuBtn.addEventListener('click', function () {
       mobileNav.classList.toggle('active');
       this.textContent = mobileNav.classList.contains('active') ? '✕' : '☰';
     });
-    
+
     // Close mobile menu when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       if (!mobileMenuBtn.contains(e.target) && !mobileNav.contains(e.target)) {
         mobileNav.classList.remove('active');
         mobileMenuBtn.textContent = '☰';
@@ -1177,73 +1362,79 @@
     // Simple i18n (EN/AR) and RTL toggle:
     const messages = {
       en: {
-        install:"Install on Salla", login:"Login",
-        badge:"Works with Salla – 1-click install",
-        heroTitle:"Grow your <span class='accent'>Salla</span> store with smart widgets & social ad campaigns",
-        heroLead:"Enable coupons, popups, live visitor counter, and launch TikTok/Snap/Instagram ads — all from one dashboard.",
-        viewDemo:"View Demo", oauthNote:"Secure OAuth · Zero code · Disable anytime",
-        stepsTitle:"Get Started in 3 Steps", stepsLead:"Simple setup, powerful results",
-        step1T:"1) Install", step1D:"Add Nomo Flow from the Salla App Store.",
-        step2T:"2) Connect", step2D:"Authorize your store and pick your widgets.",
-        step3T:"3) Launch", step3D:"Go live with coupons, popups, and live counter in minutes.",
-        featuresTitle:"Powerful Marketing Features", featuresLead:"Convert more visitors with urgency, social proof, and personalized offers.",
-        f1T:"Social Ads Campaigns", f1D:"Build and publish campaigns to TikTok, Snapchat, and Instagram from one place.",
-        f2T:"Live View Counter", f2D:"Show real-time visitors to create urgency and social proof.",
-        f3T:"Email Collector", f3D:"Capture emails with smart, non-intrusive popups.",
-        f4T:"Smart Discount Coupons", f4D:"Auto-generate attractive coupons tied to your campaigns.",
-        f5T:"Custom Notifications", f5D:"Target alerts by page, device, or behavior.",
-        f6T:"Recent Purchases", f6D:"Display latest conversions to build trust.",
-        shotsTitle:"See it in Action", shotsLead:"Dashboard, on-store widget, and campaign builder.",
-        faqTitle:"FAQ for Salla Merchants",
-        fq1Q:"Will Nomo Flow slow my Salla store?", fq1A:"We load lightweight scripts and defer non-critical assets. You can enable/disable widgets per page.",
-        fq2Q:"Can I disable widgets on specific pages?", fq2A:"Yes, you can target by URL patterns or product collections.",
-        fq3Q:"How do ads connect to sales?", fq3A:"We track clicks and attribute conversions using Salla order data and UTM parameters.",
-        fq4Q:"What permissions do you request?", fq4A:"Store info and basic order/visitor data required to render widgets and analytics. You can revoke access anytime.",
-        footerDesc:"Smart marketing tools for Salla stores.",
-        footerAbout:"About", footerContact:"Contact", footerPrivacy:"Privacy Policy",
-        rights:"All rights reserved."
+        install: "Install on Salla", login: "Login",
+        badge: "Works with Salla – 1-click install",
+        heroTitle: "Grow your <span class='accent'>Salla</span> store with smart widgets & social ad campaigns",
+        heroLead: "Enable coupons, popups, live visitor counter, and launch TikTok/Snap/Instagram ads — all from one dashboard.",
+        viewDemo: "View Demo", oauthNote: "Secure OAuth · Zero code · Disable anytime",
+        stepsTitle: "Get Started in 3 Steps", stepsLead: "Simple setup, powerful results",
+        step1T: "1) Install", step1D: "Add Nomo Flow from the Salla App Store.",
+        step2T: "2) Connect", step2D: "Authorize your store and pick your widgets.",
+        step3T: "3) Launch", step3D: "Go live with coupons, popups, and live counter in minutes.",
+        featuresTitle: "Powerful Marketing Features", featuresLead: "Convert more visitors with urgency, social proof, and personalized offers.",
+        f1T: "Social Ads Campaigns", f1D: "Build and publish campaigns to TikTok, Snapchat, and Instagram from one place.",
+        f2T: "Live View Counter", f2D: "Show real-time visitors to create urgency and social proof.",
+        f3T: "Email Collector", f3D: "Capture emails with smart, non-intrusive popups.",
+        f4T: "Smart Discount Coupons", f4D: "Auto-generate attractive coupons tied to your campaigns.",
+        f5T: "Custom Notifications", f5D: "Target alerts by page, device, or behavior.",
+        f6T: "Recent Purchases", f6D: "Display latest conversions to build trust.",
+        shotsTitle: "See it in Action", shotsLead: "Dashboard, on-store widget, and campaign builder.",
+        shot1T: "Comprehensive Dashboard", shot1D: "Track all your key metrics in one place.",
+        shot2T: "On-Store Widget", shot2D: "Seamlessly integrates with your store design.",
+        shot3T: "Campaign Builder", shot3D: "Create and launch ads in minutes.",
+        faqTitle: "FAQ for Salla Merchants",
+        fq1Q: "Will Nomo Flow slow my Salla store?", fq1A: "We load lightweight scripts and defer non-critical assets. You can enable/disable widgets per page.",
+        fq2Q: "Can I disable widgets on specific pages?", fq2A: "Yes, you can target by URL patterns or product collections.",
+        fq3Q: "How do ads connect to sales?", fq3A: "We track clicks and attribute conversions using Salla order data and UTM parameters.",
+        fq4Q: "What permissions do you request?", fq4A: "Store info and basic order/visitor data required to render widgets and analytics. You can revoke access anytime.",
+        footerDesc: "Smart marketing tools for Salla stores.",
+        footerAbout: "About", footerContact: "Contact", footerPrivacy: "Privacy Policy",
+        rights: "All rights reserved."
       },
       ar: {
-        install:"ثبّت على سلة", login:"تسجيل الدخول",
-        badge:"متوافق مع سلة – تثبيت بنقرة واحدة",
-        heroTitle:"نمِّ مبيعات متجرك على <span class='accent'>سلة</span> بأدوات ذكية وحملات إعلانية اجتماعية",
-        heroLead:"فعّل الكوبونات والنوافذ المنبثقة وعدّاد الزوار، واطلق إعلانات TikTok وSnapchat وInstagram من لوحة واحدة.",
-        viewDemo:"شاهد العرض", oauthNote:"توثيق آمن · بدون كود · يمكن الإيقاف في أي وقت",
-        stepsTitle:"ابدأ في 3 خطوات", stepsLead:"إعداد بسيط، نتائج قوية",
-        step1T:"١) التثبيت", step1D:"أضف Nomo Flow من متجر تطبيقات سلة.",
-        step2T:"٢) الربط", step2D:"امنح الصلاحيات واختر الأدوات المناسبة.",
-        step3T:"٣) الإطلاق", step3D:"فعّل الأدوات خلال دقائق على متجرك.",
-        featuresTitle:"ميزات تسويقية قوية", featuresLead:"حوِّل الزوار إلى مشترين عبر العجلة الاجتماعية والعرض المخصص.",
-        f1T:"حملات الإعلانات الاجتماعية", f1D:"ابنِ وانشر الحملات على TikTok وSnapchat وInstagram من مكان واحد.",
-        f2T:"عدّاد الزوار اللحظي", f2D:"أظهر عدد الزوار مباشرة لخلق العجلة والإثبات الاجتماعي.",
-        f3T:"جامع الإيميلات", f3D:"اجمع الإيميلات بنوافذ ذكية غير مزعجة.",
-        f4T:"كوبونات ذكية", f4D:"أنشئ كوبونات جذابة مرتبطة بحملاتك.",
-        f5T:"تنبيهات مخصصة", f5D:"استهدف حسب الصفحة أو الجهاز أو السلوك.",
-        f6T:"آخر عمليات الشراء", f6D:"اعرض أحدث المشتريات لبناء الثقة.",
-        shotsTitle:"شاهد كيف تعمل", shotsLead:"لوحة التحكم، أداة المتجر، ومنشئ الحملات.",
-        faqTitle:"الأسئلة الشائعة لتجار سلة",
-        fq1Q:"هل يبطّئ Nomo Flow متجري على سلة؟", fq1A:"نحمّل سكربتات خفيفة ونؤخّر غير الضروري. ويمكن تفعيل/إيقاف الأدوات لكل صفحة.",
-        fq2Q:"هل أستطيع إخفاء الأدوات في صفحات محددة؟", fq2A:"نعم، عبر استهداف الروابط أو التصنيفات.",
-        fq3Q:"كيف ترتبط الإعلانات بالمبيعات؟", fq3A:"نعزو التحويلات لبيانات الطلب من سلة ومعلمات UTM.",
-        fq4Q:"ما الصلاحيات المطلوبة؟", fq4A:"معلومات المتجر وبعض بيانات الطلب/الزوار لتفعيل الأدوات والتحليلات، ويمكن إلغاء الربط في أي وقت.",
-        footerDesc:"أدوات تسويقية ذكية لمتاجر سلة.",
-        footerAbout:"من نحن", footerContact:"اتصل بنا", footerPrivacy:"سياسة الخصوصية",
-        rights:"جميع الحقوق محفوظة."
+        install: "ثبّت على سلة", login: "تسجيل الدخول",
+        badge: "متوافق مع سلة – تثبيت بنقرة واحدة",
+        heroTitle: "نمِّ مبيعات متجرك على <span class='accent'>سلة</span> بأدوات ذكية وحملات إعلانية اجتماعية",
+        heroLead: "فعّل الكوبونات والنوافذ المنبثقة وعدّاد الزوار، واطلق إعلانات TikTok وSnapchat وInstagram من لوحة واحدة.",
+        viewDemo: "شاهد العرض", oauthNote: "توثيق آمن · بدون كود · يمكن الإيقاف في أي وقت",
+        stepsTitle: "ابدأ في 3 خطوات", stepsLead: "إعداد بسيط، نتائج قوية",
+        step1T: "١) التثبيت", step1D: "أضف Nomo Flow من متجر تطبيقات سلة.",
+        step2T: "٢) الربط", step2D: "امنح الصلاحيات واختر الأدوات المناسبة.",
+        step3T: "٣) الإطلاق", step3D: "فعّل الأدوات خلال دقائق على متجرك.",
+        featuresTitle: "ميزات تسويقية قوية", featuresLead: "حوِّل الزوار إلى مشترين عبر العجلة الاجتماعية والعرض المخصص.",
+        f1T: "حملات الإعلانات الاجتماعية", f1D: "ابنِ وانشر الحملات على TikTok وSnapchat وInstagram من مكان واحد.",
+        f2T: "عدّاد الزوار اللحظي", f2D: "أظهر عدد الزوار مباشرة لخلق العجلة والإثبات الاجتماعي.",
+        f3T: "جامع الإيميلات", f3D: "اجمع الإيميلات بنوافذ ذكية غير مزعجة.",
+        f4T: "كوبونات ذكية", f4D: "أنشئ كوبونات جذابة مرتبطة بحملاتك.",
+        f5T: "تنبيهات مخصصة", f5D: "استهدف حسب الصفحة أو الجهاز أو السلوك.",
+        f6T: "آخر عمليات الشراء", f6D: "اعرض أحدث المشتريات لبناء الثقة.",
+        shotsTitle: "شاهد كيف تعمل", shotsLead: "لوحة التحكم، أداة المتجر، ومنشئ الحملات.",
+        shot1T: "لوحة تحكم شاملة", shot1D: "تتبع جميع مؤشراتك الهامة في مكان واحد.",
+        shot2T: "أداة المتجر", shot2D: "تتكامل بسلاسة مع تصميم متجرك.",
+        shot3T: "منشئ الحملات", shot3D: "أنشئ واطلق الإعلانات في دقائق.",
+        faqTitle: "الأسئلة الشائعة لتجار سلة",
+        fq1Q: "هل يبطّئ Nomo Flow متجري على سلة؟", fq1A: "نحمّل سكربتات خفيفة ونؤخّر غير الضروري. ويمكن تفعيل/إيقاف الأدوات لكل صفحة.",
+        fq2Q: "هل أستطيع إخفاء الأدوات في صفحات محددة؟", fq2A: "نعم، عبر استهداف الروابط أو التصنيفات.",
+        fq3Q: "كيف ترتبط الإعلانات بالمبيعات؟", fq3A: "نعزو التحويلات لبيانات الطلب من سلة ومعلمات UTM.",
+        fq4Q: "ما الصلاحيات المطلوبة؟", fq4A: "معلومات المتجر وبعض بيانات الطلب/الزوار لتفعيل الأدوات والتحليلات، ويمكن إلغاء الربط في أي وقت.",
+        footerDesc: "أدوات تسويقية ذكية لمتاجر سلة.",
+        footerAbout: "من نحن", footerContact: "اتصل بنا", footerPrivacy: "سياسة الخصوصية",
+        rights: "جميع الحقوق محفوظة."
       }
     };
 
-    function applyLang(lang){
+    function applyLang(lang) {
       const map = messages[lang];
       document.documentElement.lang = (lang === 'ar' ? 'ar' : 'en');
       document.documentElement.dir = (lang === 'ar' ? 'rtl' : 'ltr');
-      document.querySelectorAll('[data-i18n]').forEach(el=>{
+      document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if(map[key] !== undefined){
-          if(key === 'heroTitle'){ el.innerHTML = map[key]; }
+        if (map[key] !== undefined) {
+          if (key === 'heroTitle') { el.innerHTML = map[key]; }
           else { el.textContent = map[key]; }
         }
       });
-      try{ localStorage.setItem('nf_lang', lang); }catch(e){}
+      try { localStorage.setItem('nf_lang', lang); } catch (e) { }
     }
 
     // language pills
@@ -1251,24 +1442,24 @@
     const pillAr = document.getElementById('pill-ar');
     const mobilePillEn = document.getElementById('mobile-pill-en');
     const mobilePillAr = document.getElementById('mobile-pill-ar');
-    
-    function setActive(lang){
-      pillEn.classList.toggle('chip-active', lang==='en');
-      pillAr.classList.toggle('chip-active', lang==='ar');
-      mobilePillEn.classList.toggle('chip-active', lang==='en');
-      mobilePillAr.classList.toggle('chip-active', lang==='ar');
+
+    function setActive(lang) {
+      pillEn.classList.toggle('chip-active', lang === 'en');
+      pillAr.classList.toggle('chip-active', lang === 'ar');
+      mobilePillEn.classList.toggle('chip-active', lang === 'en');
+      mobilePillAr.classList.toggle('chip-active', lang === 'ar');
     }
-    
-    pillEn.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('en'); setActive('en'); });
-    pillAr.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('ar'); setActive('ar'); });
-    mobilePillEn.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('en'); setActive('en'); });
-    mobilePillAr.addEventListener('click', (e)=>{ e.preventDefault(); applyLang('ar'); setActive('ar'); });
+
+    pillEn.addEventListener('click', (e) => { e.preventDefault(); applyLang('en'); setActive('en'); });
+    pillAr.addEventListener('click', (e) => { e.preventDefault(); applyLang('ar'); setActive('ar'); });
+    mobilePillEn.addEventListener('click', (e) => { e.preventDefault(); applyLang('en'); setActive('en'); });
+    mobilePillAr.addEventListener('click', (e) => { e.preventDefault(); applyLang('ar'); setActive('ar'); });
 
     // initialize from storage or browser language
-    (function(){
+    (function () {
       let lang = 'en';
-      try{ lang = localStorage.getItem('nf_lang') || lang; }catch(e){}
-      if(!['en','ar'].includes(lang)){
+      try { lang = localStorage.getItem('nf_lang') || lang; } catch (e) { }
+      if (!['en', 'ar'].includes(lang)) {
         lang = (navigator.language || '').startsWith('ar') ? 'ar' : 'en';
       }
       applyLang(lang);
@@ -1276,4 +1467,5 @@
     })();
   </script>
 </body>
+
 </html>
