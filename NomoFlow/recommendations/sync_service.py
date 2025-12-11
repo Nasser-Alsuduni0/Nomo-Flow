@@ -118,7 +118,7 @@ class SallaSyncService:
         # Get status
         status = product_data.get('status', '')
         is_active = status == 'available' or status == 'sale'
-        is_available = product_data.get('quantity', 0) > 0
+        is_available = (product_data.get('quantity') or 0) > 0
         
         # Create or update product
         product, created = Product.objects.update_or_create(

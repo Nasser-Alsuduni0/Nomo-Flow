@@ -288,6 +288,11 @@ def similar_products_js(request):
       
       var productId = window.__NOMO_CURRENT_PRODUCT_ID__;
       
+      // Validate that it's not an unrendered template variable
+      if (productId && typeof productId === 'string' && productId.includes('{{')) {
+        productId = null;
+      }
+      
       // Try multiple methods to detect product ID
       if (!productId && window.Salla) {
         // Method 1: Salla product object
@@ -302,23 +307,63 @@ def similar_products_js(request):
         if (!productId && window.Salla.currentProduct && window.Salla.currentProduct.id) {
           productId = window.Salla.currentProduct.id;
         }
+        // Method 4: Salla page data (Twilight themes)
+        if (!productId && window.Salla.page && window.Salla.page.id) {
+          productId = window.Salla.page.id;
+        }
+        // Method 5: Salla config product
+        if (!productId && window.Salla.config && window.Salla.config.product) {
+          productId = window.Salla.config.product.id || window.Salla.config.product;
+        }
       }
       
-      // Method 4: URL pattern
-      if (!productId) {
-        var urlMatch = window.location.pathname.match(/\\/products\\/([^\\/]+)/);
-        if (urlMatch) productId = urlMatch[1];
+      // Method 6: window.salla (lowercase - Twilight v2)
+      if (!productId && window.salla) {
+        if (window.salla.product && window.salla.product.id) {
+          productId = window.salla.product.id;
+        }
+        if (!productId && window.salla.page && window.salla.page.product) {
+          productId = window.salla.page.product.id || window.salla.page.product;
+        }
       }
       
-      // Method 5: Meta tag
+      // Method 7: URL pattern - Salla uses multiple formats:
+      // - /store/product-name/p{id} (e.g., /dev-xxx/فستان/p1856291938)
+      // - /products/{slug}
+      // - /p/{slug}
       if (!productId) {
-        var metaProductId = document.querySelector('meta[property="product:id"], meta[name="product-id"], meta[property="og:product:id"]');
+        // First try: Match p{numeric_id} at end of URL path
+        var urlMatch = window.location.pathname.match(/\\/p(\\d+)(?:\\/|$|\\?)/);
+        if (urlMatch) {
+          productId = urlMatch[1];
+          console.log('Nomo Recommendations: Found product ID from URL:', productId);
+        }
+      }
+      if (!productId) {
+        // Second try: Match /products/{slug} or /p/{slug}
+        var urlMatch2 = window.location.pathname.match(/\\/(?:products|p)\\/([^\\/\\?]+)/);
+        if (urlMatch2) productId = urlMatch2[1];
+      }
+      
+      // Method 8: Meta tags
+      if (!productId) {
+        var metaProductId = document.querySelector('meta[property="product:id"], meta[name="product-id"], meta[property="og:product:id"], meta[name="twitter:data1"]');
         if (metaProductId) productId = metaProductId.getAttribute('content');
       }
       
-      // Method 6: Data attributes
+      // Method 9: salla-product Web Component
       if (!productId) {
-        var productElement = document.querySelector('[data-product-id], [data-product-id], .product[data-id]');
+        var sallaProduct = document.querySelector('salla-product, [is="salla-product"]');
+        if (sallaProduct) {
+          productId = sallaProduct.getAttribute('product-id') || 
+                     sallaProduct.getAttribute('data-id') ||
+                     sallaProduct.id;
+        }
+      }
+      
+      // Method 10: Data attributes on common containers
+      if (!productId) {
+        var productElement = document.querySelector('[data-product-id], .product[data-id], .product-single[data-id], [data-product]');
         if (productElement) {
           productId = productElement.getAttribute('data-product-id') || 
                      productElement.getAttribute('data-id') ||
@@ -326,7 +371,7 @@ def similar_products_js(request):
         }
       }
       
-      // Method 7: JSON-LD structured data
+      // Method 11: JSON-LD structured data
       if (!productId) {
         var jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
         for (var i = 0; i < jsonLdScripts.length; i++) {
@@ -345,17 +390,32 @@ def similar_products_js(request):
       }
       
       if (!productId) {
-        // Only log detailed info in development/debug mode
-        if (window.__NOMO_DEBUG__) {
-          console.warn('Nomo Recommendations: Product ID not found. Tried:', {
-            'window.__NOMO_CURRENT_PRODUCT_ID__': window.__NOMO_CURRENT_PRODUCT_ID__,
-            'window.Salla.product': window.Salla && window.Salla.product,
-            'URL': window.location.pathname,
-            'meta tags': document.querySelectorAll('meta[property*="product"], meta[name*="product"]').length
-          });
-        } else {
-          console.log('Nomo Recommendations: Product ID not found. Make sure you are on a product page or set window.__NOMO_CURRENT_PRODUCT_ID__');
-        }
+        // Always log what data sources are available to help with debugging
+        console.log('Nomo Recommendations: Product ID not found on this page.');
+        console.log('Nomo Recommendations: Available Salla data:', {
+          'Salla': typeof window.Salla !== 'undefined' ? 'exists' : 'not found',
+          'Salla.product': window.Salla && window.Salla.product,
+          'Salla.page': window.Salla && window.Salla.page,
+          'Salla.config': window.Salla && window.Salla.config,
+          'salla (lowercase)': typeof window.salla !== 'undefined' ? window.salla : 'not found',
+          'URL path': window.location.pathname,
+          'salla-product elements': document.querySelectorAll('salla-product, [is=\"salla-product\"]').length,
+          'data-product-id elements': document.querySelectorAll('[data-product-id]').length
+        });
+        console.log('Nomo Recommendations: If you are on a product page, please add: window.__NOMO_CURRENT_PRODUCT_ID__ = YOUR_PRODUCT_ID;');
+        return;
+      }
+      
+      // Validate product ID - skip if it looks like an unrendered template variable
+      if (typeof productId === 'string' && (
+          productId.includes('{{') || 
+          productId.includes('}}') || 
+          productId.includes('{%') ||
+          productId === 'undefined' ||
+          productId === 'null' ||
+          productId === ''
+      )) {
+        console.warn('Nomo Recommendations: Invalid product ID detected (template variable not rendered):', productId);
         return;
       }
       
@@ -400,7 +460,7 @@ def similar_products_js(request):
           var titleSection = document.createElement('div');
           titleSection.style.cssText = 'margin-bottom: 20px; text-align: center;';
           var title = document.createElement('h2');
-          title.textContent = 'You May Also Like';
+          title.textContent = 'قد يعجبك أيضاً';
           title.style.cssText = 'font-size: 1.75rem; font-weight: 700; margin: 0; color: #1e293b;';
           titleSection.appendChild(title);
           container.appendChild(titleSection);
@@ -537,6 +597,24 @@ def frequently_bought_together_js(request):
       }
       
       console.log('Nomo Recommendations: Cart products detected:', cartProducts.length);
+      
+      // Filter out any items that look like unrendered template variables
+      cartProducts = cartProducts.filter(function(id) {
+        if (typeof id !== 'string') id = String(id);
+        return id && 
+               !id.includes('{{') && 
+               !id.includes('}}') && 
+               !id.includes('{%') &&
+               id !== 'undefined' &&
+               id !== 'null' &&
+               id !== 'product-id-1' &&
+               id !== 'product-id-2';
+      });
+      
+      if (cartProducts.length === 0) {
+        console.log('Nomo Recommendations: No valid products in cart after filtering.');
+        return;
+      }
       
       // Get recommendations for first product in cart - pass store_id
       var firstProductId = cartProducts[0];

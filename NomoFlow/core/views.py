@@ -30,29 +30,23 @@ def app_entry(request):
             'show_connect_button': True
         })
     
-    # No session - check if merchant exists with valid token (app installed from Salla Store)
-    # Try to find merchant by checking for valid tokens
-    from core.models import SallaToken
-    from django.utils import timezone
+    # SECURITY FIX: Do not auto-login based on "first" available token.
+    # This was causing cross-store contamination where a user gets logged into another store's account
+    # if their own session setup failed.
+    # We must require a clean OAuth flow or a specific verified parameter to identify the store.
     
-    # Find token that is not expired (or expires within next 5 minutes)
-    now = timezone.now()
-    token = SallaToken.objects.select_related('merchant').filter(
-        merchant__is_connected=True,
-        expires_at__gt=now - timezone.timedelta(minutes=5)  # Token not expired (with 5 min buffer)
-    ).first()
+    # If we want to support "Seamless Login" in the future, we must verify the "store-id" 
+    # from Salla's JWT or query parameters. For now, fail safe to the login button.
+
     
-    if token and token.merchant:
-        # Merchant exists with valid token - auto-create session
-        # This happens when app is installed from Salla Store
-        try:
-            set_current_merchant(request, token.merchant)
-            print(f"✅ Auto-created session for merchant {token.merchant.salla_merchant_id} (installed from Salla Store)")
-            return redirect('dashboard')
-        except Exception as e:
-            print(f"⚠️ Failed to auto-create session: {e}")
-            # Fall through to show login page
-    
+    # DEBUG LOGGING for Login Logic
+    print(f"🔍 DEBUG: app_entry called")
+    print(f"   Session ID: {request.session.session_key}")
+    print(f"   Session Data: {dict(request.session)}")
+    print(f"   Cookies: {request.COOKIES}")
+    print(f"   GET Params: {request.GET}")
+    print(f"   Referer: {request.META.get('HTTP_REFERER', '')}")
+
     # No session and no valid merchant - show "Continue with Salla" button
     return render(request, 'core/app_entry.html', {
         'show_connect_button': True

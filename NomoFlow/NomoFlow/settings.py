@@ -139,6 +139,18 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# --- Security & Session Settings ---
+# Ensure cookies work over HTTPS (ngrok) and embedded contexts
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'  # Required for iframes (Salla App)
+CSRF_COOKIE_SAMESITE = 'None'
+# Trust the proxy's (ngrok) HTTPS header
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Save session to DB (default, but explicit is good)
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+
 # --- Salla Integration Settings ---
 # Prefer configuring these via environment variables
 SALLA_CLIENT_ID = os.getenv("SALLA_CLIENT_ID", "")
@@ -168,7 +180,7 @@ SALLA_WEBHOOK_TOKEN = os.getenv("SALLA_WEBHOOK_TOKEN", "nomo-flow-webhook-token-
 
 # CSRF trusted origins (comma-separated) e.g. https://abc.ngrok-free.app,https://app.example.com
 CSRF_TRUSTED_ORIGINS = [
-    'https://639edf321289.ngrok-free.app',
+    'https://487197db1ff5.ngrok-free.app',
 ]
 
 INSTALLED_APPS += ['corsheaders']
