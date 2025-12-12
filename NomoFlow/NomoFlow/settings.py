@@ -90,12 +90,23 @@ WSGI_APPLICATION = 'NomoFlow.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+import dj_database_url
+
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -133,6 +144,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -145,7 +158,7 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'None'  # Required for iframes (Salla App)
 CSRF_COOKIE_SAMESITE = 'None'
-# Trust the proxy's (ngrok) HTTPS header
+# Trust the proxy's (ngrok/railway) HTTPS header
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Save session to DB (default, but explicit is good)
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
@@ -158,33 +171,41 @@ SALLA_CLIENT_SECRET = os.getenv("SALLA_CLIENT_SECRET", "")
 SALLA_REDIRECT_URI = os.getenv("SALLA_REDIRECT_URI", "")  # e.g., https://yourdomain.com/salla/callback
 # Salla OAuth scopes - Only use scopes that are enabled for your app in Salla Partners Portal
 # Common available scopes: orders.read, products.read, webhooks.read_write, offline_access
-# Note: discounts.write may not be available for all apps - check your app settings in Salla Partners Portal
 SALLA_SCOPES = os.getenv(
     "SALLA_SCOPES",
     "orders.read products.read webhooks.read_write offline_access",
 ).split()
 
 # API & OAuth endpoints (override via env if different in your portal)
-# According to Salla docs: https://accounts.salla.sa/oauth2/auth
 SALLA_OAUTH_AUTHORIZE_URL = os.getenv("SALLA_OAUTH_AUTHORIZE_URL", "https://accounts.salla.sa/oauth2/auth")
 SALLA_OAUTH_TOKEN_URL     = os.getenv("SALLA_OAUTH_TOKEN_URL", "https://accounts.salla.sa/oauth2/token")
 SALLA_API_BASE            = os.getenv("SALLA_API_BASE", "https://api.salla.dev/admin/v2")
 # Optional user info endpoint (used to reliably fetch store/merchant info)
 SALLA_USERINFO_URL        = os.getenv("SALLA_USERINFO_URL", "https://accounts.salla.sa/oauth2/user/info")
 # Public base URL for webhooks/callbacks (required in production)
-PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "")  # e.g., https://yourdomain.com
+PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "https://" + os.getenv("RAILWAY_PUBLIC_DOMAIN", "")) if os.getenv("PUBLIC_BASE_URL") or os.getenv("RAILWAY_PUBLIC_DOMAIN") else ""
 
 # Optional: default webhook secret if you want a global secret (or set per-merchant on subscription)
 SALLA_WEBHOOK_SECRET = os.getenv("SALLA_WEBHOOK_SECRET", "")
 SALLA_WEBHOOK_TOKEN = os.getenv("SALLA_WEBHOOK_TOKEN", "nomo-flow-webhook-token-2025")
 
-# CSRF trusted origins (comma-separated) e.g. https://abc.ngrok-free.app,https://app.example.com
+# CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
-    'https://487197db1ff5.ngrok-free.app',
+    'https://' + host for host in ALLOWED_HOSTS if '*' not in host
 ]
 
 INSTALLED_APPS += ['corsheaders']
-MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware', *MIDDLEWARE]
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add Whitenoise here
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = [

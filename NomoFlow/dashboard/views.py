@@ -236,3 +236,28 @@ def page_features(request):
     }
     
     return render(request, "dashboard/features.html", context)
+
+
+def page_settings(request):
+    """Account settings page"""
+    merchant = get_current_merchant(request)
+    if not merchant:
+        return redirect('app_entry')
+    
+    # Get data statistics
+    from recommendations.models import Product, Customer, Order, CustomerInteraction
+    
+    total_products = Product.objects.filter(merchant=merchant).count()
+    total_customers = Customer.objects.filter(merchant=merchant).count()
+    total_orders = Order.objects.filter(merchant=merchant).count()
+    total_interactions = CustomerInteraction.objects.filter(merchant=merchant).count()
+    
+    context = {
+        'merchant': merchant,
+        'total_products': total_products,
+        'total_customers': total_customers,
+        'total_orders': total_orders,
+        'total_interactions': total_interactions,
+    }
+    
+    return render(request, "dashboard/settings.html", context)

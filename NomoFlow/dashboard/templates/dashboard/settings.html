@@ -1,0 +1,114 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}Dashboard · Settings{% endblock %}
+{% block header %}Account Settings{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <!-- Account Information Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0"><i class="bi bi-person-circle me-2 text-primary"></i>Account Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label class="text-muted small d-block mb-1">Store Name</label>
+                        <div class="fs-5 fw-semibold">{{ merchant.name }}</div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="text-muted small d-block mb-1">Salla Merchant ID</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <code class="bg-light px-2 py-1 rounded">{{ merchant.salla_merchant_id }}</code>
+                            <button class="btn btn-outline-secondary btn-sm"
+                                onclick="copyToClipboard('{{ merchant.salla_merchant_id }}')">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="text-muted small d-block mb-1">Connection Status</label>
+                        {% if merchant.is_connected %}
+                        <span class="badge bg-success fs-6"><i class="bi bi-check-circle me-1"></i> Connected</span>
+                        {% else %}
+                        <span class="badge bg-danger fs-6"><i class="bi bi-x-circle me-1"></i> Disconnected</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label class="text-muted small d-block mb-1">Store Domain</label>
+                        <div>
+                            {% if merchant.domain %}
+                            <a href="https://{{ merchant.domain }}" target="_blank" class="text-decoration-none">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>{{ merchant.domain }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">Not set</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="text-muted small d-block mb-1">Member Since</label>
+                        <div>{{ merchant.created_at|date:"F d, Y" }}</div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="text-muted small d-block mb-1">Last Updated</label>
+                        <div>{{ merchant.updated_at|date:"F d, Y \a\t H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Card -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0"><i class="bi bi-lightning me-2 text-warning"></i>Quick Actions</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="/dashboard/recommendations/" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-arrow-repeat d-block fs-4 mb-1"></i>
+                        Sync Products
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/dashboard/features/" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-grid-3x3-gap d-block fs-4 mb-1"></i>
+                        Manage Features
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/contact/" class="btn btn-outline-secondary w-100 py-3">
+                        <i class="bi bi-headset d-block fs-4 mb-1"></i>
+                        Get Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            // Show success feedback
+            const btn = event.target.closest('button');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check"></i>';
+            btn.classList.add('btn-success');
+            btn.classList.remove('btn-outline-secondary');
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-secondary');
+            }, 1500);
+        });
+    }
+</script>
+{% endblock %}

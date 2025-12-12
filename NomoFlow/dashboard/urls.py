@@ -17,9 +17,7 @@ urlpatterns = [
     path("switch-merchant/", views.switch_merchant, name="switch-merchant"),
     path('ai-recommendations/', views.ai_recommendations, name='ai_recommendations'),
     path('ai/', views.page_ai_recommendations, name='page_ai_recommendations'),
-
-
-
+    path('settings/', views.page_settings, name='page_settings'),
 ]
 
 

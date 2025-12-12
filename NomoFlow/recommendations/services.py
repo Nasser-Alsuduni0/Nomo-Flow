@@ -26,6 +26,7 @@ except ImportError:
         raise ImportError("scikit-learn is required. Install with: pip install scikit-learn")
 
 from collections import defaultdict
+from django.db import models
 from django.db.models import Count, Q
 from typing import List, Dict, Optional, Tuple
 

@@ -169,7 +169,38 @@ def recommended_for_you_js(request):
   
 """ + _get_common_widget_code() + """
   
+  function isCartPage() {
+    // Check URL patterns for cart page
+    var path = window.location.pathname.toLowerCase();
+    if (path.includes('/cart') || path.includes('/basket') || path.includes('/سلة')) {
+      return true;
+    }
+    
+    // Check for Salla cart page indicators
+    if (document.querySelector('.cart-page') || 
+        document.querySelector('[data-cart-page]') ||
+        document.querySelector('.salla-cart') ||
+        document.querySelector('#cart-items') ||
+        document.querySelector('.cart-items') ||
+        document.querySelector('[class*="cart-container"]')) {
+      return true;
+    }
+    
+    // Check for cart in URL hash
+    if (window.location.hash.includes('cart')) {
+      return true;
+    }
+    
+    return false;
+  }
+  
   function loadRecommendedForYou() {
+    // Only show on cart page
+    if (!isCartPage()) {
+      console.log('Nomo Recommendations: Not on cart page, skipping Recommended For You widget');
+      return;
+    }
+    
     checkFeatureEnabled(function(enabled) {
       if (!enabled) return;
       
@@ -221,7 +252,7 @@ def recommended_for_you_js(request):
           var titleSection = document.createElement('div');
           titleSection.style.cssText = 'margin-bottom: 20px; text-align: center;';
           var title = document.createElement('h2');
-          title.textContent = 'Recommended for You';
+          title.textContent = 'موصى به لك';
           title.style.cssText = 'font-size: 1.75rem; font-weight: 700; margin: 0; color: #1e293b;';
           titleSection.appendChild(title);
           container.appendChild(titleSection);
@@ -519,7 +550,39 @@ def frequently_bought_together_js(request):
   
 """ + _get_common_widget_code() + """
   
+  function isProductPage() {
+    // Check URL patterns for product page
+    var path = window.location.pathname;
+    
+    // Salla product URLs typically have /p followed by product ID
+    if (path.match(/\\/p\\d+/) || path.match(/\\/product\\//)) {
+      return true;
+    }
+    
+    // Check for product page elements
+    if (document.querySelector('[data-product-id]') && 
+        !document.querySelector('.cart-page') &&
+        !document.querySelector('.cart-items')) {
+      return true;
+    }
+    
+    // Check for Salla product page
+    if (document.querySelector('salla-product-availability') ||
+        document.querySelector('.product-details') ||
+        document.querySelector('.product-page')) {
+      return true;
+    }
+    
+    return false;
+  }
+  
   function loadFrequentlyBoughtTogether() {
+    // Only show on product pages
+    if (!isProductPage()) {
+      console.log('Nomo Recommendations: Not on product page, skipping Frequently Bought Together widget');
+      return;
+    }
+    
     checkFeatureEnabled(function(enabled) {
       if (!enabled) return;
       

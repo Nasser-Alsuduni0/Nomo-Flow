@@ -1,11 +1,14 @@
 from django.http import JsonResponse
 from django.db.models import Sum, Count
+from django.db.models.functions import TruncDate, TruncMonth, TruncYear
 from django.utils import timezone
 from datetime import timedelta
+from decimal import Decimal
 from marketing.models import Campaign
 from coupons.models import Coupon
 from visitors.models import VisitorSession, PageView
 from core.utils import get_current_merchant
+from recommendations.models import Order
 
 def dashboard_metrics(request):
     now = timezone.now()
@@ -166,3 +169,109 @@ def dashboard_traffic_sources(request):
         'labels': ['Direct', 'Referral'],
         'data': [direct_count, referral_count]
     })
+
+
+def dashboard_sales(request):
+    """Get sales analytics data by period (days, months, years)"""
+    merchant = get_current_merchant(request)
+    period = request.GET.get('period', 'days')
+    now = timezone.now()
+    
+    labels = []
+    sales_data = []
+    
+    if merchant:
+        orders = Order.objects.filter(merchant=merchant)
+    else:
+        orders = Order.objects.all()
+    
+    if period == 'days':
+        # Last 7 days
+        for i in range(7):
+            day = now - timedelta(days=6-i)
+            day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+            day_end = day.replace(hour=23, minute=59, second=59, microsecond=999999)
+            
+            day_sales = orders.filter(
+                ordered_at__gte=day_start,
+                ordered_at__lte=day_end
+            ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+            
+            day_label = day.strftime('%a, %b %d')
+            labels.append(day_label)
+            sales_data.append(float(day_sales))
+    
+    elif period == 'months':
+        # Last 12 months
+        for i in range(12):
+            month_date = now - timedelta(days=30 * (11 - i))
+            month_start = month_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            
+            # Get next month start for the end date
+            if month_start.month == 12:
+                month_end = month_start.replace(year=month_start.year + 1, month=1) - timedelta(seconds=1)
+            else:
+                month_end = month_start.replace(month=month_start.month + 1) - timedelta(seconds=1)
+            
+            month_sales = orders.filter(
+                ordered_at__gte=month_start,
+                ordered_at__lte=month_end
+            ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+            
+            month_label = month_start.strftime('%b %Y')
+            labels.append(month_label)
+            sales_data.append(float(month_sales))
+    
+    elif period == 'years':
+        # Last 5 years
+        current_year = now.year
+        for i in range(5):
+            year = current_year - (4 - i)
+            year_start = now.replace(year=year, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+            year_end = now.replace(year=year, month=12, day=31, hour=23, minute=59, second=59, microsecond=999999)
+            
+            year_sales = orders.filter(
+                ordered_at__gte=year_start,
+                ordered_at__lte=year_end
+            ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+            
+            labels.append(str(year))
+            sales_data.append(float(year_sales))
+    
+    # Calculate summary stats
+    total_sales = sum(sales_data)
+    total_orders_count = orders.count()
+    avg_order = total_sales / total_orders_count if total_orders_count > 0 else 0
+    
+    return JsonResponse({
+        'labels': labels,
+        'sales': sales_data,
+        'total_sales': total_sales,
+        'total_orders': total_orders_count,
+        'avg_order': avg_order
+    })
+
+
+def dashboard_marketing_suggestions(request):
+    """Get AI marketing suggestions for the merchant"""
+    merchant = get_current_merchant(request)
+    
+    if not merchant:
+        return JsonResponse({
+            'error': 'No merchant selected',
+            'notification_timing': [],
+            'coupon_strategy': [],
+            'target_audience': []
+        }, status=400)
+    
+    try:
+        from dashboard.marketing_ai import get_marketing_suggestions
+        suggestions = get_marketing_suggestions(merchant)
+        return JsonResponse(suggestions)
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'notification_timing': [],
+            'coupon_strategy': [],
+            'target_audience': []
+        }, status=500)

@@ -102,7 +102,7 @@ def recommendations_widget_js(request):
     titleSection.style.cssText = 'margin-bottom: 20px; text-align: center;';
     
     var titleEl = document.createElement('h2');
-    titleEl.textContent = title || 'Recommended for You';
+    titleEl.textContent = title || 'موصى به لك';
     titleEl.style.cssText = 'font-size: 1.75rem; font-weight: 700; margin: 0; color: #1e293b;';
     titleSection.appendChild(titleEl);
     
@@ -260,7 +260,7 @@ def recommendations_widget_js(request):
     })
     .then(function(data) {
       if (data.recommendations && data.recommendations.length > 0) {
-        var widget = createRecommendationsWidget(data.recommendations, 'Recommended for You');
+        var widget = createRecommendationsWidget(data.recommendations, 'موصى به لك');
         if (widget) {
           // Insert widget in specific container or find best location
           var target = document.querySelector('[data-nomo-recommendations]');

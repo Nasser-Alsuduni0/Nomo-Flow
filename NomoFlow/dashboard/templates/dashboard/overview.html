@@ -6,10 +6,6 @@
 {% block content %}
 <div class="container-fluid py-3">
 
-  <div class="alert alert-info d-flex align-items-center shadow-sm" role="alert">
-    <i class="bi bi-shop me-2 fs-4"></i>
-    <div><strong>Current Store:</strong> {{ merchant.name }}</div>
-  </div>
   <div class="row g-3 mb-4">
     {% for kpi in kpis %}
     <div class="col-md-3 col-6">
@@ -30,20 +26,33 @@
     </div>
   </div>
 
-  <div class="row g-3">
-    <div class="col-lg-6">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="mb-3"><i class="bi bi-ticket-perforated me-2 text-warning"></i>Coupon Usage</h6>
-          <canvas id="couponChart" height="180"></canvas>
+  <!-- Sales Analytics Section -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0"><i class="bi bi-currency-dollar me-2 text-success"></i>Sales Analytics</h6>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Time period selector">
+          <button type="button" class="btn btn-outline-primary active" data-period="days"
+            onclick="changeSalesPeriod('days')">Days</button>
+          <button type="button" class="btn btn-outline-primary" data-period="months"
+            onclick="changeSalesPeriod('months')">Months</button>
+          <button type="button" class="btn btn-outline-primary" data-period="years"
+            onclick="changeSalesPeriod('years')">Years</button>
         </div>
       </div>
-    </div>
-    <div class="col-lg-6">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="mb-3"><i class="bi bi-pie-chart me-2 text-info"></i>Traffic Sources</h6>
-          <canvas id="trafficChart" height="180"></canvas>
+      <canvas id="salesChart" height="120"></canvas>
+      <div class="row mt-3">
+        <div class="col-md-4 text-center">
+          <div class="text-muted small">Total Sales</div>
+          <div id="total-sales" class="fs-5 fw-bold text-success">SAR 0.00</div>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="text-muted small">Average Order</div>
+          <div id="avg-order" class="fs-5 fw-bold text-primary">SAR 0.00</div>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="text-muted small">Total Orders</div>
+          <div id="total-orders" class="fs-5 fw-bold text-info">0</div>
         </div>
       </div>
     </div>
@@ -62,7 +71,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
   const apiDashboard = "/api/dashboard";
-  const aiEndpoint = "/dashboard/recommendations/";
+  const aiEndpoint = "/dashboard/ai-recommendations/";
+
+  let salesChart = null;
+  let currentPeriod = 'days';
 
   const money = v => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'SAR' }).format(v || 0);
 
@@ -87,15 +99,14 @@
         data: {
           labels: data.labels,
           datasets: [
-            { label: 'Visitors', data: data.visitors, borderWidth: 3, borderColor: '#0d6efd', tension: .35 },
-            { label: 'Page Views', data: data.page_views, borderWidth: 3, borderColor: '#198754', tension: .35 }
+            { label: 'Visitors', data: data.visitors, borderWidth: 3, borderColor: '#0d6efd', tension: .35, fill: false },
+            { label: 'Page Views', data: data.page_views, borderWidth: 3, borderColor: '#198754', tension: .35, fill: false }
           ]
         },
         options: { responsive: true, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom' } } }
       });
     } catch (e) {
       console.warn("Failed to load performance data", e);
-      // Fallback to empty chart
       const ctx = document.getElementById("perfChart");
       new Chart(ctx, {
         type: 'line',
@@ -105,54 +116,188 @@
     }
   }
 
-  async function renderCoupons() {
+  // Sales Analytics Chart
+  async function renderSalesChart(period = 'days') {
     try {
-      const r = await fetch(`${apiDashboard}/coupon-usage/`);
+      const r = await fetch(`${apiDashboard}/sales/?period=${period}`);
       const data = await r.json();
-      const ctx = document.getElementById('couponChart');
-      new Chart(ctx, {
-        type: 'doughnut',
+
+      const ctx = document.getElementById('salesChart');
+
+      // Destroy existing chart if it exists
+      if (salesChart) {
+        salesChart.destroy();
+      }
+
+      // Gradient fill for the chart
+      const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+      gradient.addColorStop(0, 'rgba(25, 135, 84, 0.3)');
+      gradient.addColorStop(1, 'rgba(25, 135, 84, 0.05)');
+
+      salesChart = new Chart(ctx, {
+        type: 'line',
         data: {
-          labels: data.labels,
-          datasets: [{ data: data.data, backgroundColor: ['#facc15', '#e5e7eb'] }]
+          labels: data.labels || generateDefaultLabels(period),
+          datasets: [{
+            label: 'Sales (SAR)',
+            data: data.sales || generateDefaultData(period),
+            backgroundColor: gradient,
+            borderColor: '#198754',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#198754',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+          }]
         },
-        options: { plugins: { legend: { position: 'bottom' } } }
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return money(context.parsed.y);
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function (value) {
+                  return 'SAR ' + value.toLocaleString();
+                }
+              }
+            }
+          }
+        }
       });
+
+      // Update summary stats
+      document.getElementById('total-sales').textContent = money(data.total_sales || 0);
+      document.getElementById('avg-order').textContent = money(data.avg_order || 0);
+      document.getElementById('total-orders').textContent = data.total_orders || 0;
+
     } catch (e) {
-      console.warn("Failed to load coupon usage data", e);
-      // Fallback to empty chart
-      const ctx = document.getElementById('couponChart');
-      new Chart(ctx, {
-        type: 'doughnut',
-        data: { labels: [], datasets: [] },
-        options: { plugins: { legend: { position: 'bottom' } } }
-      });
+      console.warn("Failed to load sales data, using demo data", e);
+      renderDemoSalesChart(period);
     }
   }
 
-  async function renderTrafficSources() {
-    try {
-      const r = await fetch(`${apiDashboard}/traffic-sources/`);
-      const data = await r.json();
-      const ctx = document.getElementById('trafficChart');
-      new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: data.labels,
-          datasets: [{ data: data.data, backgroundColor: ['#3b82f6', '#fbbf24'] }]
-        },
-        options: { plugins: { legend: { position: 'bottom' } } }
-      });
-    } catch (e) {
-      console.warn("Failed to load traffic sources data", e);
-      // Fallback to empty chart
-      const ctx = document.getElementById('trafficChart');
-      new Chart(ctx, {
-        type: 'doughnut',
-        data: { labels: [], datasets: [] },
-        options: { plugins: { legend: { position: 'bottom' } } }
-      });
+  function generateDefaultLabels(period) {
+    if (period === 'days') {
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        days.push(d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
+      }
+      return days;
+    } else if (period === 'months') {
+      const months = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        months.push(d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
+      }
+      return months;
+    } else {
+      const years = [];
+      const currentYear = new Date().getFullYear();
+      for (let i = 4; i >= 0; i--) {
+        years.push((currentYear - i).toString());
+      }
+      return years;
     }
+  }
+
+  function generateDefaultData(period) {
+    const length = period === 'days' ? 7 : period === 'months' ? 12 : 5;
+    return Array(length).fill(0);
+  }
+
+  function renderDemoSalesChart(period) {
+    const ctx = document.getElementById('salesChart');
+
+    if (salesChart) {
+      salesChart.destroy();
+    }
+
+    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(25, 135, 84, 0.3)');
+    gradient.addColorStop(1, 'rgba(25, 135, 84, 0.05)');
+
+    // Use real labels with zero data (no fake demo data)
+    let labels = generateDefaultLabels(period);
+    let data = generateDefaultData(period);
+
+    salesChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Sales (SAR)',
+          data: data,
+          backgroundColor: gradient,
+          borderColor: '#198754',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#198754',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return money(context.parsed.y);
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function (value) {
+                return 'SAR ' + value.toLocaleString();
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Update with zero stats
+    document.getElementById('total-sales').textContent = money(0);
+    document.getElementById('avg-order').textContent = money(0);
+    document.getElementById('total-orders').textContent = 0;
+  }
+
+  function changeSalesPeriod(period) {
+    currentPeriod = period;
+
+    // Update button states
+    document.querySelectorAll('[data-period]').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.period === period) {
+        btn.classList.add('active');
+      }
+    });
+
+    renderSalesChart(period);
   }
 
   async function loadAIRecommendations() {
@@ -176,8 +321,7 @@
 
   loadKPIs();
   renderPerformance();
-  renderCoupons();
-  renderTrafficSources();
+  renderSalesChart('days');
   loadAIRecommendations();
 </script>
 {% endblock %}
