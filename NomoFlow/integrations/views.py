@@ -170,21 +170,31 @@ def salla_callback(request):
         return HttpResponseBadRequest(f"Request error: {str(e)}")
     ui = ui_resp.json()
 
-# تحمّل اختلافات البُنى
+    # Debug Salla UserInfo response
+    print(f"🧐 UserInfo raw response: {ui}")
+
     store_obj = ui.get("store") or ui.get("data", {}).get("store") or {}
     store_id   = str(store_obj.get("id") or ui.get("merchant_id") or ui.get("id") or "")
     store_name = store_obj.get("name") or ui.get("name") or "Salla Store"
 
     if not store_id:
-    # خيار إضافي: جرّب Admin API كخطة بديلة
-     si = requests.get(f"{settings.SALLA_API_BASE}/store/info", headers=headers, timeout=20)
-    if si.status_code == 200:
-        s = si.json().get("data") or si.json()
-        store_id   = str(s.get("id") or "")
-        store_name = s.get("name") or store_name
+        print(f"⚠️ Store ID not found in UserInfo. Trying Admin API...")
+        # Fallback to Admin API
+        try:
+            si = requests.get(f"{settings.SALLA_API_BASE}/store/info", headers=headers, timeout=20)
+            print(f"🧐 StoreInfo status: {si.status_code}")
+            print(f"🧐 StoreInfo response: {si.text}")
+            
+            if si.status_code == 200:
+                s = si.json().get("data") or si.json()
+                store_id   = str(s.get("id") or "")
+                store_name = s.get("name") or store_name
+        except Exception as e:
+            print(f"🔴 Admin API fallback failed: {e}")
 
     if not store_id:
-      return HttpResponseBadRequest("Missing store id")
+        print("🔴 CRITICAL: Failed to retrieve Store ID from both UserInfo and Admin API.")
+        return HttpResponseBadRequest("Missing store id - Could not retrieve store information from Salla.")
 
     merchant, _ = Merchant.objects.get_or_create(
         salla_merchant_id=store_id,
