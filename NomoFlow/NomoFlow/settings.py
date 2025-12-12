@@ -191,7 +191,7 @@ SALLA_SCOPES = os.getenv(
 # API & OAuth endpoints (override via env if different in your portal)
 SALLA_OAUTH_AUTHORIZE_URL = os.getenv("SALLA_OAUTH_AUTHORIZE_URL", "https://accounts.salla.sa/oauth2/auth")
 SALLA_OAUTH_TOKEN_URL     = os.getenv("SALLA_OAUTH_TOKEN_URL", "https://accounts.salla.sa/oauth2/token")
-SALLA_API_BASE            = os.getenv("SALLA_API_BASE", "https://api.salla.dev/admin/v2")
+SALLA_API_BASE            = os.getenv("SALLA_API_BASE", "https://api.salla.sa/admin/v2")
 # Optional user info endpoint (used to reliably fetch store/merchant info)
 SALLA_USERINFO_URL        = os.getenv("SALLA_USERINFO_URL", "https://accounts.salla.sa/oauth2/user/info")
 # Public base URL for webhooks/callbacks (required in production)
