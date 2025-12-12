@@ -193,8 +193,9 @@ def salla_callback(request):
             print(f"🔴 Admin API fallback failed: {e}")
 
     if not store_id:
-        print("🔴 CRITICAL: Failed to retrieve Store ID from both UserInfo and Admin API.")
-        return HttpResponseBadRequest("Missing store id - Could not retrieve store information from Salla.")
+        debug_info = f"UserInfo: {str(ui)[:500]} | AdminAPI: {si.text if 'si' in locals() and si else 'Not attempted'}"
+        print(f"🔴 CRITICAL: Failed to retrieve Store ID. {debug_info}")
+        return HttpResponseBadRequest(f"Missing store id - Could not retrieve store information from Salla. Debug: {debug_info}")
 
     merchant, _ = Merchant.objects.get_or_create(
         salla_merchant_id=store_id,
