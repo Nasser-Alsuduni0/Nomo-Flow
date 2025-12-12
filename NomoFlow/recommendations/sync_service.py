@@ -53,7 +53,14 @@ class SallaSyncService:
                     break
                 
                 data = response.json()
+                if not isinstance(data, dict):
+                    print(f"Error: Expected dict response, got {type(data)}")
+                    break
+                    
                 products_data = data.get('data', [])
+                if not isinstance(products_data, list):
+                    print(f"Error: Expected list of products, got {type(products_data)}")
+                    break
                 
                 if not products_data:
                     break
@@ -80,6 +87,9 @@ class SallaSyncService:
     
     def _sync_product(self, product_data: Dict):
         """Sync a single product"""
+        if not isinstance(product_data, dict):
+            return
+            
         salla_product_id = str(product_data.get('id', ''))
         if not salla_product_id:
             return
@@ -169,7 +179,15 @@ class SallaSyncService:
                     break
                 
                 data = response.json()
+                if not isinstance(data, dict):
+                    print(f"Error: Expected dict response for orders, got {type(data)}")
+                    break
+                    
                 orders_data = data.get('data', [])
+                if not isinstance(orders_data, list):
+                    print(f"Error: Expected list of orders, got {type(orders_data)}")
+                    break
+                
                 
                 if not orders_data:
                     break
@@ -196,6 +214,9 @@ class SallaSyncService:
     
     def _sync_order(self, order_data: Dict):
         """Sync a single order"""
+        if not isinstance(order_data, dict):
+            return
+            
         salla_order_id = str(order_data.get('id', ''))
         if not salla_order_id:
             return
