@@ -13,6 +13,11 @@ def about(request):
     return render(request, 'core/about.html')
 
 
+def health_check(request):
+    from django.http import JsonResponse
+    return JsonResponse({"status": "healthy"})
+
+
 def contact(request):
     return render(request, 'core/contact.html')
 

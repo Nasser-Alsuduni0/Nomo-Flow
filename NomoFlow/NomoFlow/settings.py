@@ -32,6 +32,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()] if os.getenv("ALLOWED_HOSTS") else ['localhost', '127.0.0.1', '.ngrok-free.app']
 
+# Fix for Railway Healthchecks: Auto-allow Railway hosts if running in Railway
+if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RAILWAY_STATIC_URL"):
+    ALLOWED_HOSTS = ['*']
+
 
 # Application definition
 
