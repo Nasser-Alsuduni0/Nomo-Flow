@@ -96,7 +96,15 @@ WSGI_APPLICATION = 'NomoFlow.wsgi.application'
 
 import dj_database_url
 
-if os.environ.get("DATABASE_URL"):
+# Fix for Railway Build: Use dummy DB during build phase (collectstatic)
+if os.environ.get("BUILD_PHASE"):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+elif os.environ.get("DATABASE_URL"):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get("DATABASE_URL"),
