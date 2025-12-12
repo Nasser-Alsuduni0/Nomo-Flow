@@ -1,0 +1,393 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Contact Us · Nomo Flow</title>
+    <meta name="description" content="Get in touch with the Nomo Flow team. We're here to help you succeed." />
+    <meta name="theme-color" content="#17a8ff" />
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        :root {
+            --brand: #17a8ff;
+            --brand-dark: #0f9cf5;
+            --text: #0f172a;
+            --muted: #64748b;
+            --bg: #0a0e27;
+            --bg-light: #1a1f3a;
+            --card: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.08);
+            --gradient-brand: linear-gradient(135deg, #17a8ff 0%, #0f9cf5 50%, #0284c7 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+            color: #ffffff;
+            background: var(--bg);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(23, 168, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 14, 39, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--brand);
+        }
+
+        /* Main Content */
+        .page-header {
+            text-align: center;
+            padding: 80px 0 40px;
+        }
+
+        .page-header h1 {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #a0d2ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .content {
+            padding: 40px 0 100px;
+        }
+
+        .content-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            margin-bottom: 32px;
+        }
+
+        .content-card h2 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .content-card p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* Contact Methods */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .contact-card {
+            background: rgba(23, 168, 255, 0.1);
+            border: 1px solid rgba(23, 168, 255, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--brand);
+            box-shadow: 0 10px 40px rgba(23, 168, 255, 0.2);
+        }
+
+        .contact-card .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .contact-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .contact-card p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 16px;
+        }
+
+        .contact-card a.contact-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--gradient-brand);
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-card a.contact-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(23, 168, 255, 0.4);
+        }
+
+        /* FAQ Section */
+        .faq {
+            margin-top: 32px;
+        }
+
+        details {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        details:hover {
+            border-color: rgba(23, 168, 255, 0.5);
+        }
+
+        details[open] {
+            border-color: var(--brand);
+        }
+
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            color: #fff;
+            font-size: 16px;
+            list-style: none;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details p {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        footer a {
+            color: var(--brand);
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 36px;
+            }
+
+            .content-card {
+                padding: 32px 24px;
+            }
+
+            .content-card h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <nav class="nav">
+            <a href="/" class="logo">
+                <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow">
+            </a>
+            <a href="/" class="back-btn">
+                ← Back to Home
+            </a>
+        </nav>
+
+        <header class="page-header">
+            <h1>Contact Us</h1>
+            <p>We'd love to hear from you. Get in touch and we'll respond as soon as possible.</p>
+        </header>
+
+        <main class="content">
+            <div class="content-card">
+                <h2>Get in Touch</h2>
+                <p>
+                    Have questions about Nomo Flow? Need help with your integration? Or just want to say hello?
+                    We're here for you. Choose your preferred method of contact below.
+                </p>
+
+                <div class="contact-grid">
+                    <div class="contact-card">
+                        <div class="icon">📧</div>
+                        <h3>Email Us</h3>
+                        <p>For general inquiries and support</p>
+                        <a href="mailto:support@nomoflow.com" class="contact-link">support@nomoflow.com</a>
+                    </div>
+
+                    <div class="contact-card">
+                        <div class="icon">💬</div>
+                        <h3>Live Chat</h3>
+                        <p>Get instant help from our team</p>
+                        <a href="#" class="contact-link">Start Chat</a>
+                    </div>
+
+                    <div class="contact-card">
+                        <div class="icon">🐦</div>
+                        <h3>Twitter/X</h3>
+                        <p>Follow us for updates and tips</p>
+                        <a href="https://twitter.com/nomoflow" target="_blank" class="contact-link">@nomoflow</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq">
+                    <details>
+                        <summary>How do I install Nomo Flow on my Salla store?</summary>
+                        <p>Installation is simple! Just click the "Install on Salla" button, authorize the app, and
+                            you're ready to go. The entire process takes less than a minute.</p>
+                    </details>
+
+                    <details>
+                        <summary>Is there a free trial available?</summary>
+                        <p>Yes! We offer a free plan that lets you explore basic features. You can upgrade anytime to
+                            access premium features and advanced analytics.</p>
+                    </details>
+
+                    <details>
+                        <summary>How do I get support if I have issues?</summary>
+                        <p>Our support team is available via email and live chat. We typically respond within 2 hours
+                            during business hours. For urgent issues, use our live chat feature.</p>
+                    </details>
+
+                    <details>
+                        <summary>Can I cancel my subscription anytime?</summary>
+                        <p>Absolutely! There are no long-term contracts. You can upgrade, downgrade, or cancel your
+                            subscription at any time from your dashboard.</p>
+                    </details>
+
+                    <details>
+                        <summary>Do you offer custom solutions for larger stores?</summary>
+                        <p>Yes! For enterprise clients, we offer custom integrations, dedicated support, and tailored
+                            solutions. Contact us to discuss your specific needs.</p>
+                    </details>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2>Business Hours</h2>
+                <p><strong>Support Hours:</strong> Sunday - Thursday, 9:00 AM - 6:00 PM (AST)</p>
+                <p><strong>Response Time:</strong> We aim to respond to all inquiries within 24 hours.</p>
+                <p><strong>Emergency Support:</strong> For critical issues affecting your store, contact us via live
+                    chat for priority assistance.</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2024 Nomo Flow. All rights reserved. | <a href="/about/">About</a> | <a href="/privacy/">Privacy
+                    Policy</a></p>
+        </footer>
+    </div>
+</body>
+
+</html>

@@ -531,14 +531,30 @@ def frequently_bought_together_js(request):
       // Get products from cart - try multiple methods
       var cartProducts = window.__NOMO_CART_PRODUCTS__ || [];
       
-      // Method 1: Salla cart object
-      if (window.Salla) {
-        if (window.Salla.cart && window.Salla.cart.items) {
-          cartProducts = window.Salla.cart.items.map(function(item) {
-            return item.product ? (item.product.id || item.product.product_id) : 
-                   (item.product_id || item.id || item.sku);
-          }).filter(function(id) { return id; });
+      // Validate manual cart products aren't template variables
+      if (cartProducts.length > 0) {
+        cartProducts = cartProducts.filter(function(id) {
+          return id && typeof id === 'string' && !id.includes('{{');
+        });
+      }
+      
+      // Method 1: Salla cart object (Twilight)
+      if (cartProducts.length === 0 && window.Salla) {
+        // Twilight uses Salla.cart as a Proxy with .items property or .get() method
+        try {
+          if (window.Salla.cart) {
+            // Try direct items access
+            if (window.Salla.cart.items && Array.isArray(window.Salla.cart.items)) {
+              cartProducts = window.Salla.cart.items.map(function(item) {
+                return item.product ? (item.product.id || item.product.product_id) : 
+                       (item.product_id || item.id || item.sku);
+              }).filter(function(id) { return id; });
+            }
+          }
+        } catch(e) {
+          console.log('Nomo Recommendations: Could not access Salla.cart directly');
         }
+        
         // Method 2: Salla cart data
         if (cartProducts.length === 0 && window.Salla.cartData && window.Salla.cartData.items) {
           cartProducts = window.Salla.cartData.items.map(function(item) {
@@ -556,22 +572,34 @@ def frequently_bought_together_js(request):
         }
       }
       
-      // Method 4: DOM elements
+      // Method 4: window.salla (lowercase - Twilight v2)
+      if (cartProducts.length === 0 && window.salla && window.salla.cart) {
+        try {
+          if (window.salla.cart.items && Array.isArray(window.salla.cart.items)) {
+            cartProducts = window.salla.cart.items.map(function(item) {
+              return item.product_id || item.id || (item.product && item.product.id);
+            }).filter(function(id) { return id; });
+          }
+        } catch(e) {}
+      }
+      
+      // Method 5: DOM elements
       if (cartProducts.length === 0) {
         var cartItems = document.querySelectorAll(
           '[data-product-id], .cart-item[data-id], .cart-item[data-product-id], ' +
           '.cart__item[data-product-id], .line-item[data-product-id], ' +
-          '[class*="cart"][class*="item"][data-id]'
+          '[class*="cart"][class*="item"][data-id], salla-cart-item'
         );
         cartProducts = Array.from(cartItems).map(function(item) {
           return item.getAttribute('data-product-id') || 
                  item.getAttribute('data-id') ||
                  item.getAttribute('data-product') ||
+                 item.getAttribute('product-id') ||
                  item.getAttribute('data-sku');
         }).filter(function(id) { return id; });
       }
       
-      // Method 5: Try to find cart in localStorage/sessionStorage
+      // Method 6: Try to find cart in localStorage/sessionStorage
       if (cartProducts.length === 0) {
         try {
           var storedCart = localStorage.getItem('salla_cart') || 
@@ -591,14 +619,8 @@ def frequently_bought_together_js(request):
         }
       }
       
-      if (cartProducts.length === 0) {
-        console.log('Nomo Recommendations: No products in cart detected. This is normal if the cart is empty.');
-        return;
-      }
-      
-      console.log('Nomo Recommendations: Cart products detected:', cartProducts.length);
-      
-      // Filter out any items that look like unrendered template variables
+      // Filter out any items that look like unrendered template variables or placeholders
+      // Do this BEFORE the URL fallback so placeholders don't prevent fallback
       cartProducts = cartProducts.filter(function(id) {
         if (typeof id !== 'string') id = String(id);
         return id && 
@@ -611,10 +633,27 @@ def frequently_bought_together_js(request):
                id !== 'product-id-2';
       });
       
+      // Method 7: FALLBACK - If no valid products and on a product page, use current product ID from URL
       if (cartProducts.length === 0) {
-        console.log('Nomo Recommendations: No valid products in cart after filtering.');
+        var urlMatch = window.location.pathname.match(/\\/p(\\d+)(?:\\/|$|\\?)/);
+        if (urlMatch) {
+          cartProducts = [urlMatch[1]];
+          console.log('Nomo Recommendations: Using current product from URL:', urlMatch[1]);
+        }
+      }
+      
+      if (cartProducts.length === 0) {
+        console.log('Nomo Recommendations: No products detected for frequently bought together.');
+        console.log('Nomo Recommendations: Cart detection checked:', {
+          'Salla.cart': window.Salla && window.Salla.cart,
+          'salla.cart': window.salla && window.salla.cart,
+          'cart DOM elements': document.querySelectorAll('[data-product-id], salla-cart-item').length,
+          'URL path': window.location.pathname
+        });
         return;
       }
+      
+      console.log('Nomo Recommendations: Using products for recommendations:', cartProducts);
       
       // Get recommendations for first product in cart - pass store_id
       var firstProductId = cartProducts[0];
@@ -652,20 +691,21 @@ def frequently_bought_together_js(request):
         if (products.length > 0) {
           var container = document.createElement('div');
           container.className = 'nomo-frequently-bought-together';
-          container.style.cssText = 'margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;';
+          container.style.cssText = 'margin: 40px 0; padding: 0; width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;';
           
           var titleSection = document.createElement('div');
           titleSection.style.cssText = 'margin-bottom: 20px; text-align: center;';
           var title = document.createElement('h2');
-          title.textContent = 'Frequently Bought Together';
-          title.style.cssText = 'font-size: 1.5rem; font-weight: 700; margin: 0; color: #1e293b;';
+          title.textContent = 'يُشترى معاً عادةً';
+          title.style.cssText = 'font-size: 1.75rem; font-weight: 700; margin: 0; color: #1e293b;';
           titleSection.appendChild(title);
           container.appendChild(titleSection);
           
           var grid = document.createElement('div');
-          grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px;';
+          grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto;';
           if (window.innerWidth < 768) {
-            grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
+            grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
+            grid.style.gap = '15px';
           }
           
           products.slice(0, 4).forEach(function(product) {

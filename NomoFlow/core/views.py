@@ -9,13 +9,33 @@ def home(request):
     return render(request, 'core/home.html')
 
 
+def about(request):
+    return render(request, 'core/about.html')
+
+
+def contact(request):
+    return render(request, 'core/contact.html')
+
+
+def privacy(request):
+    return render(request, 'core/privacy.html')
+
+
 @require_http_methods(["GET"])
 def app_entry(request):
     """
     Entry point for the app (/app).
     Checks for valid session and redirects accordingly.
     If app was installed from Salla Store, auto-create session if merchant exists.
+    Supports language switching via ?lang=en or ?lang=ar
     """
+    # Handle language preference
+    lang = request.GET.get('lang')
+    if lang in ['en', 'ar']:
+        request.session['language'] = lang
+    else:
+        lang = request.session.get('language', 'ar')  # Default to Arabic
+    
     merchant = get_current_merchant(request)
     
     if merchant:
@@ -26,8 +46,10 @@ def app_entry(request):
     # This prevents auto-login after logout
     if request.GET.get('logged_out') == 'true' or 'logout' in request.META.get('HTTP_REFERER', ''):
         # User just logged out - show login page without auto-creating session
-        return render(request, 'core/app_entry.html', {
-            'show_connect_button': True
+        template = 'core/app_entry_en.html' if lang == 'en' else 'core/app_entry.html'
+        return render(request, template, {
+            'show_connect_button': True,
+            'current_lang': lang
         })
     
     # SECURITY FIX: Do not auto-login based on "first" available token.
@@ -46,10 +68,13 @@ def app_entry(request):
     print(f"   Cookies: {request.COOKIES}")
     print(f"   GET Params: {request.GET}")
     print(f"   Referer: {request.META.get('HTTP_REFERER', '')}")
+    print(f"   Language: {lang}")
 
     # No session and no valid merchant - show "Continue with Salla" button
-    return render(request, 'core/app_entry.html', {
-        'show_connect_button': True
+    template = 'core/app_entry_en.html' if lang == 'en' else 'core/app_entry.html'
+    return render(request, template, {
+        'show_connect_button': True,
+        'current_lang': lang
     })
 
 
