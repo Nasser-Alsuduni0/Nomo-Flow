@@ -182,9 +182,6 @@ def salla_callback(request):
         # Fallback to Admin API
         try:
             si = requests.get(f"{settings.SALLA_API_BASE}/store/info", headers=headers, timeout=20)
-            print(f"🧐 StoreInfo status: {si.status_code}")
-            print(f"🧐 StoreInfo response: {si.text}")
-            
             if si.status_code == 200:
                 s = si.json().get("data") or si.json()
                 store_id   = str(s.get("id") or "")
@@ -193,7 +190,7 @@ def salla_callback(request):
             print(f"🔴 Admin API fallback failed: {e}")
 
     if not store_id:
-        debug_info = f"UserInfo: {str(ui)[:500]} | AdminAPI: {si.text if 'si' in locals() and si else 'Not attempted'}"
+        debug_info = f"UserInfo: {str(ui)[:500]}"
         print(f"🔴 CRITICAL: Failed to retrieve Store ID. {debug_info}")
         return HttpResponseBadRequest(f"Missing store id - Could not retrieve store information from Salla. Debug: {debug_info}")
 
