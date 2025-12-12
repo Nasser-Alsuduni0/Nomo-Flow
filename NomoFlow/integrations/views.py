@@ -173,9 +173,18 @@ def salla_callback(request):
     # Debug Salla UserInfo response
     print(f"🧐 UserInfo raw response: {ui}")
 
-    store_obj = ui.get("store") or ui.get("data", {}).get("store") or {}
-    store_id   = str(store_obj.get("id") or ui.get("merchant_id") or ui.get("id") or "")
-    store_name = store_obj.get("name") or ui.get("name") or "Salla Store"
+    data = ui.get("data", {})
+    store_obj = ui.get("store") or data.get("store") or data.get("merchant") or {}
+    
+    # Try different paths to find the store/merchant ID
+    store_id = str(
+        store_obj.get("id") 
+        or ui.get("merchant_id") 
+        or ui.get("id") 
+        or data.get("id") 
+        or ""
+    )
+    store_name = store_obj.get("name") or ui.get("name") or data.get("name") or "Salla Store"
 
     if not store_id:
         print(f"⚠️ Store ID not found in UserInfo. Trying Admin API...")
