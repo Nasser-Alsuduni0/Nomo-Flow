@@ -138,10 +138,12 @@ def call_salla_api_with_refresh(merchant: Merchant, method: str, url: str, **kwa
                     response = requests.request(method, url, timeout=30, **kwargs)
                     
                     if response.status_code == 401:
+                        print(f"🔴 Still 401 after refresh! URL: {url}")
+                        print(f"🔴 Response Body: {response.text}")
                         # Still 401 after refresh - merchant needs to reconnect
                         merchant.is_connected = False
                         merchant.save(update_fields=["is_connected"])
-                        return None, "Token refresh succeeded but API still returns 401 - merchant needs to reconnect"
+                        return None, f"Token refresh succeeded but API still returns 401 ({response.text[:200]})"
                 else:
                     # Refresh failed - mark as disconnected
                     merchant.is_connected = False
