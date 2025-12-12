@@ -118,7 +118,13 @@ def call_salla_api_with_refresh(merchant: Merchant, method: str, url: str, **kwa
         if response.status_code == 401:
             # Check if it's an invalid token error
             error_data = response.json() if response.content else {}
-            error_code = error_data.get("error", {}).get("code", "") if isinstance(error_data, dict) else ""
+            
+            # Safely extract error code handling both dict and string formats
+            error_obj = error_data.get("error")
+            if isinstance(error_obj, dict):
+                error_code = error_obj.get("code", "")
+            else:
+                error_code = str(error_obj) if error_obj else ""
             
             if "invalid_token" in str(error_code).lower() or "unauthorized" in str(response.text).lower():
                 print(f"🔄 Got 401, attempting token refresh for merchant {merchant.salla_merchant_id}")
