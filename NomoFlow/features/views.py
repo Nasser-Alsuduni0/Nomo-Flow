@@ -880,8 +880,20 @@ def purchase_display_embed_js(request):
 (function() {
     'use strict';
 
-    if (window.__NOMO_PURCHASE_DISPLAY_LOADED__) return;
-    window.__NOMO_PURCHASE_DISPLAY_LOADED__ = true;
+    // Clean up ANY old widget instances first
+    var oldPopups = document.querySelectorAll('[data-nomo-purchase-popup], #nomo-purchase-popup');
+    for (var i = 0; i < oldPopups.length; i++) {
+        oldPopups[i].remove();
+    }
+    
+    // Stop old widget timers if they exist
+    if (window.__NOMO_STOP_WIDGET__) {
+        window.__NOMO_STOP_WIDGET__();
+    }
+
+    // New versioned flag to force fresh start
+    if (window.__NOMO_PURCHASE_V3__) return;
+    window.__NOMO_PURCHASE_V3__ = true;
 
     var DEFAULT_SETTINGS = __DEFAULT_SETTINGS__;
     var BASE_URL = __BASE_URL__;
@@ -891,6 +903,13 @@ def purchase_display_embed_js(request):
     var items = [];
     var currentIndex = 0;
     var settings = DEFAULT_SETTINGS;
+    var stopped = false;
+    
+    // Allow stopping from outside
+    window.__NOMO_STOP_WIDGET__ = function() {
+        stopped = true;
+        if (popup) popup.remove();
+    };
 
     function getStoreId() {
         // Try multiple sources
@@ -973,11 +992,12 @@ def purchase_display_embed_js(request):
         var hideDuration = settings.delay_between_ms || 4000;
         
         function showNext() {
-            if (!items.length) return;
+            if (stopped || !items.length) return;
             showItem(items[currentIndex]);
             currentIndex = (currentIndex + 1) % items.length;
             
             setTimeout(function() {
+                if (stopped) return;
                 hidePopup();
                 setTimeout(showNext, hideDuration);
             }, showDuration);
