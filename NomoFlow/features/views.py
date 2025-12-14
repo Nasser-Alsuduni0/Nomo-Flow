@@ -887,28 +887,32 @@ def purchase_display_embed_js(request):
     var BASE_URL = __BASE_URL__;
     var STORE_ID = __STORE_ID__;
 
-    // Try to get store ID from Salla if not provided
-    if (!STORE_ID) {
-        try {
-            if (window.salla && window.salla.config && window.salla.config.get) {
-                STORE_ID = window.salla.config.get('store.id') || window.salla.config.get('merchant.id');
-            } else if (window.Salla && window.Salla.store) {
-                STORE_ID = window.Salla.store.id;
-            }
-        } catch(e) {}
-    }
-
-    if (!STORE_ID) {
-        console.warn('[Nomo] No store ID');
-        return;
-    }
-
     var popup = null;
     var items = [];
     var currentIndex = 0;
     var settings = DEFAULT_SETTINGS;
-    var intervalId = null;
-    var isVisible = false;
+
+    function getStoreId() {
+        // Try multiple sources
+        if (STORE_ID) return STORE_ID;
+        try {
+            // Salla Twilight theme
+            if (window.salla && window.salla.config && window.salla.config.get) {
+                return window.salla.config.get('store.id') || window.salla.config.get('merchant.id');
+            }
+            // Salla legacy
+            if (window.Salla && window.Salla.store && window.Salla.store.id) {
+                return window.Salla.store.id;
+            }
+            // Try from meta tag
+            var meta = document.querySelector('meta[name="salla-store-id"]');
+            if (meta) return meta.content;
+            // Try from data attribute
+            var el = document.querySelector('[data-store-id]');
+            if (el) return el.dataset.storeId;
+        } catch(e) {}
+        return null;
+    }
 
     function formatPrice(amount) {
         if (typeof amount !== 'number') return '';
@@ -953,30 +957,14 @@ def purchase_display_embed_js(request):
         document.getElementById('nomo-price').textContent = item.amount ? formatPrice(item.amount) : '';
         document.getElementById('nomo-time').textContent = item.ago || 'Just now';
         
-        // Show
         popup.style.opacity = '1';
         popup.style.transform = 'translateY(0)';
-        isVisible = true;
     }
 
     function hidePopup() {
-        if (popup && isVisible) {
+        if (popup) {
             popup.style.opacity = '0';
             popup.style.transform = 'translateY(20px)';
-            isVisible = false;
-        }
-    }
-
-    function tick() {
-        if (!items.length) return;
-        
-        if (isVisible) {
-            // Currently showing - hide it
-            hidePopup();
-        } else {
-            // Currently hidden - show next item
-            showItem(items[currentIndex]);
-            currentIndex = (currentIndex + 1) % items.length;
         }
     }
 
@@ -989,35 +977,62 @@ def purchase_display_embed_js(request):
             showItem(items[currentIndex]);
             currentIndex = (currentIndex + 1) % items.length;
             
-            // After showing, wait showDuration then hide
             setTimeout(function() {
                 hidePopup();
-                // After hiding, wait hideDuration then show next
                 setTimeout(showNext, hideDuration);
             }, showDuration);
         }
         
-        // Start immediately
         showNext();
     }
 
-    // Fetch and start
-    fetch(BASE_URL + '/features/is-enabled/?feature=recent_purchases&store_id=' + STORE_ID)
-        .then(function(r) { return r.json(); })
-        .then(function(status) {
-            if (!status.enabled) return;
-            settings = Object.assign({}, DEFAULT_SETTINGS, status.settings || {});
-            
-            return fetch(BASE_URL + '/features/purchase-display/feed/?store_id=' + STORE_ID);
-        })
-        .then(function(r) { return r ? r.json() : null; })
-        .then(function(feed) {
-            if (!feed || !feed.enabled || !feed.items || !feed.items.length) return;
-            items = feed.items;
-            if (feed.settings) settings = Object.assign(settings, feed.settings);
-            start();
-        })
-        .catch(function(e) { console.error('[Nomo]', e); });
+    function init(storeId) {
+        STORE_ID = storeId;
+        
+        fetch(BASE_URL + '/features/is-enabled/?feature=recent_purchases&store_id=' + STORE_ID)
+            .then(function(r) { return r.json(); })
+            .then(function(status) {
+                if (!status.enabled) return;
+                settings = Object.assign({}, DEFAULT_SETTINGS, status.settings || {});
+                
+                return fetch(BASE_URL + '/features/purchase-display/feed/?store_id=' + STORE_ID);
+            })
+            .then(function(r) { return r ? r.json() : null; })
+            .then(function(feed) {
+                if (!feed || !feed.enabled || !feed.items || !feed.items.length) return;
+                items = feed.items;
+                if (feed.settings) settings = Object.assign(settings, feed.settings);
+                start();
+            })
+            .catch(function(e) { console.error('[Nomo]', e); });
+    }
+
+    // Wait for Salla to load (retry up to 5 seconds)
+    var attempts = 0;
+    var maxAttempts = 25;
+    
+    function tryInit() {
+        var storeId = getStoreId();
+        if (storeId) {
+            console.log('[Nomo] Store ID found:', storeId);
+            init(storeId);
+            return;
+        }
+        
+        attempts++;
+        if (attempts < maxAttempts) {
+            setTimeout(tryInit, 200);
+        } else {
+            console.warn('[Nomo] Could not detect store ID after 5 seconds');
+        }
+    }
+    
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryInit);
+    } else {
+        tryInit();
+    }
 })();
 """
 
