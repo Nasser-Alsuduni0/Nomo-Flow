@@ -880,20 +880,51 @@ def purchase_display_embed_js(request):
 (function() {
     'use strict';
 
-    // Clean up ANY old widget instances first
-    var oldPopups = document.querySelectorAll('[data-nomo-purchase-popup], #nomo-purchase-popup');
-    for (var i = 0; i < oldPopups.length; i++) {
-        oldPopups[i].remove();
+    // Generate unique instance ID
+    var INSTANCE_ID = 'nomo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Kill ALL old instances - stop their timers
+    if (window.__NOMO_STOP_WIDGET__) {
+        try { window.__NOMO_STOP_WIDGET__(); } catch(e) {}
     }
     
-    // Stop old widget timers if they exist
-    if (window.__NOMO_STOP_WIDGET__) {
-        window.__NOMO_STOP_WIDGET__();
+    // Invalidate ALL old version flags
+    window.__NOMO_PURCHASE_DISPLAY_LOADED__ = false;
+    window.__NOMO_PURCHASE_V3__ = false;
+    
+    // Set new flag with our instance
+    if (window.__NOMO_ACTIVE_INSTANCE__ === INSTANCE_ID) return;
+    window.__NOMO_ACTIVE_INSTANCE__ = INSTANCE_ID;
+    
+    // Remove ALL existing popups immediately
+    function cleanupOldPopups() {
+        var selectors = [
+            '[data-nomo-purchase-popup]',
+            '#nomo-purchase-popup',
+            '[id^="nomo-"]',
+            '.nomo-popup'
+        ];
+        selectors.forEach(function(sel) {
+            var els = document.querySelectorAll(sel);
+            for (var i = 0; i < els.length; i++) {
+                if (!els[i].dataset.nomoInstance || els[i].dataset.nomoInstance !== INSTANCE_ID) {
+                    els[i].remove();
+                }
+            }
+        });
     }
-
-    // New versioned flag to force fresh start
-    if (window.__NOMO_PURCHASE_V3__) return;
-    window.__NOMO_PURCHASE_V3__ = true;
+    
+    cleanupOldPopups();
+    
+    // Continue cleanup periodically for first 10 seconds
+    var cleanupCount = 0;
+    var cleanupInterval = setInterval(function() {
+        cleanupOldPopups();
+        cleanupCount++;
+        if (cleanupCount > 20) {
+            clearInterval(cleanupInterval);
+        }
+    }, 500);
 
     var DEFAULT_SETTINGS = __DEFAULT_SETTINGS__;
     var BASE_URL = __BASE_URL__;
@@ -908,8 +939,14 @@ def purchase_display_embed_js(request):
     // Allow stopping from outside
     window.__NOMO_STOP_WIDGET__ = function() {
         stopped = true;
+        clearInterval(cleanupInterval);
         if (popup) popup.remove();
     };
+    
+    // Check if we're still the active instance
+    function isActive() {
+        return !stopped && window.__NOMO_ACTIVE_INSTANCE__ === INSTANCE_ID;
+    }
 
     function getStoreId() {
         // Try multiple sources
@@ -945,6 +982,7 @@ def purchase_display_embed_js(request):
     function createPopup() {
         var el = document.createElement('div');
         el.id = 'nomo-purchase-popup';
+        el.dataset.nomoInstance = INSTANCE_ID;  // Mark as ours
         el.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:999999;opacity:0;transform:translateY(20px);transition:all 0.4s ease;pointer-events:auto;';
         
         el.innerHTML = '<div style="min-width:300px;max-width:360px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border-radius:14px;padding:16px 20px;box-shadow:0 10px 40px rgba(102,126,234,0.4);font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif;display:flex;gap:14px;align-items:center;position:relative;">' +
@@ -966,6 +1004,7 @@ def purchase_display_embed_js(request):
     }
 
     function showItem(item) {
+        if (!isActive()) return;  // Stop if we're not the active instance
         if (!popup) popup = createPopup();
         
         var name = item.customer_name || 'Someone';
@@ -992,12 +1031,12 @@ def purchase_display_embed_js(request):
         var hideDuration = settings.delay_between_ms || 4000;
         
         function showNext() {
-            if (stopped || !items.length) return;
+            if (!isActive() || !items.length) return;
             showItem(items[currentIndex]);
             currentIndex = (currentIndex + 1) % items.length;
             
             setTimeout(function() {
-                if (stopped) return;
+                if (!isActive()) return;
                 hidePopup();
                 setTimeout(showNext, hideDuration);
             }, showDuration);
