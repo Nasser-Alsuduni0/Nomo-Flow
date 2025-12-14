@@ -11,7 +11,7 @@
 
 **Coupons • Notifications • Live Counter • Email Collector • Recent Purchases • Social Ad Campaigns**
 
-[🚀 Features](#-features) • [📸 Screenshots](#-screenshots) • [🏗️ Architecture](#️-architecture) • [⚙️ Installation](#️-installation) • [🇸🇦 عربي](#-عربي)
+[🚀 Features](#-features) • [📸 Screenshots](#-screenshots) • [🏗️ Architecture](#️-architecture) • [🇸🇦 عربي](#-عربي)
 
 </div>
 
@@ -81,7 +81,7 @@ Publish ads to **TikTok**, **Snapchat**, and **Instagram** from one unified dash
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### Database Schema
 
