@@ -899,10 +899,8 @@ def purchase_display_embed_js(request):
     // Remove ALL existing popups immediately
     function cleanupOldPopups() {
         var selectors = [
-            '[data-nomo-purchase-popup]',
             '#nomo-purchase-popup',
-            '[id^="nomo-"]',
-            '.nomo-popup'
+            '[data-nomo-purchase-popup]'
         ];
         selectors.forEach(function(sel) {
             var els = document.querySelectorAll(sel);
@@ -1024,7 +1022,7 @@ def purchase_display_embed_js(request):
         if (productEl) productEl.textContent = product;
         if (priceEl) priceEl.textContent = item.amount ? formatPrice(item.amount) : '';
         if (timeEl) timeEl.textContent = item.ago || 'Just now';
-        
+        // Show the popup
         popup.style.opacity = '1';
         popup.style.transform = 'translateY(0)';
     }
@@ -1045,11 +1043,24 @@ def purchase_display_embed_js(request):
             showItem(items[currentIndex]);
             currentIndex = (currentIndex + 1) % items.length;
             
-            setTimeout(function() {
+            if (!settings.loop) {
+                // Show once, then hide after showDuration and stop
+                var hideTimeout = setTimeout(function() {
+                    if (!isActive()) return;
+                    hidePopup();
+                    stopped = true;
+                }, showDuration);
+                timerIds.push(hideTimeout);
+                return;
+            }
+            
+            var hideTimeout = setTimeout(function() {
                 if (!isActive()) return;
                 hidePopup();
-                setTimeout(showNext, hideDuration);
+                var nextTimeout = setTimeout(showNext, hideDuration);
+                timerIds.push(nextTimeout);
             }, showDuration);
+            timerIds.push(hideTimeout);
         }
         
         showNext();
