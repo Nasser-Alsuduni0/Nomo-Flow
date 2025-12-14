@@ -25,11 +25,16 @@ class SallaSyncService:
         
         self.base_url = settings.SALLA_API_BASE.rstrip('/')
     
-    def sync_products(self, limit: int = 100) -> int:
-        """Sync products from Salla API with automatic token refresh"""
+    def sync_products(self, limit: int = 100) -> dict:
+        """Sync products from Salla API with automatic token refresh
+        
+        Returns:
+            dict with 'synced_count' and 'deactivated_count'
+        """
         synced_count = 0
         page = 1
         per_page = min(limit, 50)  # Salla API typically limits to 50 per page
+        synced_product_ids = set()  # Track which products we've synced
         
         while synced_count < limit:
             try:
@@ -66,7 +71,9 @@ class SallaSyncService:
                     break
                 
                 for product_data in products_data:
-                    self._sync_product(product_data)
+                    product = self._sync_product(product_data)
+                    if product:
+                        synced_product_ids.add(product.id)
                     synced_count += 1
                     
                     if synced_count >= limit:
@@ -83,7 +90,22 @@ class SallaSyncService:
                 print(f"Error syncing products: {e}")
                 break
         
-        return synced_count
+        # Mark products that weren't in this sync as inactive
+        # This ensures old products are removed from recommendations
+        deactivated_count = 0
+        if synced_product_ids:
+            deactivated_count = Product.objects.filter(
+                merchant=self.merchant,
+                is_active=True
+            ).exclude(id__in=synced_product_ids).update(is_active=False)
+            
+            if deactivated_count > 0:
+                print(f"Marked {deactivated_count} old products as inactive")
+        
+        return {
+            'synced_count': synced_count,
+            'deactivated_count': deactivated_count
+        }
     
     def _sync_product(self, product_data: Dict):
         """Sync a single product"""

@@ -372,12 +372,20 @@ def sync_products(request):
     try:
         sync_service = SallaSyncService(merchant)
         limit = int(request.GET.get('limit', 100))
-        synced_count = sync_service.sync_products(limit=limit)
+        result = sync_service.sync_products(limit=limit)
+        
+        synced_count = result['synced_count']
+        deactivated_count = result['deactivated_count']
+        
+        message = f'Synced {synced_count} products'
+        if deactivated_count > 0:
+            message += f', removed {deactivated_count} old products from recommendations'
         
         return JsonResponse({
             'success': True,
             'synced_count': synced_count,
-            'message': f'Synced {synced_count} products'
+            'deactivated_count': deactivated_count,
+            'message': message
         })
     except ValueError as e:
         return JsonResponse({'error': str(e)}, status=400)
