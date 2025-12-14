@@ -74,6 +74,8 @@ class Attribution(models.Model):
     )
     salla_order_id = models.CharField(max_length=100)
     salla_customer_id = models.CharField(max_length=100, null=True, blank=True, db_index=True)
+    customer_name = models.CharField(max_length=120, null=True, blank=True, help_text="Customer first name for purchase display")
+    product_name = models.CharField(max_length=200, null=True, blank=True, help_text="Main product name for purchase display")
     revenue_sar = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
     used_coupon_code = models.CharField(max_length=40, null=True, blank=True)
     occurred_at = models.DateTimeField()

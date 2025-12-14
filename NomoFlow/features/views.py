@@ -840,6 +840,8 @@ def purchase_display_feed(request):
         items.append({
             'order_id': order_id,
             'order_display': order_display,
+            'customer_name': attribution.customer_name or None,
+            'product_name': attribution.product_name or None,
             'amount': amount,
             'currency': 'SAR',
             'ago': _format_timesince(attribution.occurred_at),
@@ -983,108 +985,115 @@ def purchase_display_embed_js(request):
         }
     }
 
-    var activeTimer = null;
-    var exitTimer = null;
-    var activeCard = null;
+    // Single timer reference to prevent conflicts
+    var loopTimer = null;
+    var currentPopup = null;
+    var isAnimating = false;
 
-    function clearActive() {
-        if (activeTimer) {
-            clearTimeout(activeTimer);
-            activeTimer = null;
+    function hidePopup(callback) {
+        if (!currentPopup || isAnimating) {
+            if (callback) callback();
+            return;
         }
-        if (exitTimer) {
-            clearTimeout(exitTimer);
-            exitTimer = null;
-        }
-        if (activeCard) {
-            activeCard.remove();
-            activeCard = null;
-        }
+        isAnimating = true;
+        currentPopup.style.opacity = '0';
+        currentPopup.style.transform = 'translateY(20px)';
+        
+        setTimeout(function() {
+            if (currentPopup) {
+                currentPopup.remove();
+                currentPopup = null;
+            }
+            isAnimating = false;
+            if (callback) callback();
+        }, 400);
     }
 
-    function showPurchase(item, settings) {
-        clearActive();
+    function showPurchase(item, settings, onComplete) {
+        // Wait for any existing animation to complete
+        if (isAnimating) {
+            setTimeout(function() { showPurchase(item, settings, onComplete); }, 100);
+            return;
+        }
+
+        // Remove existing popup first
+        if (currentPopup) {
+            currentPopup.remove();
+            currentPopup = null;
+        }
 
         var wrapper = document.createElement('div');
         wrapper.setAttribute('data-nomo-purchase-popup', '1');
-        wrapper.style.position = 'fixed';
-        wrapper.style.zIndex = '999999';
-        wrapper.style.opacity = '0';
-        wrapper.style.pointerEvents = 'none';
-        wrapper.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
-        wrapper.style.transform = settings.animation === 'fade' ? 'translateY(0)' : 'translateY(16px)';
+        wrapper.style.cssText = 'position:fixed;z-index:999999;opacity:0;pointer-events:none;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);transform:translateY(20px);';
 
         applyPosition(wrapper, settings.position);
 
+        // Card with purple gradient matching email popup
         var card = document.createElement('div');
-        card.style.cssText = 'min-width:280px;max-width:340px;background:rgba(27,39,63,0.95);backdrop-filter:blur(12px);color:#f8fafc;border-radius:18px;padding:18px 20px;box-shadow:0 18px 45px rgba(15,23,42,0.35);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:row;gap:14px;align-items:flex-start;position:relative;overflow:hidden;';
+        card.style.cssText = 'min-width:300px;max-width:380px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:#ffffff;border-radius:15px;padding:20px 24px;box-shadow:0 10px 40px rgba(102,126,234,0.4);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:row;gap:16px;align-items:center;position:relative;overflow:hidden;';
 
-        var accent = document.createElement('div');
-        accent.style.cssText = 'width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#38bdf8 0%,#6366f1 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;';
-        accent.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l.4 2M7 13h10l3-8H5.4"></path><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M7 13L5.4 5"></path></svg>';
-        card.appendChild(accent);
+        // Shopping bag icon
+        var iconBox = document.createElement('div');
+        iconBox.style.cssText = 'width:50px;height:50px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+        iconBox.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>';
+        card.appendChild(iconBox);
 
+        // Content
         var content = document.createElement('div');
-        content.style.flex = '1';
+        content.style.cssText = 'flex:1;min-width:0;';
 
+        // Customer name + action
         var headline = document.createElement('div');
-        headline.style.fontWeight = '700';
-        headline.style.fontSize = '16px';
-        headline.style.marginBottom = '6px';
-        headline.textContent = item.order_display || 'New order placed!';
+        headline.style.cssText = 'font-weight:700;font-size:15px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+        var customerName = item.customer_name || 'Someone';
+        headline.textContent = customerName + ' just bought';
         content.appendChild(headline);
 
-        var subline = document.createElement('div');
-        subline.style.fontSize = '14px';
-        subline.style.opacity = '0.85';
-        var parts = [];
-        if (settings.show_amount && item.amount) {
-            parts.push(formatAmount(item.amount, item.currency));
-        }
-        if (item.ago) {
-            parts.push(item.ago);
-        }
-        subline.textContent = parts.join(' · ') || 'Just now';
-        content.appendChild(subline);
+        // Product name
+        var productLine = document.createElement('div');
+        productLine.style.cssText = 'font-size:14px;font-weight:500;opacity:0.95;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+        productLine.textContent = item.product_name || 'a product';
+        content.appendChild(productLine);
 
-        if (settings.show_coupon && item.used_coupon) {
-            var coupon = document.createElement('div');
-            coupon.style.marginTop = '8px';
-            coupon.style.fontSize = '13px';
-            coupon.style.opacity = '0.75';
-            coupon.textContent = 'Used coupon ' + item.used_coupon;
-            content.appendChild(coupon);
-        }
+        // Price and time
+        var metaLine = document.createElement('div');
+        metaLine.style.cssText = 'font-size:13px;opacity:0.85;display:flex;gap:8px;align-items:center;';
+        
+        var priceSpan = document.createElement('span');
+        priceSpan.style.cssText = 'background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px;font-weight:600;';
+        priceSpan.textContent = item.amount ? formatAmount(item.amount, item.currency) : '';
+        
+        var timeSpan = document.createElement('span');
+        timeSpan.textContent = item.ago || 'Just now';
+        
+        if (item.amount) metaLine.appendChild(priceSpan);
+        metaLine.appendChild(timeSpan);
+        content.appendChild(metaLine);
 
         card.appendChild(content);
 
+        // Close button
         var close = document.createElement('button');
         close.type = 'button';
         close.innerHTML = '&times;';
-        close.style.position = 'absolute';
-        close.style.top = '10px';
-        close.style.right = '12px';
-        close.style.background = 'rgba(148,163,184,0.15)';
-        close.style.color = '#cbd5f5';
-        close.style.border = 'none';
-        close.style.width = '28px';
-        close.style.height = '28px';
-        close.style.borderRadius = '50%';
-        close.style.cursor = 'pointer';
-        close.style.fontSize = '18px';
-        close.style.lineHeight = '1';
-        close.style.transition = 'opacity 0.2s ease';
-        close.onmouseenter = function() { close.style.opacity = '1'; };
-        close.onmouseleave = function() { close.style.opacity = '0.75'; };
-        close.onclick = function() {
-            clearActive();
+        close.style.cssText = 'position:absolute;top:8px;right:10px;background:rgba(255,255,255,0.2);color:white;border:none;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background 0.2s;';
+        close.onmouseenter = function() { close.style.background = 'rgba(255,255,255,0.3)'; };
+        close.onmouseleave = function() { close.style.background = 'rgba(255,255,255,0.2)'; };
+        close.onclick = function(e) {
+            e.stopPropagation();
+            if (loopTimer) {
+                clearTimeout(loopTimer);
+                loopTimer = null;
+            }
+            hidePopup(null);
         };
-        close.style.opacity = '0.75';
         card.appendChild(close);
 
         wrapper.appendChild(card);
         document.body.appendChild(wrapper);
+        currentPopup = wrapper;
 
+        // Animate in
         requestAnimationFrame(function() {
             requestAnimationFrame(function() {
                 wrapper.style.opacity = '1';
@@ -1093,19 +1102,11 @@ def purchase_display_embed_js(request):
             });
         });
 
-        activeCard = wrapper;
-
-        exitTimer = setTimeout(function() {
-            if (activeCard !== wrapper) return;
-            wrapper.style.opacity = '0';
-            wrapper.style.transform = 'translateY(16px)';
-            setTimeout(function() {
-                if (activeCard === wrapper) {
-                    activeCard = null;
-                }
-                wrapper.remove();
-            }, 350);
-        }, settings.display_duration_ms || 6000);
+        // Schedule hide after display duration
+        var displayDuration = settings.display_duration_ms || 6000;
+        setTimeout(function() {
+            hidePopup(onComplete);
+        }, displayDuration);
     }
 
     function startLoop(items, settings) {
@@ -1115,18 +1116,26 @@ def purchase_display_embed_js(request):
         }
 
         var index = 0;
+        var delayBetween = settings.delay_between_ms || 4000;
+        var displayDuration = settings.display_duration_ms || 6000;
 
-        function cycle() {
+        function showNext() {
             if (!items.length) return;
-            showPurchase(items[index], settings);
-            index = (index + 1) % items.length;
-            if (!settings.loop && index === 0) {
-                return;
-            }
-            activeTimer = setTimeout(cycle, (settings.display_duration_ms || 6000) + (settings.delay_between_ms || 4000));
+            
+            showPurchase(items[index], settings, function() {
+                // After popup hides, wait for delay then show next
+                index = (index + 1) % items.length;
+                
+                if (!settings.loop && index === 0) {
+                    return; // Stop if not looping and we've shown all
+                }
+                
+                loopTimer = setTimeout(showNext, delayBetween);
+            });
         }
 
-        cycle();
+        // Start the first one
+        showNext();
     }
 
     function bootstrap() {
