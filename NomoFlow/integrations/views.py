@@ -372,6 +372,59 @@ def salla_webhook(request):
                     },
                 )
 
+    # Handle order events - create Attribution records for purchase display
+    elif event_type in ["order.created", "order.updated", "order.completed", "order.payment.succeeded"]:
+        if merchant:
+            from core.models import Attribution
+            from decimal import Decimal
+            
+            order_data = data.get("order") or data
+            order_id = str(order_data.get("id") or order_data.get("reference_id") or "")
+            customer_id = str(order_data.get("customer", {}).get("id") or order_data.get("customer_id") or "")
+            
+            # Get order total - try different paths
+            amounts = order_data.get("amounts") or order_data.get("totals") or {}
+            if isinstance(amounts, dict):
+                total = amounts.get("total", {})
+                if isinstance(total, dict):
+                    revenue = Decimal(str(total.get("amount") or total.get("value") or 0))
+                else:
+                    revenue = Decimal(str(total or 0))
+            else:
+                revenue = Decimal(str(order_data.get("total") or order_data.get("grand_total") or 0))
+            
+            # Get coupon code if used
+            coupon_code = None
+            coupons = order_data.get("coupons") or order_data.get("discount_codes") or []
+            if coupons and isinstance(coupons, list) and len(coupons) > 0:
+                coupon_code = coupons[0].get("code") or coupons[0].get("name") or str(coupons[0])
+            
+            # Get order date
+            ordered_at_str = order_data.get("created_at") or order_data.get("date")
+            if ordered_at_str:
+                try:
+                    from datetime import datetime
+                    ordered_at = datetime.fromisoformat(str(ordered_at_str).replace('Z', '+00:00'))
+                    if timezone.is_naive(ordered_at):
+                        ordered_at = timezone.make_aware(ordered_at)
+                except:
+                    ordered_at = timezone.now()
+            else:
+                ordered_at = timezone.now()
+            
+            if order_id:
+                Attribution.objects.update_or_create(
+                    merchant=merchant,
+                    salla_order_id=order_id,
+                    defaults={
+                        "salla_customer_id": customer_id or None,
+                        "revenue_sar": revenue,
+                        "used_coupon_code": coupon_code,
+                        "occurred_at": ordered_at,
+                    }
+                )
+                print(f"✅ Created/Updated Attribution for order {order_id} - SAR {revenue}")
+
     # Event already stored above before uninstall handling
 
     return HttpResponse(status=200)
