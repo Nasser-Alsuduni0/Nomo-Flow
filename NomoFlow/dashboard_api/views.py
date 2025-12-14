@@ -11,6 +11,8 @@ from core.utils import get_current_merchant
 from recommendations.models import Order
 
 def dashboard_metrics(request):
+    from core.models import Attribution
+    
     now = timezone.now()
     week_ago = now - timedelta(days=7)
     merchant = get_current_merchant(request)
@@ -20,24 +22,27 @@ def dashboard_metrics(request):
         visitors = VisitorSession.objects.filter(merchant=merchant, last_seen_at__gte=week_ago)
         page_views = PageView.objects.filter(merchant=merchant, viewed_at__gte=week_ago)
         coupons = Coupon.objects.filter(merchant=merchant)
+        # Real revenue from Attribution
+        total_revenue = Attribution.objects.filter(merchant=merchant).aggregate(
+            total=Sum('revenue_sar')
+        )['total'] or Decimal('0.00')
     else:
         visitors = VisitorSession.objects.filter(last_seen_at__gte=week_ago)
         page_views = PageView.objects.filter(viewed_at__gte=week_ago)
         coupons = Coupon.objects.all()
+        total_revenue = Attribution.objects.aggregate(
+            total=Sum('revenue_sar')
+        )['total'] or Decimal('0.00')
 
     total_visitors = visitors.count()
     total_page_views = page_views.count()
     total_coupons = coupons.count()
-    
-    # Estimate revenue (can be replaced with real revenue tracking later)
-    # For now, estimate based on coupons and visitors
-    estimated_revenue = total_coupons * 100 + total_visitors * 5  # Placeholder calculation
 
     data = {
         "total_visitors": total_visitors,
         "total_page_views": total_page_views,
         "total_coupons": total_coupons,
-        "estimated_revenue": float(estimated_revenue),
+        "estimated_revenue": float(total_revenue),
     }
     return JsonResponse(data)
 
@@ -173,6 +178,8 @@ def dashboard_traffic_sources(request):
 
 def dashboard_sales(request):
     """Get sales analytics data by period (days, months, years)"""
+    from core.models import Attribution
+    
     merchant = get_current_merchant(request)
     period = request.GET.get('period', 'days')
     now = timezone.now()
@@ -181,9 +188,9 @@ def dashboard_sales(request):
     sales_data = []
     
     if merchant:
-        orders = Order.objects.filter(merchant=merchant)
+        orders = Attribution.objects.filter(merchant=merchant)
     else:
-        orders = Order.objects.all()
+        orders = Attribution.objects.all()
     
     if period == 'days':
         # Last 7 days
@@ -193,9 +200,9 @@ def dashboard_sales(request):
             day_end = day.replace(hour=23, minute=59, second=59, microsecond=999999)
             
             day_sales = orders.filter(
-                ordered_at__gte=day_start,
-                ordered_at__lte=day_end
-            ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+                occurred_at__gte=day_start,
+                occurred_at__lte=day_end
+            ).aggregate(total=Sum('revenue_sar'))['total'] or Decimal('0.00')
             
             day_label = day.strftime('%a, %b %d')
             labels.append(day_label)
@@ -214,9 +221,9 @@ def dashboard_sales(request):
                 month_end = month_start.replace(month=month_start.month + 1) - timedelta(seconds=1)
             
             month_sales = orders.filter(
-                ordered_at__gte=month_start,
-                ordered_at__lte=month_end
-            ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+                occurred_at__gte=month_start,
+                occurred_at__lte=month_end
+            ).aggregate(total=Sum('revenue_sar'))['total'] or Decimal('0.00')
             
             month_label = month_start.strftime('%b %Y')
             labels.append(month_label)
@@ -231,9 +238,9 @@ def dashboard_sales(request):
             year_end = now.replace(year=year, month=12, day=31, hour=23, minute=59, second=59, microsecond=999999)
             
             year_sales = orders.filter(
-                ordered_at__gte=year_start,
-                ordered_at__lte=year_end
-            ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+                occurred_at__gte=year_start,
+                occurred_at__lte=year_end
+            ).aggregate(total=Sum('revenue_sar'))['total'] or Decimal('0.00')
             
             labels.append(str(year))
             sales_data.append(float(year_sales))

@@ -38,10 +38,10 @@ FEATURE_DEFAULTS = {
 
 
 PURCHASE_DISPLAY_DEFAULT_SETTINGS = {
-    "display_duration_ms": 6000,
+    "display_duration_ms": 8000,
     "delay_between_ms": 4000,
-    "max_items": 12,
-    "loop": True,
+    "max_items": 1,
+    "loop": False,
     "position": "bottom-left",
     "show_amount": True,
     "show_order_reference": True,
