@@ -23,7 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('salla/', include('integrations.urls')),
     path('coupons/', include('coupons.urls')),
-    # Alias singular prefix to avoid 404s when storefront snippet uses /coupon/
     path('coupon/', include('coupons.urls')),
     path('features/', include('features.urls')),
     path('notifications/', include('notifications.urls')),
