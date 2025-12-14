@@ -1005,15 +1005,25 @@ def purchase_display_embed_js(request):
 
     function showItem(item) {
         if (!isActive()) return;  // Stop if we're not the active instance
-        if (!popup) popup = createPopup();
+        
+        // Check if popup exists in DOM, recreate if removed
+        if (!popup || !document.body.contains(popup)) {
+            popup = createPopup();
+        }
         
         var name = item.customer_name || 'Someone';
         var product = item.product_name || 'a product';
         
-        document.getElementById('nomo-headline').textContent = name + ' just bought';
-        document.getElementById('nomo-product').textContent = product;
-        document.getElementById('nomo-price').textContent = item.amount ? formatPrice(item.amount) : '';
-        document.getElementById('nomo-time').textContent = item.ago || 'Just now';
+        // Get elements from our popup, not document
+        var headline = popup.querySelector('#nomo-headline');
+        var productEl = popup.querySelector('#nomo-product');
+        var priceEl = popup.querySelector('#nomo-price');
+        var timeEl = popup.querySelector('#nomo-time');
+        
+        if (headline) headline.textContent = name + ' just bought';
+        if (productEl) productEl.textContent = product;
+        if (priceEl) priceEl.textContent = item.amount ? formatPrice(item.amount) : '';
+        if (timeEl) timeEl.textContent = item.ago || 'Just now';
         
         popup.style.opacity = '1';
         popup.style.transform = 'translateY(0)';
