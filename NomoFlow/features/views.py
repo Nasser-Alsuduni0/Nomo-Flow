@@ -867,335 +867,157 @@ def purchase_display_embed_js(request):
 
     store_id = request.GET.get('store_id', '')
     base_url = f"https://{request.get_host()}"
-
+    
+    # JSON-encode values for JS template
     defaults_json = json.dumps(PURCHASE_DISPLAY_DEFAULT_SETTINGS)
     base_url_json = json.dumps(base_url)
     store_id_json = json.dumps(store_id or "")
-
+    
+    # Version for cache busting
+    version = "2.0.1"
+    
     script_template = r"""
 (function() {
     'use strict';
 
-    if (window.__NOMO_PURCHASE_DISPLAY_LOADED__) {
-        console.log('[Nomo Purchase Display] Already loaded, skipping');
-        return;
-    }
+    if (window.__NOMO_PURCHASE_DISPLAY_LOADED__) return;
     window.__NOMO_PURCHASE_DISPLAY_LOADED__ = true;
 
     var DEFAULT_SETTINGS = __DEFAULT_SETTINGS__;
+    var BASE_URL = __BASE_URL__;
+    var STORE_ID = __STORE_ID__;
 
-    var SCRIPT_EL = (function() {
-        if (document.currentScript) return document.currentScript;
-        var scripts = document.getElementsByTagName('script');
-        return scripts.length ? scripts[scripts.length - 1] : null;
-    })();
-    var SCRIPT_SRC = (SCRIPT_EL && SCRIPT_EL.src) || '';
-
-    var BASE_URL = (window._NOMO_BASE_ || '').replace(/\/+$/, '');
-    if (!BASE_URL) {
+    // Try to get store ID from Salla if not provided
+    if (!STORE_ID) {
         try {
-            var parsed = new URL(SCRIPT_SRC);
-            BASE_URL = parsed.origin;
-        } catch (err) {
-            BASE_URL = __BASE_URL__;
+            if (window.salla && window.salla.config && window.salla.config.get) {
+                STORE_ID = window.salla.config.get('store.id') || window.salla.config.get('merchant.id');
+            } else if (window.Salla && window.Salla.store) {
+                STORE_ID = window.Salla.store.id;
+            }
+        } catch(e) {}
+    }
+
+    if (!STORE_ID) {
+        console.warn('[Nomo] No store ID');
+        return;
+    }
+
+    var popup = null;
+    var items = [];
+    var currentIndex = 0;
+    var settings = DEFAULT_SETTINGS;
+    var intervalId = null;
+    var isVisible = false;
+
+    function formatPrice(amount) {
+        if (typeof amount !== 'number') return '';
+        try {
+            return new Intl.NumberFormat('ar-SA', {style:'currency', currency:'SAR', maximumFractionDigits:0}).format(amount);
+        } catch(e) {
+            return amount + ' SAR';
         }
     }
 
-    var STORE_ID = __STORE_ID__ || window._NOMO_STORE_ID_ || (SCRIPT_EL && SCRIPT_EL.getAttribute('data-store-id')) || null;
-
-    function ready(fn) {
-        if (document.readyState !== 'loading') fn();
-        else document.addEventListener('DOMContentLoaded', fn);
+    function createPopup() {
+        var el = document.createElement('div');
+        el.id = 'nomo-purchase-popup';
+        el.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:999999;opacity:0;transform:translateY(20px);transition:all 0.4s ease;pointer-events:auto;';
+        
+        el.innerHTML = '<div style="min-width:300px;max-width:360px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border-radius:14px;padding:16px 20px;box-shadow:0 10px 40px rgba(102,126,234,0.4);font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif;display:flex;gap:14px;align-items:center;position:relative;">' +
+            '<div style="width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>' +
+            '</div>' +
+            '<div style="flex:1;min-width:0;">' +
+            '<div id="nomo-headline" style="font-weight:700;font-size:14px;margin-bottom:3px;"></div>' +
+            '<div id="nomo-product" style="font-size:13px;opacity:0.9;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>' +
+            '<div style="display:flex;gap:8px;align-items:center;font-size:12px;opacity:0.85;">' +
+            '<span id="nomo-price" style="background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:8px;font-weight:600;"></span>' +
+            '<span id="nomo-time"></span>' +
+            '</div></div>' +
+            '<button onclick="document.getElementById(\'nomo-purchase-popup\').style.opacity=\'0\'" style="position:absolute;top:6px;right:8px;background:rgba(255,255,255,0.2);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:14px;">&times;</button>' +
+            '</div>';
+        
+        document.body.appendChild(el);
+        return el;
     }
 
-    function fetchFeatureStatus() {
-        var url = BASE_URL + '/features/is-enabled/?feature=recent_purchases&store_id=' + encodeURIComponent(STORE_ID || '');
-        return fetch(url, {
-            method: 'GET',
-            headers: { 'ngrok-skip-browser-warning': 'true' }
-        }).then(function(response) {
-            if (!response.ok) {
-                console.warn('[Nomo Purchase Display] Feature status error', response.status);
-                return { enabled: false };
-            }
-            return response.json();
-        }).catch(function(err) {
-            console.error('[Nomo Purchase Display] Failed to read feature status', err);
-            return { enabled: false };
-        });
+    function showItem(item) {
+        if (!popup) popup = createPopup();
+        
+        var name = item.customer_name || 'Someone';
+        var product = item.product_name || 'a product';
+        
+        document.getElementById('nomo-headline').textContent = name + ' just bought';
+        document.getElementById('nomo-product').textContent = product;
+        document.getElementById('nomo-price').textContent = item.amount ? formatPrice(item.amount) : '';
+        document.getElementById('nomo-time').textContent = item.ago || 'Just now';
+        
+        // Show
+        popup.style.opacity = '1';
+        popup.style.transform = 'translateY(0)';
+        isVisible = true;
     }
 
-    function fetchFeed(settings) {
-        var url = BASE_URL + '/features/purchase-display/feed/?store_id=' + encodeURIComponent(STORE_ID || '');
-        if (settings && settings.max_items) {
-            url += '&limit=' + encodeURIComponent(settings.max_items);
+    function hidePopup() {
+        if (popup && isVisible) {
+            popup.style.opacity = '0';
+            popup.style.transform = 'translateY(20px)';
+            isVisible = false;
         }
-        return fetch(url, {
-            method: 'GET',
-            headers: { 'ngrok-skip-browser-warning': 'true', 'Accept': 'application/json' }
-        }).then(function(response) {
-            if (!response.ok) {
-                console.warn('[Nomo Purchase Display] Feed error', response.status);
-                return { enabled: false, items: [] };
-            }
-            return response.json();
-        }).catch(function(err) {
-            console.error('[Nomo Purchase Display] Unable to load feed', err);
-            return { enabled: false, items: [] };
-        });
     }
 
-    function applyPosition(el, position) {
-        var pos = (position || 'bottom-left').toLowerCase();
-        el.style.top = '';
-        el.style.bottom = '';
-        el.style.left = '';
-        el.style.right = '';
-        el.style.transform = '';
-
-        if (pos === 'top-left') {
-            el.style.top = '20px';
-            el.style.left = '20px';
-        } else if (pos === 'top-right') {
-            el.style.top = '20px';
-            el.style.right = '20px';
-        } else if (pos === 'bottom-right') {
-            el.style.bottom = '20px';
-            el.style.right = '20px';
-        } else if (pos === 'bottom-center') {
-            el.style.bottom = '20px';
-            el.style.left = '50%';
-            el.style.transform = 'translateX(-50%)';
-        } else if (pos === 'top-center') {
-            el.style.top = '20px';
-            el.style.left = '50%';
-            el.style.transform = 'translateX(-50%)';
+    function tick() {
+        if (!items.length) return;
+        
+        if (isVisible) {
+            // Currently showing - hide it
+            hidePopup();
         } else {
-            el.style.bottom = '20px';
-            el.style.left = '20px';
+            // Currently hidden - show next item
+            showItem(items[currentIndex]);
+            currentIndex = (currentIndex + 1) % items.length;
         }
     }
 
-    function formatAmount(amount, currency) {
-        if (typeof amount !== 'number' || isNaN(amount)) return '';
-        try {
-            return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: currency || 'SAR', maximumFractionDigits: 0 }).format(amount);
-        } catch (err) {
-            return amount.toFixed(0) + ' ' + (currency || 'SAR');
-        }
-    }
-
-    // Single timer reference to prevent conflicts
-    var loopTimer = null;
-    var currentPopup = null;
-    var isAnimating = false;
-
-    function hidePopup(callback) {
-        if (!currentPopup || isAnimating) {
-            if (callback) callback();
-            return;
-        }
-        isAnimating = true;
-        currentPopup.style.opacity = '0';
-        currentPopup.style.transform = 'translateY(20px)';
+    function start() {
+        var showDuration = settings.display_duration_ms || 6000;
+        var hideDuration = settings.delay_between_ms || 4000;
         
-        setTimeout(function() {
-            if (currentPopup) {
-                currentPopup.remove();
-                currentPopup = null;
-            }
-            isAnimating = false;
-            if (callback) callback();
-        }, 400);
-    }
-
-    function showPurchase(item, settings, onComplete) {
-        // Wait for any existing animation to complete
-        if (isAnimating) {
-            setTimeout(function() { showPurchase(item, settings, onComplete); }, 100);
-            return;
-        }
-
-        // Remove existing popup first
-        if (currentPopup) {
-            currentPopup.remove();
-            currentPopup = null;
-        }
-
-        var wrapper = document.createElement('div');
-        wrapper.setAttribute('data-nomo-purchase-popup', '1');
-        wrapper.style.cssText = 'position:fixed;z-index:999999;opacity:0;pointer-events:none;transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);transform:translateY(20px);';
-
-        applyPosition(wrapper, settings.position);
-
-        // Card with purple gradient matching email popup
-        var card = document.createElement('div');
-        card.style.cssText = 'min-width:300px;max-width:380px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:#ffffff;border-radius:15px;padding:20px 24px;box-shadow:0 10px 40px rgba(102,126,234,0.4);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:row;gap:16px;align-items:center;position:relative;overflow:hidden;';
-
-        // Shopping bag icon
-        var iconBox = document.createElement('div');
-        iconBox.style.cssText = 'width:50px;height:50px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;';
-        iconBox.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>';
-        card.appendChild(iconBox);
-
-        // Content
-        var content = document.createElement('div');
-        content.style.cssText = 'flex:1;min-width:0;';
-
-        // Customer name + action
-        var headline = document.createElement('div');
-        headline.style.cssText = 'font-weight:700;font-size:15px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
-        var customerName = item.customer_name || 'Someone';
-        headline.textContent = customerName + ' just bought';
-        content.appendChild(headline);
-
-        // Product name
-        var productLine = document.createElement('div');
-        productLine.style.cssText = 'font-size:14px;font-weight:500;opacity:0.95;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
-        productLine.textContent = item.product_name || 'a product';
-        content.appendChild(productLine);
-
-        // Price and time
-        var metaLine = document.createElement('div');
-        metaLine.style.cssText = 'font-size:13px;opacity:0.85;display:flex;gap:8px;align-items:center;';
-        
-        var priceSpan = document.createElement('span');
-        priceSpan.style.cssText = 'background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px;font-weight:600;';
-        priceSpan.textContent = item.amount ? formatAmount(item.amount, item.currency) : '';
-        
-        var timeSpan = document.createElement('span');
-        timeSpan.textContent = item.ago || 'Just now';
-        
-        if (item.amount) metaLine.appendChild(priceSpan);
-        metaLine.appendChild(timeSpan);
-        content.appendChild(metaLine);
-
-        card.appendChild(content);
-
-        // Close button
-        var close = document.createElement('button');
-        close.type = 'button';
-        close.innerHTML = '&times;';
-        close.style.cssText = 'position:absolute;top:8px;right:10px;background:rgba(255,255,255,0.2);color:white;border:none;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background 0.2s;';
-        close.onmouseenter = function() { close.style.background = 'rgba(255,255,255,0.3)'; };
-        close.onmouseleave = function() { close.style.background = 'rgba(255,255,255,0.2)'; };
-        close.onclick = function(e) {
-            e.stopPropagation();
-            if (loopTimer) {
-                clearTimeout(loopTimer);
-                loopTimer = null;
-            }
-            hidePopup(null);
-        };
-        card.appendChild(close);
-
-        wrapper.appendChild(card);
-        document.body.appendChild(wrapper);
-        currentPopup = wrapper;
-
-        // Animate in
-        requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-                wrapper.style.opacity = '1';
-                wrapper.style.pointerEvents = 'auto';
-                wrapper.style.transform = 'translateY(0)';
-            });
-        });
-
-        // Schedule hide after display duration
-        var displayDuration = settings.display_duration_ms || 6000;
-        setTimeout(function() {
-            hidePopup(onComplete);
-        }, displayDuration);
-    }
-
-    function startLoop(items, settings) {
-        if (!items || !items.length) {
-            console.log('[Nomo Purchase Display] No recent purchases to show');
-            return;
-        }
-
-        var index = 0;
-        var delayBetween = settings.delay_between_ms || 4000;
-        var displayDuration = settings.display_duration_ms || 6000;
-
         function showNext() {
             if (!items.length) return;
+            showItem(items[currentIndex]);
+            currentIndex = (currentIndex + 1) % items.length;
             
-            showPurchase(items[index], settings, function() {
-                // After popup hides, wait for delay then show next
-                index = (index + 1) % items.length;
-                
-                if (!settings.loop && index === 0) {
-                    return; // Stop if not looping and we've shown all
-                }
-                
-                loopTimer = setTimeout(showNext, delayBetween);
-            });
+            // After showing, wait showDuration then hide
+            setTimeout(function() {
+                hidePopup();
+                // After hiding, wait hideDuration then show next
+                setTimeout(showNext, hideDuration);
+            }, showDuration);
         }
-
-        // Start the first one
+        
+        // Start immediately
         showNext();
     }
 
-    function bootstrap() {
-        if (!STORE_ID) {
-            console.warn('[Nomo Purchase Display] Missing store ID');
-            return;
-        }
-
-        fetchFeatureStatus().then(function(status) {
-            if (!status.enabled) {
-                console.log('[Nomo Purchase Display] Feature disabled for this store');
-                return;
-            }
-
-            var settings = Object.assign({}, DEFAULT_SETTINGS, status.settings || {});
-
-            fetchFeed(settings).then(function(feed) {
-                if (!feed.enabled) {
-                    console.log('[Nomo Purchase Display] Feed disabled or empty');
-                    return;
-                }
-                var items = Array.isArray(feed.items) ? feed.items : [];
-                if (feed.settings) {
-                    settings = Object.assign(settings, feed.settings);
-                }
-                if (!items.length) {
-                    console.log('[Nomo Purchase Display] No items returned from feed');
-                    return;
-                }
-                startLoop(items, settings);
-            });
-        });
-    }
-
-    function resolveStoreIdAndStart() {
-        if (STORE_ID && String(STORE_ID).trim()) {
-            bootstrap();
-            return;
-        }
-
-        var attempts = 0;
-        var timer = setInterval(function() {
-            attempts += 1;
-            if (window.salla && typeof window.salla.config?.get === 'function') {
-                STORE_ID = window.salla.config.get('store.id') || window.salla.config.get('merchant.id');
-            } else if (window.Salla && window.Salla.store && window.Salla.store.id) {
-                STORE_ID = window.Salla.store.id;
-            }
-
-            if (STORE_ID) {
-                clearInterval(timer);
-                bootstrap();
-            } else if (attempts >= 10) {
-                clearInterval(timer);
-                console.warn('[Nomo Purchase Display] Could not determine store ID');
-            }
-        }, 300);
-    }
-
-    ready(resolveStoreIdAndStart);
+    // Fetch and start
+    fetch(BASE_URL + '/features/is-enabled/?feature=recent_purchases&store_id=' + STORE_ID)
+        .then(function(r) { return r.json(); })
+        .then(function(status) {
+            if (!status.enabled) return;
+            settings = Object.assign({}, DEFAULT_SETTINGS, status.settings || {});
+            
+            return fetch(BASE_URL + '/features/purchase-display/feed/?store_id=' + STORE_ID);
+        })
+        .then(function(r) { return r ? r.json() : null; })
+        .then(function(feed) {
+            if (!feed || !feed.enabled || !feed.items || !feed.items.length) return;
+            items = feed.items;
+            if (feed.settings) settings = Object.assign(settings, feed.settings);
+            start();
+        })
+        .catch(function(e) { console.error('[Nomo]', e); });
 })();
 """
 
@@ -1210,4 +1032,9 @@ def purchase_display_embed_js(request):
     response['Access-Control-Allow-Origin'] = '*'
     response['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
     response['Access-Control-Allow-Headers'] = 'Content-Type, ngrok-skip-browser-warning'
+    # Cache busting
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    response['X-Nomo-Version'] = version
     return response
