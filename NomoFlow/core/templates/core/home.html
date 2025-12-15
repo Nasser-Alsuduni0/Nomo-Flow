@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nomo Flow · Works with Salla</title>
+  <title>Nomo Flow · Smart Marketing for Online Stores</title>
 
   <!-- SEO / Open Graph -->
   <meta name="description"
-    content="Nomo Flow for Salla: coupons, popups, live visitor counter, email collector, and social ad campaigns (TikTok, Snapchat, Instagram) in one dashboard." />
+    content="Nomo Flow for online stores: coupons, popups, live visitor counter, email collector, and social ad campaigns (TikTok, Snapchat, Instagram) in one dashboard." />
   <link rel="alternate" hreflang="ar" href="https://nomoflow.com/ar/" />
   <link rel="alternate" hreflang="en" href="https://nomoflow.com/en/" />
-  <meta property="og:title" content="Nomo Flow · Works with Salla" />
+  <meta property="og:title" content="Nomo Flow · Smart Marketing for Online Stores" />
   <meta property="og:description"
-    content="Install on Salla in one click. Launch widgets and social ads without leaving your store." />
+    content="Quick setup for any store. Launch widgets and social ads without leaving your dashboard." />
   <meta property="og:image" content="/assets/og.png" />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#17a8ff" />
@@ -1103,7 +1103,7 @@
       </a>
     </div>
     <div class="nav-links">
-      <a href="{% url 'salla_connect' %}" class="btn btn-primary" data-i18n="install">Install on Salla</a>
+      <a href="{% url 'salla_connect' %}" class="btn btn-primary" data-i18n="install">Get Started</a>
       <a href="/app/" class="btn" data-i18n="login">Login</a>
       <nav class="lang-nav" aria-label="Language">
         <a href="#" id="pill-en" class="chip">EN</a>
@@ -1112,7 +1112,7 @@
     </div>
     <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle mobile menu">☰</button>
     <div class="mobile-nav" id="mobile-nav">
-      <a href="{% url 'salla_connect' %}" class="btn btn-primary" data-i18n="install">Install on Salla</a>
+      <a href="{% url 'salla_connect' %}" class="btn btn-primary" data-i18n="install">Get Started</a>
       <a href="/app/" class="btn" data-i18n="login">Login</a>
       <nav class="lang-nav" aria-label="Language">
         <a href="#" id="mobile-pill-en" class="chip">EN</a>
@@ -1124,14 +1124,15 @@
   <main>
     <!-- HERO -->
     <section class="container hero">
-      <span class="badge" data-i18n="badge">Works with Salla – 1-click install</span>
-      <h1 data-i18n="heroTitle">Grow your <span class="accent">Salla</span> store with smart widgets & social ad
+      <span class="badge" data-i18n="badge">Works with any online store – Quick setup</span>
+      <h1 data-i18n="heroTitle">Grow your <span class="accent">online</span> store with smart widgets & social ad
         campaigns</h1>
       <p class="lead" data-i18n="heroLead">
-        Enable coupons, popups, live visitor counter, and launch TikTok/Snap/Instagram ads — all from one dashboard.
+        Boost conversions with smart coupons, popups, social proof widgets, and powerful social ad campaigns — all
+        managed from one dashboard.
       </p>
       <div class="cta-row">
-        <a href="{% url 'salla_connect' %}" class="btn btn-primary" data-i18n="install">Install on Salla</a>
+        <a href="{% url 'salla_connect' %}" class="btn btn-primary" data-i18n="install">Get Started</a>
         <a href="" class="btn" data-i18n="viewDemo">View Demo</a>
       </div>
       <p class="small" data-i18n="oauthNote">Secure OAuth · Zero code · Disable anytime</p>
@@ -1151,8 +1152,8 @@
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
           </div>
-          <h4 data-i18n="step1T">1) Install</h4>
-          <p data-i18n="step1D">Add Nomo Flow from the Salla App Store.</p>
+          <h4 data-i18n="step1T">1) Sign Up</h4>
+          <p data-i18n="step1D">Create your Nomo Flow account in seconds.</p>
         </li>
         <li class="card">
           <div class="icon">
@@ -1270,7 +1271,7 @@
           </div>
         </div>
         <div class="shot">
-          <img src="{% static 'core/img/Widget on Salla Store.png' %}" alt="Widget on Salla Store">
+          <img src="{% static 'core/img/Widget on Salla Store.png' %}" alt="Widget on Store">
           <div class="shot-caption">
             <h3 data-i18n="shot2T">On-Store Widget</h3>
             <p data-i18n="shot2D">Seamlessly integrates with your store design.</p>
@@ -1288,10 +1289,10 @@
 
     <!-- FAQ -->
     <section class="container section">
-      <h2 data-i18n="faqTitle">FAQ for Salla Merchants</h2>
+      <h2 data-i18n="faqTitle">Frequently Asked Questions</h2>
       <div class="faq">
         <details>
-          <summary data-i18n="fq1Q">Will Nomo Flow slow my Salla store?</summary>
+          <summary data-i18n="fq1Q">Will Nomo Flow slow my store?</summary>
           <p data-i18n="fq1A">We load lightweight scripts and defer non-critical assets. You can enable/disable widgets
             per page.</p>
         </details>
@@ -1301,7 +1302,8 @@
         </details>
         <details>
           <summary data-i18n="fq3Q">How do ads connect to sales?</summary>
-          <p data-i18n="fq3A">We track clicks and attribute conversions using Salla order data and UTM parameters.</p>
+          <p data-i18n="fq3A">We track clicks and attribute conversions using your store's order data and UTM
+            parameters.</p>
         </details>
         <details>
           <summary data-i18n="fq4Q">What permissions do you request?</summary>
@@ -1316,7 +1318,7 @@
     <div class="brand">
       <img src="{% static 'core/img/logo.png' %}" alt="Nomo Flow">
     </div>
-    <p class="desc" data-i18n="footerDesc">Smart marketing tools for Salla stores.</p>
+    <p class="desc" data-i18n="footerDesc">Smart marketing tools for online stores.</p>
     <div class="links">
       <a href="/about/" data-i18n="footerAbout">About</a>
       <a href="/contact/" data-i18n="footerContact">Contact</a>
@@ -1366,13 +1368,13 @@
     // Simple i18n (EN/AR) and RTL toggle:
     const messages = {
       en: {
-        install: "Install on Salla", login: "Login",
-        badge: "Works with Salla – 1-click install",
-        heroTitle: "Grow your <span class='accent'>Salla</span> store with smart widgets & social ad campaigns",
-        heroLead: "Enable coupons, popups, live visitor counter, and launch TikTok/Snap/Instagram ads — all from one dashboard.",
+        install: "Get Started", login: "Login",
+        badge: "Works with any online store – Quick setup",
+        heroTitle: "Grow your <span class='accent'>online</span> store with smart widgets & social ad campaigns",
+        heroLead: "Boost conversions with smart coupons, popups, social proof widgets, and powerful social ad campaigns — all managed from one dashboard.",
         viewDemo: "View Demo", oauthNote: "Secure OAuth · Zero code · Disable anytime",
         stepsTitle: "Get Started in 3 Steps", stepsLead: "Simple setup, powerful results",
-        step1T: "1) Install", step1D: "Add Nomo Flow from the Salla App Store.",
+        step1T: "1) Sign Up", step1D: "Create your Nomo Flow account in seconds.",
         step2T: "2) Connect", step2D: "Authorize your store and pick your widgets.",
         step3T: "3) Launch", step3D: "Go live with coupons, popups, and live counter in minutes.",
         featuresTitle: "Powerful Marketing Features", featuresLead: "Convert more visitors with urgency, social proof, and personalized offers.",
@@ -1386,23 +1388,23 @@
         shot1T: "Comprehensive Dashboard", shot1D: "Track all your key metrics in one place.",
         shot2T: "On-Store Widget", shot2D: "Seamlessly integrates with your store design.",
         shot3T: "Campaign Builder", shot3D: "Create and launch ads in minutes.",
-        faqTitle: "FAQ for Salla Merchants",
-        fq1Q: "Will Nomo Flow slow my Salla store?", fq1A: "We load lightweight scripts and defer non-critical assets. You can enable/disable widgets per page.",
+        faqTitle: "Frequently Asked Questions",
+        fq1Q: "Will Nomo Flow slow my store?", fq1A: "We load lightweight scripts and defer non-critical assets. You can enable/disable widgets per page.",
         fq2Q: "Can I disable widgets on specific pages?", fq2A: "Yes, you can target by URL patterns or product collections.",
-        fq3Q: "How do ads connect to sales?", fq3A: "We track clicks and attribute conversions using Salla order data and UTM parameters.",
+        fq3Q: "How do ads connect to sales?", fq3A: "We track clicks and attribute conversions using your store's order data and UTM parameters.",
         fq4Q: "What permissions do you request?", fq4A: "Store info and basic order/visitor data required to render widgets and analytics. You can revoke access anytime.",
-        footerDesc: "Smart marketing tools for Salla stores.",
+        footerDesc: "Smart marketing tools for online stores.",
         footerAbout: "About", footerContact: "Contact", footerPrivacy: "Privacy Policy",
         rights: "All rights reserved."
       },
       ar: {
-        install: "ثبّت على سلة", login: "تسجيل الدخول",
-        badge: "متوافق مع سلة – تثبيت بنقرة واحدة",
-        heroTitle: "نمِّ مبيعات متجرك على <span class='accent'>سلة</span> بأدوات ذكية وحملات إعلانية اجتماعية",
-        heroLead: "فعّل الكوبونات والنوافذ المنبثقة وعدّاد الزوار، واطلق إعلانات TikTok وSnapchat وInstagram من لوحة واحدة.",
+        install: "ابدأ الآن", login: "تسجيل الدخول",
+        badge: "يعمل مع أي متجر إلكتروني – إعداد سريع",
+        heroTitle: "نمِّ مبيعات متجرك <span class='accent'>الإلكتروني</span> بأدوات ذكية وحملات إعلانية اجتماعية",
+        heroLead: "عزّز التحويلات بالكوبونات الذكية، النوافذ المنبثقة، أدوات الإثبات الاجتماعي، وحملات إعلانية قوية — كلها من لوحة واحدة.",
         viewDemo: "شاهد العرض", oauthNote: "توثيق آمن · بدون كود · يمكن الإيقاف في أي وقت",
         stepsTitle: "ابدأ في 3 خطوات", stepsLead: "إعداد بسيط، نتائج قوية",
-        step1T: "١) التثبيت", step1D: "أضف Nomo Flow من متجر تطبيقات سلة.",
+        step1T: "١) التسجيل", step1D: "أنشئ حسابك في Nomo Flow خلال ثوانٍ.",
         step2T: "٢) الربط", step2D: "امنح الصلاحيات واختر الأدوات المناسبة.",
         step3T: "٣) الإطلاق", step3D: "فعّل الأدوات خلال دقائق على متجرك.",
         featuresTitle: "ميزات تسويقية قوية", featuresLead: "حوِّل الزوار إلى مشترين عبر العجلة الاجتماعية والعرض المخصص.",
@@ -1416,12 +1418,12 @@
         shot1T: "لوحة تحكم شاملة", shot1D: "تتبع جميع مؤشراتك الهامة في مكان واحد.",
         shot2T: "أداة المتجر", shot2D: "تتكامل بسلاسة مع تصميم متجرك.",
         shot3T: "منشئ الحملات", shot3D: "أنشئ واطلق الإعلانات في دقائق.",
-        faqTitle: "الأسئلة الشائعة لتجار سلة",
-        fq1Q: "هل يبطّئ Nomo Flow متجري على سلة؟", fq1A: "نحمّل سكربتات خفيفة ونؤخّر غير الضروري. ويمكن تفعيل/إيقاف الأدوات لكل صفحة.",
+        faqTitle: "الأسئلة الشائعة",
+        fq1Q: "هل يبطّئ Nomo Flow متجري؟", fq1A: "نحمّل سكربتات خفيفة ونؤخّر غير الضروري. ويمكن تفعيل/إيقاف الأدوات لكل صفحة.",
         fq2Q: "هل أستطيع إخفاء الأدوات في صفحات محددة؟", fq2A: "نعم، عبر استهداف الروابط أو التصنيفات.",
-        fq3Q: "كيف ترتبط الإعلانات بالمبيعات؟", fq3A: "نعزو التحويلات لبيانات الطلب من سلة ومعلمات UTM.",
+        fq3Q: "كيف ترتبط الإعلانات بالمبيعات؟", fq3A: "نعزو التحويلات لبيانات الطلب من متجرك ومعلمات UTM.",
         fq4Q: "ما الصلاحيات المطلوبة؟", fq4A: "معلومات المتجر وبعض بيانات الطلب/الزوار لتفعيل الأدوات والتحليلات، ويمكن إلغاء الربط في أي وقت.",
-        footerDesc: "أدوات تسويقية ذكية لمتاجر سلة.",
+        footerDesc: "أدوات تسويقية ذكية للمتاجر الإلكترونية.",
         footerAbout: "من نحن", footerContact: "اتصل بنا", footerPrivacy: "سياسة الخصوصية",
         rights: "جميع الحقوق محفوظة."
       }
