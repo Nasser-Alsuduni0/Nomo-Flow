@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ Nomo Flow
+<img src="NomoFlow/core/static/core/img/logo.png" alt="Nomo Flow" height="60">
 
 ### Smart Marketing Toolkit for Salla Stores
 
@@ -9,9 +9,9 @@
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-**Coupons • Notifications • Live Counter • Email Collector • Recent Purchases • Social Ad Campaigns**
+**Coupons • Notifications • Live Counter • Email Collector • Recent Purchases • Product Recommendations • Social Ad Campaigns**
 
-[🚀 Features](#-features) • [📸 Screenshots](#-screenshots) • [🏗️ Architecture](#️-architecture) • [🇸🇦 عربي](#-عربي)
+[Features ](#-features) • [Screenshots ](#-screenshots) • [Architecture ](#️-architecture) • [🇸🇦 عربي ](#-عربي)
 
 </div>
 
@@ -40,6 +40,9 @@ Popup forms with double opt-in and exportable CSV lists. Grow your marketing lis
 
 ### Recent Purchases Ticker
 Social proof widget displaying latest orders on your storefront. "Someone just bought..." notifications.
+
+### Product Recommendations
+AI-powered product suggestions based on customer behavior, purchase history, and browsing patterns.
 
 ### Campaign Launcher
 Publish ads to **TikTok**, **Snapchat**, and **Instagram** from one unified dashboard.
@@ -142,6 +145,7 @@ Nomo-Flow/
 |  **عداد الزوار** | عرض لحظي لعدد الزوار الحاليين |
 |  **جامع الإيميلات** | نوافذ اشتراك مع تأكيد مزدوج |
 |  **آخر المشتريات** | إشعارات "شخص ما اشترى للتو..." |
+|  **توصيات المنتجات** | اقتراحات ذكية للمنتجات بناءً على سلوك العميل |
 |  **الحملات الإعلانية** | إطلاق إعلانات على تيك توك وسناب شات وإنستغرام |
 
 الواجهة تدعم اللغة العربية والإنجليزية مع إمكانية التبديل بينهما بسهولة.
