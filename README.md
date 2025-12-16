@@ -94,8 +94,9 @@ Publish ads to **TikTok**, **Snapchat**, and **Instagram** from one unified dash
 
 ```
 Nomo-Flow/
-├──  README.md
-├──  requirements.txt
+├── README.md
+├── requirements.txt
+├── Procfile                         # Deployment config
 │
 └── NomoFlow/
     ├── manage.py                    # Django entry point
@@ -106,16 +107,18 @@ Nomo-Flow/
     │   ├── urls.py                  # Root URL router
     │   └── wsgi.py / asgi.py
     │
-    ├── core/                        #  Landing page & public site
-    ├── integrations/                #  Salla OAuth & webhooks
-    ├── coupons/                     #  Coupon management
-    ├── notifications/               #  Alerts & popups
-    ├── visitors/                    #  Session & page tracking
-    ├── recommendations/             #  Product & customer data
-    ├── marketing/                   #  Ad campaigns
-    ├── tracking/                    #  Event attribution
-    ├── features/                    #  Feature flags
-    └── dashboard/                   #  Admin UI
+    ├── core/                        # Landing page & public site
+    ├── integrations/                # Salla OAuth & webhooks
+    ├── coupons/                     # Coupon management
+    ├── notifications/               # Alerts & popups
+    ├── visitors/                    # Session & page tracking
+    ├── recommendations/             # Product recommendations
+    ├── marketing/                   # Ad campaigns
+    ├── tracking/                    # Event attribution
+    ├── features/                    # Feature flags
+    ├── optimizer/                   # A/B testing engine
+    ├── dashboard/                   # Admin UI templates
+    └── dashboard_api/               # REST API endpoints
 ```
 
 ### Tech Stack
