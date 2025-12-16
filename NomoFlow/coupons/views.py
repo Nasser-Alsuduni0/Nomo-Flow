@@ -30,11 +30,9 @@ def coupons_page(request):
             coupon.merchant = merchant
             coupon.save()
 
-            # Attempt to create the coupon in Salla Admin API (best-effort)
             try:
                 _create_coupon_in_salla(merchant, coupon)
             except Exception as e:
-                # Best-effort: do not block local creation if Salla call fails
                 print(f"⚠️ Salla coupon sync failed: {e}")
             messages.success(request, f'Coupon "{coupon.code}" created successfully!')
             return redirect('coupons:coupons_page')
@@ -58,7 +56,6 @@ def delete_coupon(request, pk):
         coupon = get_object_or_404(Coupon, pk=pk, merchant=merchant)
         code = coupon.code
         
-        # Try to delete from Salla first (best-effort)
         try:
             _delete_coupon_in_salla(merchant, coupon)
         except Exception as e:
@@ -110,7 +107,6 @@ def edit_coupon(request, pk):
         if form.is_valid():
             updated_coupon = form.save()
             
-            # Try to sync update to Salla (best-effort)
             try:
                 _update_coupon_in_salla(merchant, updated_coupon)
             except Exception as e:
