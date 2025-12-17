@@ -122,7 +122,7 @@ def _get_common_widget_code():
     
     if (product.price) {
       var price = document.createElement('div');
-      price.textContent = product.price + ' ر.س';
+      price.textContent = product.price + ' SAR';
       price.style.cssText = 'color: #0ea5e9; font-weight: 700; font-size: 1.1rem;';
       content.appendChild(price);
     }
@@ -252,7 +252,7 @@ def recommended_for_you_js(request):
           var titleSection = document.createElement('div');
           titleSection.style.cssText = 'margin-bottom: 20px; text-align: center;';
           var title = document.createElement('h2');
-          title.textContent = 'موصى به لك';
+          title.textContent = 'Recommended for you';
           title.style.cssText = 'font-size: 1.75rem; font-weight: 700; margin: 0; color: #1e293b;';
           titleSection.appendChild(title);
           container.appendChild(titleSection);
@@ -491,7 +491,7 @@ def similar_products_js(request):
           var titleSection = document.createElement('div');
           titleSection.style.cssText = 'margin-bottom: 20px; text-align: center;';
           var title = document.createElement('h2');
-          title.textContent = 'قد يعجبك أيضاً';
+          title.textContent = 'You may also like';
           title.style.cssText = 'font-size: 1.75rem; font-weight: 700; margin: 0; color: #1e293b;';
           titleSection.appendChild(title);
           container.appendChild(titleSection);
@@ -759,7 +759,7 @@ def frequently_bought_together_js(request):
           var titleSection = document.createElement('div');
           titleSection.style.cssText = 'margin-bottom: 20px; text-align: center;';
           var title = document.createElement('h2');
-          title.textContent = 'يُشترى معاً عادةً';
+          title.textContent = 'Frequently bought together';
           title.style.cssText = 'font-size: 1.75rem; font-weight: 700; margin: 0; color: #1e293b;';
           titleSection.appendChild(title);
           container.appendChild(titleSection);

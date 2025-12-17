@@ -102,7 +102,7 @@ def recommendations_widget_js(request):
     titleSection.style.cssText = 'margin-bottom: 20px; text-align: center;';
     
     var titleEl = document.createElement('h2');
-    titleEl.textContent = title || 'موصى به لك';
+    titleEl.textContent = title || 'Recommended for you';
     titleEl.style.cssText = 'font-size: 1.75rem; font-weight: 700; margin: 0; color: #1e293b;';
     titleSection.appendChild(titleEl);
     
@@ -174,7 +174,7 @@ def recommendations_widget_js(request):
         
         var price = document.createElement('div');
         price.className = 'nomo-product-price';
-        price.textContent = product.price + ' ر.س';
+        price.textContent = product.price + ' SAR';
         price.style.cssText = 'color: #0ea5e9; font-weight: 700; font-size: 1.1rem;';
         priceWrapper.appendChild(price);
         
@@ -260,7 +260,7 @@ def recommendations_widget_js(request):
     })
     .then(function(data) {
       if (data.recommendations && data.recommendations.length > 0) {
-        var widget = createRecommendationsWidget(data.recommendations, 'موصى به لك');
+        var widget = createRecommendationsWidget(data.recommendations, 'Recommended for you');
         if (widget) {
           // Insert widget in specific container or find best location
           var target = document.querySelector('[data-nomo-recommendations]');
